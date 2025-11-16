@@ -2,19 +2,34 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Budget Tracker</title>
+    <!-- CDN libraries for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 600px;
-            margin: 20px auto;
-            padding: 0 20px;
+            margin: 0 auto;
+            padding: 10px;
+            background: #f5f5f5;
         }
 
         .grocery-list {
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
+            padding: 15px;
+        }
+
+        h2 {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 20px;
         }
 
         .budget-container {
@@ -22,13 +37,22 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .budget-container label {
+            font-weight: bold;
+            font-size: 16px;
         }
 
         .budget-input {
-            width: 100px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            flex: 1;
+            min-width: 100px;
+            max-width: 150px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
         }
 
         .section-title {
@@ -36,80 +60,138 @@
             padding-top: 20px;
             border-top: 2px solid #eee;
             color: #555;
+            font-size: 16px;
         }
 
         .grocery-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            padding: 8px;
+            gap: 6px;
+            margin-bottom: 10px;
+            padding: 10px;
             background: #f8f9fa;
-            border-radius: 4px;
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+
+        .grocery-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
         .grocery-item input[type="text"] {
-            width: 120px;
-            padding: 6px;
-            border: 1px solid #ddd;
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            border: 2px solid #ddd;
             border-radius: 4px;
+            font-size: 15px;
         }
 
         .grocery-item input[type="number"] {
-            width: 65px;
-            padding: 6px;
-            border: 1px solid #ddd;
+            width: 70px;
+            padding: 10px;
+            border: 2px solid #ddd;
             border-radius: 4px;
+            font-size: 15px;
         }
 
         .grocery-item input[type="number"].qty {
-            width: 45px;
+            width: 55px;
+        }
+
+        .category-label {
+            font-size: 11px;
+            color: #666;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            min-width: 65px;
+            text-align: center;
+            flex-shrink: 0;
         }
 
         .delete-btn {
             color: #dc3545;
-            background: none;
-            border: none;
-            padding: 4px 8px;
+            background: #fff;
+            border: 2px solid #dc3545;
+            padding: 8px 12px;
             cursor: pointer;
             font-weight: bold;
+            border-radius: 4px;
+            font-size: 18px;
+            line-height: 1;
+            min-width: 40px;
+            min-height: 40px;
+            flex-shrink: 0;
         }
 
         .delete-btn:hover {
-            background: #fee;
-            border-radius: 4px;
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .delete-btn:active {
+            transform: scale(0.95);
         }
 
         .button-container {
             display: flex;
-            gap: 10px;
-            margin: 10px 0;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .add-button, .clear-button, .pdf-button {
+            flex: 1;
+            min-width: 140px;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.2s;
         }
 
         .add-button {
             background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
         }
 
         .add-button:hover {
             background: #0056b3;
         }
 
+        .add-button:active {
+            transform: scale(0.98);
+        }
+
         .clear-button {
             background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
         }
 
         .clear-button:hover {
             background: #c82333;
+        }
+
+        .clear-button:active {
+            transform: scale(0.98);
+        }
+
+        .pdf-button {
+            background: #28a745;
+        }
+
+        .pdf-button:hover {
+            background: #218838;
+        }
+
+        .pdf-button:active {
+            transform: scale(0.98);
         }
 
         .total {
@@ -118,6 +200,7 @@
             border-top: 2px solid #eee;
             font-weight: bold;
             text-align: right;
+            font-size: 18px;
         }
 
         .total.over-budget {
@@ -136,15 +219,77 @@
         .price-input-container::before {
             content: '$';
             position: absolute;
-            left: 6px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1;
             color: #666;
+            font-size: 15px;
         }
 
         .price-input-container input {
-            padding-left: 16px !important;
+            padding-left: 22px !important;
+        }
+
+        /* Hidden canvas for chart rendering */
+        #chartCanvas {
+            display: none;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .grocery-list {
+                padding: 12px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            .grocery-item {
+                padding: 8px;
+                gap: 5px;
+            }
+
+            .grocery-item input[type="text"] {
+                min-width: 100px;
+                font-size: 14px;
+            }
+
+            .grocery-item input[type="number"] {
+                font-size: 14px;
+            }
+
+            .category-label {
+                font-size: 10px;
+                padding: 3px 6px;
+                min-width: 60px;
+            }
+
+            .button-container {
+                gap: 6px;
+            }
+
+            .add-button, .clear-button, .pdf-button {
+                min-width: 100%;
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+            .total {
+                font-size: 16px;
+            }
+        }
+
+        /* Improve touch targets on all devices */
+        @media (pointer: coarse) {
+            input, button {
+                min-height: 44px;
+            }
         }
     </style>
 </head>
@@ -163,6 +308,7 @@
         <div class="button-container">
             <button class="add-button" onclick="addItem()">Add Item</button>
             <button class="clear-button" onclick="clearList()">Clear List</button>
+            <button class="pdf-button" onclick="generatePDF()">Generate PDF Report</button>
         </div>
 
         <h3 class="section-title">Purchased</h3>
@@ -173,6 +319,9 @@
         <div class="total">Total: $<span id="total-amount">0.00</span></div>
     </div>
 
+    <!-- Hidden canvas for chart rendering -->
+    <canvas id="chartCanvas" width="400" height="400"></canvas>
+
     <script>
         let listModified = false;
 
@@ -181,6 +330,46 @@
                 return 'You have unsaved changes in your grocery list. Are you sure you want to leave?';
             }
         };
+
+        /**
+         * Categorizes an item based on its name using keyword matching
+         * @param {string} name - The item name to categorize
+         * @returns {string} - The category name
+         */
+        function categorizeItem(name) {
+            const itemName = name.toLowerCase();
+            
+            // Define category keywords
+            const categories = {
+                'Produce': ['apple', 'banana', 'lettuce', 'tomato', 'onion', 'garlic', 'potato', 
+                           'berries', 'spinach', 'kale', 'pepper', 'cucumber', 'avocado', 'grape', 
+                           'orange', 'lemon', 'lime', 'carrot', 'broccoli', 'celery', 'mushroom', 'corn'],
+                'Meat': ['chicken', 'beef', 'pork', 'steak', 'turkey', 'sausage', 'bacon', 
+                        'ham', 'lamb', 'ground beef', 'ground turkey'],
+                'Dairy': ['milk', 'cheese', 'yogurt', 'butter', 'cream', 'sour cream', 
+                         'half and half', 'cottage cheese', 'eggs'],
+                'Pantry': ['rice', 'pasta', 'beans', 'flour', 'sugar', 'salt', 'oil', 'cereal', 
+                          'oats', 'peanut butter', 'jam', 'sauce', 'spice', 'seasoning', 'broth', 
+                          'canned', 'soup'],
+                'Snacks': ['chips', 'crackers', 'cookies', 'candy', 'chocolate', 'granola', 
+                          'popcorn', 'pretzel'],
+                'Frozen': ['frozen', 'ice cream', 'pizza', 'nuggets', 'fries', 'peas', 'waffles'],
+                'Household': ['soap', 'detergent', 'cleaner', 'bag', 'foil', 'wrap', 'sponge', 
+                             'towel', 'paper towel', 'tissue', 'trash', 'bleach', 'wipes', 'toilet paper'],
+                'Beverages': ['soda', 'juice', 'coffee', 'tea', 'water', 'energy drink']
+            };
+            
+            // Check each category for keyword matches
+            for (const [category, keywords] of Object.entries(categories)) {
+                for (const keyword of keywords) {
+                    if (itemName.includes(keyword)) {
+                        return category;
+                    }
+                }
+            }
+            
+            return 'Other';
+        }
 
         function formatCurrency(input) {
             // Get cursor position before we modify the value
@@ -237,6 +426,7 @@
                     }
                     if (data.items && data.items.length > 0) {
                         document.getElementById('list-container').innerHTML = '';
+                        document.getElementById('purchased-container').innerHTML = '';
                         data.items.forEach(item => {
                             addItem(item);
                         });
@@ -250,13 +440,22 @@
             return false;
         }
 
+        function updateItemCategory(itemElement) {
+            const nameInput = itemElement.querySelector('input[type="text"]');
+            const categoryLabel = itemElement.querySelector('.category-label');
+            const category = categorizeItem(nameInput.value);
+            categoryLabel.textContent = category;
+        }
+
         function addItem(savedItem = null) {
             const item = document.createElement('div');
             item.className = 'grocery-item';
             
             item.innerHTML = `
                 <input type="checkbox" onchange="handleCheck(this)">
-                <input type="text" placeholder="Item" onchange="saveToSession()" onkeyup="saveToSession()">
+                <input type="text" placeholder="Item" onchange="saveToSession(); updateItemCategory(this.closest('.grocery-item'))" 
+                       onkeyup="saveToSession(); updateItemCategory(this.closest('.grocery-item'))">
+                <span class="category-label">Other</span>
                 <input type="number" class="qty" min="1" value="1" placeholder="Qty" onchange="updateTotal()">
                 <div class="price-input-container">
                     <input type="text" class="price-input" placeholder="0.00" 
@@ -271,6 +470,7 @@
                 inputs[1].value = savedItem.name;
                 inputs[2].value = savedItem.quantity;
                 inputs[3].value = savedItem.price;
+                updateItemCategory(item);
             }
 
             const container = savedItem?.checked ? 
@@ -327,13 +527,246 @@
                 document.getElementById('list-container').innerHTML = '';
                 document.getElementById('purchased-container').innerHTML = '';
                 document.getElementById('budget').value = '';
+                document.getElementById('total-amount').textContent = '0.00';
                 addItem();
+                listModified = false;
                 updateTotal();
             }
         }
 
         function setModified() {
             listModified = true;
+        }
+
+        /**
+         * Collects all items and organizes them by category
+         * @returns {Object} - Object with category data and totals
+         */
+        function collectItemsByCategory() {
+            const allItems = document.getElementsByClassName('grocery-item');
+            const categorizedItems = {};
+            const categoryTotals = {};
+            
+            for (let item of allItems) {
+                const nameInput = item.querySelector('input[type="text"]');
+                const qtyInput = item.querySelector('input[type="number"].qty');
+                const priceInput = item.querySelector('.price-input');
+                const categoryLabel = item.querySelector('.category-label');
+                
+                const name = nameInput.value || 'Unnamed Item';
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const category = categoryLabel.textContent;
+                const itemTotal = qty * price;
+                
+                if (!categorizedItems[category]) {
+                    categorizedItems[category] = [];
+                    categoryTotals[category] = 0;
+                }
+                
+                categorizedItems[category].push({
+                    name: name,
+                    quantity: qty,
+                    price: price,
+                    total: itemTotal
+                });
+                
+                categoryTotals[category] += itemTotal;
+            }
+            
+            return { categorizedItems, categoryTotals };
+        }
+
+        /**
+         * Generates a pie chart and returns it as a data URL
+         * @param {Object} categoryTotals - Object with category totals
+         * @returns {string} - Data URL of the chart image
+         */
+        async function generateChartImage(categoryTotals) {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear any existing chart
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Filter out categories with zero totals
+            const categories = [];
+            const totals = [];
+            
+            for (const [category, total] of Object.entries(categoryTotals)) {
+                if (total > 0) {
+                    categories.push(category);
+                    totals.push(total);
+                }
+            }
+            
+            // Define colors for each category
+            const colors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                '#9966FF', '#FF9F40', '#E7E9ED', '#8BC34A'
+            ];
+            
+            // Create the chart
+            const chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: totals,
+                        backgroundColor: colors.slice(0, categories.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 12
+                                },
+                                padding: 10
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Spending by Category',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: 20
+                        }
+                    },
+                    layout: {
+                        padding: 20
+                    }
+                }
+            });
+            
+            // Wait for chart to render
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Get the chart as an image
+            const imageData = canvas.toDataURL('image/png');
+            
+            // Destroy the chart to clean up
+            chart.destroy();
+            
+            return imageData;
+        }
+
+        /**
+         * Generates a PDF report of the grocery list
+         */
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Get budget and total
+            const budget = parseFloat(document.getElementById('budget').value) || 0;
+            const totalSpent = parseFloat(document.getElementById('total-amount').textContent) || 0;
+            const difference = budget - totalSpent;
+            
+            // Collect items by category
+            const { categorizedItems, categoryTotals } = collectItemsByCategory();
+            
+            // Title section
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('Grocery Budget Report', 105, 20, { align: 'center' });
+            
+            // Budget summary
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            let yPos = 35;
+            
+            doc.text(`Budget: $${budget.toFixed(2)}`, 20, yPos);
+            yPos += 8;
+            doc.text(`Total Spent: $${totalSpent.toFixed(2)}`, 20, yPos);
+            yPos += 8;
+            
+            // Difference with color
+            if (difference >= 0) {
+                doc.setTextColor(0, 128, 0); // Green
+                doc.text(`Remaining: $${difference.toFixed(2)}`, 20, yPos);
+            } else {
+                doc.setTextColor(220, 53, 69); // Red
+                doc.text(`Over Budget: $${Math.abs(difference).toFixed(2)}`, 20, yPos);
+            }
+            doc.setTextColor(0, 0, 0); // Reset to black
+            yPos += 15;
+            
+            // Items table grouped by category
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Items by Category', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            
+            // Sort categories alphabetically
+            const sortedCategories = Object.keys(categorizedItems).sort();
+            
+            for (const category of sortedCategories) {
+                // Check if we need a new page
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                // Category header
+                doc.setFont(undefined, 'bold');
+                doc.text(category, 20, yPos);
+                yPos += 6;
+                
+                doc.setFont(undefined, 'normal');
+                
+                // Items in this category
+                const items = categorizedItems[category];
+                for (const item of items) {
+                    if (yPos > 275) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    
+                    const itemText = `  ${item.name} - Qty: ${item.quantity} × $${item.price.toFixed(2)} = $${item.total.toFixed(2)}`;
+                    doc.text(itemText, 20, yPos);
+                    yPos += 5;
+                }
+                
+                // Category subtotal
+                doc.setFont(undefined, 'bold');
+                doc.text(`${category} Subtotal: $${categoryTotals[category].toFixed(2)}`, 25, yPos);
+                doc.setFont(undefined, 'normal');
+                yPos += 10;
+            }
+            
+            // Generate and add pie chart
+            if (Object.keys(categoryTotals).length > 0) {
+                try {
+                    const chartImage = await generateChartImage(categoryTotals);
+                    
+                    // Add new page for chart
+                    doc.addPage();
+                    
+                    // Add chart image (centered)
+                    const imgWidth = 160;
+                    const imgHeight = 160;
+                    const xPos = (210 - imgWidth) / 2; // Center on A4 page
+                    
+                    doc.addImage(chartImage, 'PNG', xPos, 30, imgWidth, imgHeight);
+                } catch (error) {
+                    console.error('Error generating chart:', error);
+                }
+            }
+            
+            // Save the PDF
+            const date = new Date().toISOString().split('T')[0];
+            doc.save(`grocery_report_${date}.pdf`);
         }
 
         // Initialize
