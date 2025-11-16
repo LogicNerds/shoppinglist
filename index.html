@@ -46,10 +46,8 @@
         }
 
         .budget-input {
-            flex: 1;
-            min-width: 100px;
-            max-width: 150px;
-            padding: 12px;
+            width: 90px;
+            padding: 10px 8px;
             border: 2px solid #ddd;
             border-radius: 6px;
             font-size: 16px;
@@ -66,50 +64,51 @@
         .grocery-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             margin-bottom: 10px;
-            padding: 10px;
+            padding: 8px;
             background: #f8f9fa;
             border-radius: 6px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         .grocery-item input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
             flex-shrink: 0;
         }
 
         .grocery-item input[type="text"] {
-            flex: 1;
-            min-width: 120px;
-            padding: 10px;
+            width: 110px;
+            padding: 8px 6px;
             border: 2px solid #ddd;
             border-radius: 4px;
-            font-size: 15px;
+            font-size: 14px;
+            flex-shrink: 0;
         }
 
         .grocery-item input[type="number"] {
-            width: 70px;
-            padding: 10px;
+            width: 50px;
+            padding: 8px 6px;
             border: 2px solid #ddd;
             border-radius: 4px;
-            font-size: 15px;
+            font-size: 14px;
+            flex-shrink: 0;
         }
 
         .grocery-item input[type="number"].qty {
-            width: 55px;
+            width: 45px;
         }
 
         .category-label {
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
             background: #e9ecef;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 3px 6px;
+            border-radius: 3px;
             white-space: nowrap;
-            min-width: 65px;
+            min-width: 60px;
             text-align: center;
             flex-shrink: 0;
         }
@@ -118,14 +117,14 @@
             color: #dc3545;
             background: #fff;
             border: 2px solid #dc3545;
-            padding: 8px 12px;
+            padding: 6px 10px;
             cursor: pointer;
             font-weight: bold;
             border-radius: 4px;
-            font-size: 18px;
+            font-size: 16px;
             line-height: 1;
-            min-width: 40px;
-            min-height: 40px;
+            min-width: 36px;
+            min-height: 36px;
             flex-shrink: 0;
         }
 
@@ -214,21 +213,23 @@
         .price-input-container {
             position: relative;
             display: inline-block;
+            flex-shrink: 0;
         }
 
         .price-input-container::before {
             content: '$';
             position: absolute;
-            left: 10px;
+            left: 8px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1;
             color: #666;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .price-input-container input {
-            padding-left: 22px !important;
+            padding-left: 18px !important;
+            width: 60px;
         }
 
         /* Hidden canvas for chart rendering */
@@ -243,7 +244,7 @@
             }
 
             .grocery-list {
-                padding: 12px;
+                padding: 10px;
             }
 
             h2 {
@@ -251,23 +252,36 @@
             }
 
             .grocery-item {
-                padding: 8px;
-                gap: 5px;
+                padding: 6px;
+                gap: 4px;
             }
 
             .grocery-item input[type="text"] {
-                min-width: 100px;
-                font-size: 14px;
+                width: 95px;
+                font-size: 13px;
+                padding: 8px 5px;
             }
 
             .grocery-item input[type="number"] {
-                font-size: 14px;
+                font-size: 13px;
+                padding: 8px 4px;
+            }
+
+            .grocery-item input[type="number"].qty {
+                width: 40px;
             }
 
             .category-label {
-                font-size: 10px;
-                padding: 3px 6px;
-                min-width: 60px;
+                font-size: 9px;
+                padding: 2px 5px;
+                min-width: 55px;
+            }
+
+            .delete-btn {
+                min-width: 32px;
+                min-height: 32px;
+                padding: 5px 8px;
+                font-size: 14px;
             }
 
             .button-container {
@@ -287,8 +301,8 @@
 
         /* Improve touch targets on all devices */
         @media (pointer: coarse) {
-            input, button {
-                min-height: 44px;
+            input[type="checkbox"], button {
+                min-height: 36px;
             }
         }
     </style>
