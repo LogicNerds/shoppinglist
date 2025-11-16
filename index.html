@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .grocery-list {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .budget-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .budget-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .section-title {
+            margin: 20px 0 10px 0;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #555;
+        }
+
+        .grocery-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .grocery-item input[type="text"] {
+            width: 120px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .grocery-item input[type="number"] {
+            width: 65px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .grocery-item input[type="number"].qty {
+            width: 45px;
+        }
+
+        .delete-btn {
+            color: #dc3545;
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            background: #fee;
+            border-radius: 4px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .add-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background: #0056b3;
+        }
+
+        .clear-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .clear-button:hover {
+            background: #c82333;
+        }
+
+        .total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .total.over-budget {
+            color: #dc3545;
+        }
+
+        #purchased-container {
+            opacity: 0.75;
+        }
+
+        .price-input-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .price-input-container::before {
+            content: '$';
+            position: absolute;
+            left: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+            color: #666;
+        }
+
+        .price-input-container input {
+            padding-left: 16px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="grocery-list">
+        <div class="budget-container">
+            <label for="budget">Budget: $</label>
+            <input type="text" id="budget" class="budget-input" placeholder="0.00" onchange="updateTotal()" oninput="formatCurrency(this)">
+        </div>
+        
+        <h2>Shopping List</h2>
+        <div id="list-container">
+            <!-- Active items will be added here -->
+        </div>
+        
+        <div class="button-container">
+            <button class="add-button" onclick="addItem()">Add Item</button>
+            <button class="clear-button" onclick="clearList()">Clear List</button>
+        </div>
+
+        <h3 class="section-title">Purchased</h3>
+        <div id="purchased-container">
+            <!-- Purchased items will move here -->
+        </div>
+
+        <div class="total">Total: $<span id="total-amount">0.00</span></div>
+    </div>
+
+    <script>
+        let listModified = false;
+
+        window.onbeforeunload = function(e) {
+            if (listModified) {
+                return 'You have unsaved changes in your grocery list. Are you sure you want to leave?';
+            }
+        };
+
+        function formatCurrency(input) {
+            // Get cursor position before we modify the value
+            const cursorPosition = input.selectionStart;
+            const previousLength = input.value.length;
+            
+            // Remove any non-digit characters except decimal point
+            let value = input.value.replace(/[^\d.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit decimal places to 2
+            if (parts[1] && parts[1].length > 2) {
+                value = parts[0] + '.' + parts[1].substring(0, 2);
+            }
+            
+            input.value = value;
+            
+            // Calculate new cursor position
+            const lengthDifference = input.value.length - previousLength;
+            input.setSelectionRange(cursorPosition + lengthDifference, cursorPosition + lengthDifference);
+        }
+
+        function saveToSession() {
+            try {
+                const budget = document.getElementById('budget').value;
+                const activeItems = Array.from(document.getElementsByClassName('grocery-item')).map(item => ({
+                    name: item.querySelector('input[type="text"]').value,
+                    quantity: item.querySelector('input[type="number"].qty').value,
+                    price: item.querySelector('.price-input').value,
+                    checked: item.querySelector('input[type="checkbox"]').checked
+                }));
+                
+                sessionStorage.setItem('groceryList', JSON.stringify({
+                    budget: budget,
+                    items: activeItems
+                }));
+            } catch (e) {
+                console.log('Session storage not available');
+            }
+        }
+
+        function loadFromSession() {
+            try {
+                const savedData = sessionStorage.getItem('groceryList');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    if (data.budget) {
+                        document.getElementById('budget').value = data.budget;
+                    }
+                    if (data.items && data.items.length > 0) {
+                        document.getElementById('list-container').innerHTML = '';
+                        data.items.forEach(item => {
+                            addItem(item);
+                        });
+                        updateTotal();
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.log('Session storage not available');
+            }
+            return false;
+        }
+
+        function addItem(savedItem = null) {
+            const item = document.createElement('div');
+            item.className = 'grocery-item';
+            
+            item.innerHTML = `
+                <input type="checkbox" onchange="handleCheck(this)">
+                <input type="text" placeholder="Item" onchange="saveToSession()" onkeyup="saveToSession()">
+                <input type="number" class="qty" min="1" value="1" placeholder="Qty" onchange="updateTotal()">
+                <div class="price-input-container">
+                    <input type="text" class="price-input" placeholder="0.00" 
+                           onchange="updateTotal()" oninput="formatCurrency(this)">
+                </div>
+                <button class="delete-btn" onclick="deleteItem(this)">×</button>
+            `;
+            
+            if (savedItem) {
+                const inputs = item.getElementsByTagName('input');
+                inputs[0].checked = savedItem.checked;
+                inputs[1].value = savedItem.name;
+                inputs[2].value = savedItem.quantity;
+                inputs[3].value = savedItem.price;
+            }
+
+            const container = savedItem?.checked ? 
+                document.getElementById('purchased-container') : 
+                document.getElementById('list-container');
+            container.appendChild(item);
+            
+            setModified();
+        }
+
+        function handleCheck(checkbox) {
+            const item = checkbox.closest('.grocery-item');
+            const targetContainer = checkbox.checked ? 
+                document.getElementById('purchased-container') : 
+                document.getElementById('list-container');
+            targetContainer.appendChild(item);
+            updateTotal();
+        }
+
+        function deleteItem(button) {
+            button.closest('.grocery-item').remove();
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const allItems = document.getElementsByClassName('grocery-item');
+            let total = 0;
+            
+            for (let item of allItems) {
+                const qtyInput = item.querySelector('input[type="number"].qty');
+                const priceInput = item.querySelector('.price-input');
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                total += qty * price;
+            }
+            
+            const totalElement = document.getElementById('total-amount');
+            totalElement.textContent = total.toFixed(2);
+            
+            const budget = parseFloat(document.getElementById('budget').value) || 0;
+            totalElement.parentElement.classList.toggle('over-budget', total > budget);
+            
+            saveToSession();
+            setModified();
+        }
+
+        function clearList() {
+            if (confirm('Are you sure you want to clear the entire list?')) {
+                try {
+                    sessionStorage.removeItem('groceryList');
+                } catch (e) {
+                    // Silently fail if sessionStorage is not available
+                }
+                document.getElementById('list-container').innerHTML = '';
+                document.getElementById('purchased-container').innerHTML = '';
+                document.getElementById('budget').value = '';
+                addItem();
+                updateTotal();
+            }
+        }
+
+        function setModified() {
+            listModified = true;
+        }
+
+        // Initialize
+        if (!loadFromSession()) {
+            addItem();
+            listModified = false;
+        }
+    </script>
+</body>
+</html>
