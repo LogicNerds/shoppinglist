@@ -1,793 +1,1585 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grocery Budget Tracker</title>
-    <!-- CDN libraries for PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>IDK My Groceries</title>
     <style>
+        :root {
+            --primary-start: #2c5f7a;
+            --primary-end: #1a3a4a;
+            --accent-primary: #0d9488;
+            --accent-secondary: #0f766e;
+            --accent-bg: #f0fdfa;
+            --balance-start: #0d9488;
+            --balance-end: #0f766e;
+        }
+
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
             margin: 0 auto;
-            padding: 10px;
-            background: #f5f5f5;
+            min-height: 100vh;
+            background: white;
+            box-shadow: 0 0 50px rgba(0,0,0,0.2);
         }
 
-        .grocery-list {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 15px;
+        /* Login Screen */
+        .login-screen {
+            padding: 40px 20px;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
         }
 
-        h2 {
-            margin-top: 10px;
+        .login-screen h1 {
+            color: white;
+            font-size: 3em;
             margin-bottom: 15px;
-            font-size: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
-        .budget-container {
-            margin-bottom: 20px;
+        .login-screen p {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            font-size: 0.95em;
+            font-style: italic;
+            line-height: 1.4;
+            max-width: 300px;
+        }
+
+        .google-signin-btn {
+            background: white;
+            color: #333;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+            margin: 0 auto;
+        }
+
+        .google-signin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .google-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-start) 0%, var(--primary-end) 100%);
+            color: white;
+            padding: 25px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .budget-container label {
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .budget-input {
-            width: 90px;
-            padding: 10px 8px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        .section-title {
-            margin: 20px 0 10px 0;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-            color: #555;
-            font-size: 16px;
-        }
-
-        .grocery-item {
+        .header-right {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .theme-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.2s;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 100px 20px 80px 20px;
+        }
+
+        /* Financial Overview Card */
+        .total-balance {
+            background: linear-gradient(135deg, var(--balance-start) 0%, var(--balance-end) 100%);
+            border-radius: 16px;
+            padding: 25px;
+            color: white;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+        }
+
+        .total-balance h2 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .balance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .balance-item h3 {
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            font-weight: 400;
+        }
+
+        .balance-item .amount {
+            font-size: 1.4em;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .amount.positive {
+            color: rgba(255,255,255,0.95);
+        }
+
+        .amount.negative {
+            color: #fef08a;
+        }
+
+        /* Shopping Lists Section */
+        .lists-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .list-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .list-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 3px 10px rgba(13, 148, 136, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            flex-wrap: nowrap;
         }
 
-        .grocery-item input[type="checkbox"] {
+        .list-info h4 {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .list-date {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .delete-list-btn {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: all 0.2s;
+            color: #dc2626;
+        }
+
+        .delete-list-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .list-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-value.over-budget {
+            color: #dc2626;
+        }
+
+        .create-list-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            border: 2px dashed var(--accent-primary);
+            color: var(--accent-primary);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .create-list-btn:hover {
+            background: var(--accent-bg);
+        }
+
+        .no-lists {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        /* Shopping List View */
+        .shopping-view {
+            padding: 20px;
+        }
+
+        .shopping-header {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .budget-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--accent-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .budget-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .budget-amounts {
+            text-align: right;
+        }
+
+        .budget-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .total-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .over-budget-warning {
+            margin-left: 5px;
+        }
+
+        /* Shopping Items */
+        .items-container {
+            margin-bottom: 20px;
+        }
+
+        .shopping-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .shopping-item.dragging {
+            opacity: 0.5;
+            border-color: var(--accent-primary);
+        }
+
+        .shopping-item.checked {
+            opacity: 0.6;
+            background: #f9fafb;
+        }
+
+        .shopping-item.checked .item-name,
+        .shopping-item.checked .item-qty,
+        .shopping-item.checked .item-price {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .drag-handle {
+            font-size: 1.2em;
+            color: #999;
+            cursor: grab;
+            padding: 5px;
+            user-select: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .item-checkbox {
             width: 20px;
             height: 20px;
             cursor: pointer;
             flex-shrink: 0;
         }
 
-        .grocery-item input[type="text"] {
-            width: 110px;
-            padding: 8px 6px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            flex-shrink: 0;
+        .item-name {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
         }
 
-        .grocery-item input[type="number"] {
+        .item-name:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .item-qty {
             width: 50px;
             padding: 8px 6px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .grocery-item input[type="number"].qty {
-            width: 45px;
-        }
-
-        .category-label {
-            font-size: 10px;
-            color: #666;
-            background: #e9ecef;
-            padding: 3px 6px;
-            border-radius: 3px;
-            white-space: nowrap;
-            min-width: 60px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .delete-btn {
-            color: #dc3545;
-            background: #fff;
-            border: 2px solid #dc3545;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 4px;
-            font-size: 16px;
-            line-height: 1;
-            min-width: 36px;
-            min-height: 36px;
-            flex-shrink: 0;
-        }
-
-        .delete-btn:hover {
-            background: #dc3545;
-            color: #fff;
-        }
-
-        .delete-btn:active {
-            transform: scale(0.95);
-        }
-
-        .button-container {
-            display: flex;
-            gap: 8px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-
-        .add-button, .clear-button, .pdf-button {
-            flex: 1;
-            min-width: 140px;
-            color: white;
-            border: none;
-            padding: 14px 20px;
+            border: 1px solid #e0e0e0;
             border-radius: 6px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: bold;
-            transition: all 0.2s;
+            font-size: 0.95em;
+            text-align: center;
         }
 
-        .add-button {
-            background: #007bff;
-        }
-
-        .add-button:hover {
-            background: #0056b3;
-        }
-
-        .add-button:active {
-            transform: scale(0.98);
-        }
-
-        .clear-button {
-            background: #dc3545;
-        }
-
-        .clear-button:hover {
-            background: #c82333;
-        }
-
-        .clear-button:active {
-            transform: scale(0.98);
-        }
-
-        .pdf-button {
-            background: #28a745;
-        }
-
-        .pdf-button:hover {
-            background: #218838;
-        }
-
-        .pdf-button:active {
-            transform: scale(0.98);
-        }
-
-        .total {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-            font-weight: bold;
-            text-align: right;
-            font-size: 18px;
-        }
-
-        .total.over-budget {
-            color: #dc3545;
-        }
-
-        #purchased-container {
-            opacity: 0.75;
+        .item-qty:focus {
+            outline: none;
+            border-color: var(--accent-primary);
         }
 
         .price-input-container {
             position: relative;
-            display: inline-block;
+            width: 80px;
             flex-shrink: 0;
         }
 
         .price-input-container::before {
             content: '$';
             position: absolute;
-            left: 8px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 1;
             color: #666;
-            font-size: 14px;
+            font-size: 0.95em;
+            pointer-events: none;
         }
 
-        .price-input-container input {
-            padding-left: 18px !important;
-            width: 60px;
+        .item-price {
+            width: 100%;
+            padding: 8px 8px 8px 22px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
         }
 
-        /* Hidden canvas for chart rendering */
-        #chartCanvas {
+        .item-price:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .delete-item-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-size: 1.3em;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .delete-item-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .add-item-btn {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px dashed var(--accent-primary);
+            color: var(--accent-primary);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .add-item-btn:hover {
+            background: var(--accent-bg);
+        }
+
+        /* Done Shopping Button */
+        .done-shopping-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .done-shopping-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(13, 148, 136, 0.4);
+        }
+
+        .done-shopping-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Theme Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-option:hover {
+            border-color: var(--accent-primary);
+            background: #f9fafb;
+        }
+
+        .theme-option.selected {
+            border-color: var(--accent-primary);
+            background: var(--accent-bg);
+        }
+
+        .theme-preview {
+            width: 80px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .theme-preview-color {
+            flex: 1;
+        }
+
+        .theme-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .modal-btn.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .hidden {
             display: none;
         }
 
-        /* Mobile optimizations */
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 0.85em;
+            z-index: 999;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .footer a {
+            color: #a8edea;
+            text-decoration: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Disclaimer Drawer */
+        .disclaimer-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            z-index: 1001;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+        }
+
+        .disclaimer-drawer.open {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .disclaimer-content {
+            padding: 30px 20px 80px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .disclaimer-content h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .disclaimer-content p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .disclaimer-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #999;
+            padding: 5px 10px;
+        }
+
+        .disclaimer-close:hover {
+            color: #333;
+        }
+
+        .disclaimer-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .disclaimer-overlay.active {
+            display: block;
+        }
+
+        /* Responsive */
         @media (max-width: 480px) {
-            body {
-                padding: 5px;
+            .balance-item .amount {
+                font-size: 1.2em;
             }
 
-            .grocery-list {
+            .shopping-item {
+                gap: 6px;
                 padding: 10px;
             }
 
-            h2 {
-                font-size: 18px;
+            .item-name {
+                font-size: 0.9em;
             }
 
-            .grocery-item {
-                padding: 6px;
-                gap: 4px;
+            .item-qty {
+                width: 45px;
+                font-size: 0.9em;
             }
 
-            .grocery-item input[type="text"] {
-                width: 95px;
-                font-size: 13px;
-                padding: 8px 5px;
+            .price-input-container {
+                width: 70px;
             }
 
-            .grocery-item input[type="number"] {
-                font-size: 13px;
-                padding: 8px 4px;
-            }
-
-            .grocery-item input[type="number"].qty {
-                width: 40px;
-            }
-
-            .category-label {
-                font-size: 9px;
-                padding: 2px 5px;
-                min-width: 55px;
-            }
-
-            .delete-btn {
-                min-width: 32px;
-                min-height: 32px;
-                padding: 5px 8px;
-                font-size: 14px;
-            }
-
-            .button-container {
-                gap: 6px;
-            }
-
-            .add-button, .clear-button, .pdf-button {
-                min-width: 100%;
-                padding: 12px 16px;
-                font-size: 14px;
-            }
-
-            .total {
-                font-size: 16px;
-            }
-        }
-
-        /* Improve touch targets on all devices */
-        @media (pointer: coarse) {
-            input[type="checkbox"], button {
-                min-height: 36px;
+            .item-price {
+                font-size: 0.9em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="grocery-list">
-        <div class="budget-container">
-            <label for="budget">Budget: $</label>
-            <input type="text" id="budget" class="budget-input" placeholder="0.00" onchange="updateTotal()" oninput="formatCurrency(this)">
-        </div>
-        
-        <h2>Shopping List</h2>
-        <div id="list-container">
-            <!-- Active items will be added here -->
-        </div>
-        
-        <div class="button-container">
-            <button class="add-button" onclick="addItem()">Add Item</button>
-            <button class="clear-button" onclick="clearList()">Clear List</button>
-            <button class="pdf-button" onclick="generatePDF()">Generate PDF Report</button>
-        </div>
-
-        <h3 class="section-title">Purchased</h3>
-        <div id="purchased-container">
-            <!-- Purchased items will move here -->
-        </div>
-
-        <div class="total">Total: $<span id="total-amount">0.00</span></div>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <h1>🛒 IDK My Groceries</h1>
+        <p>A grocery budget tracker<br>for staying on budget</p>
+        <button class="google-signin-btn" onclick="signInWithGoogle()">
+            <svg class="google-icon" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Sign in with Google
+        </button>
     </div>
 
-    <!-- Hidden canvas for chart rendering -->
-    <canvas id="chartCanvas" width="400" height="400"></canvas>
+    <!-- Main App - Dashboard -->
+    <div id="mainApp" class="container hidden">
+        <div class="header">
+            <div class="header-left">
+                <button class="theme-btn" onclick="showThemeModal()" title="Change Theme">🎨</button>
+                <span style="margin-left: 15px; font-size: 1.2em; font-weight: 600;">My Groceries</span>
+            </div>
+            <div class="header-right">
+                <img id="userAvatar" class="user-avatar" src="" alt="User">
+                <button class="logout-btn" onclick="signOut()">Logout</button>
+            </div>
+        </div>
 
-    <script>
-        let listModified = false;
+        <div class="main-content">
+            <!-- Financial Overview -->
+            <div class="total-balance">
+                <h2>Spending Overview</h2>
+                <div class="balance-grid">
+                    <div class="balance-item">
+                        <h3>Last Week Spend</h3>
+                        <div class="amount" id="lastWeekSpend">$0.00</div>
+                    </div>
+                    <div class="balance-item">
+                        <h3>MTD Spend</h3>
+                        <div class="amount" id="mtdSpend">$0.00</div>
+                    </div>
+                    <div class="balance-item">
+                        <h3>Last Week Delta</h3>
+                        <div class="amount" id="lastWeekDelta">$0.00</div>
+                    </div>
+                    <div class="balance-item">
+                        <h3>MTD Delta</h3>
+                        <div class="amount" id="mtdDelta">$0.00</div>
+                    </div>
+                </div>
+            </div>
 
-        window.onbeforeunload = function(e) {
-            if (listModified) {
-                return 'You have unsaved changes in your grocery list. Are you sure you want to leave?';
-            }
+            <!-- Shopping Lists -->
+            <div class="lists-section">
+                <h3>Shopping Lists (Last 90 Days)</h3>
+                <div id="shoppingLists"></div>
+                <button class="create-list-btn" onclick="createNewList()">+ Create Shopping List</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping List View -->
+    <div id="shoppingView" class="container hidden">
+        <div class="header">
+            <div class="header-left">
+                <button class="back-btn" onclick="backToDashboard()">←</button>
+                <span style="font-size: 1.2em; font-weight: 600;">Shopping</span>
+            </div>
+            <div class="header-right">
+                <button class="theme-btn" onclick="showThemeModal()" title="Change Theme">🎨</button>
+            </div>
+        </div>
+
+        <div class="shopping-view">
+            <div class="shopping-header">
+                <div class="form-group">
+                    <label>Store Name</label>
+                    <input type="text" id="storeName" placeholder="e.g., Walmart, Kroger, Target">
+                </div>
+                <div class="form-group">
+                    <label>Budget</label>
+                    <input type="text" id="budgetAmount" placeholder="0.00" oninput="formatCurrency(this); updateTotal()">
+                </div>
+            </div>
+
+            <div class="budget-display">
+                <div>
+                    <div class="budget-label">Budget</div>
+                    <div class="budget-value" id="displayBudget">$0.00</div>
+                </div>
+                <div class="budget-amounts">
+                    <div class="budget-label">Total <span id="overBudgetIcon"></span></div>
+                    <div class="total-value" id="displayTotal">$0.00</div>
+                </div>
+            </div>
+
+            <div class="items-container" id="itemsContainer">
+                <!-- Items will be added here -->
+            </div>
+
+            <button class="add-item-btn" onclick="addShoppingItem()">+ Add Item</button>
+
+            <button class="done-shopping-btn" onclick="completeShopping()" id="doneBtn">
+                ✓ Done Shopping!
+            </button>
+        </div>
+    </div>
+
+    <!-- Theme Modal -->
+    <div id="themeModal" class="modal">
+        <div class="modal-content">
+            <h2>Choose Your Vibe</h2>
+            <div class="theme-option" onclick="setTheme('default')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #2c5f7a"></div>
+                    <div class="theme-preview-color" style="background: #0d9488"></div>
+                    <div class="theme-preview-color" style="background: #f59e0b"></div>
+                </div>
+                <div class="theme-name">Teal & Navy (Default)</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('classic')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #000"></div>
+                    <div class="theme-preview-color" style="background: #fff; border: 1px solid #ddd;"></div>
+                    <div class="theme-preview-color" style="background: #000"></div>
+                </div>
+                <div class="theme-name">Classic Black & White</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('ocean')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #0c4a6e"></div>
+                    <div class="theme-preview-color" style="background: #0ea5e9"></div>
+                    <div class="theme-preview-color" style="background: #06b6d4"></div>
+                </div>
+                <div class="theme-name">Ocean Blue</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('royal')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #1e3a8a"></div>
+                    <div class="theme-preview-color" style="background: #6366f1"></div>
+                    <div class="theme-preview-color" style="background: #a855f7"></div>
+                </div>
+                <div class="theme-name">Royal Purple & Blue</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('purple')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #581c87"></div>
+                    <div class="theme-preview-color" style="background: #a855f7"></div>
+                    <div class="theme-preview-color" style="background: #ec4899"></div>
+                </div>
+                <div class="theme-name">Deep Purple</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('pink')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #fce7f3"></div>
+                    <div class="theme-preview-color" style="background: #ec4899"></div>
+                    <div class="theme-preview-color" style="background: #fff"></div>
+                </div>
+                <div class="theme-name">Light Pink & White</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('monochrome')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #000"></div>
+                    <div class="theme-preview-color" style="background: #ef4444"></div>
+                    <div class="theme-preview-color" style="background: #fff"></div>
+                </div>
+                <div class="theme-name">Black Red White</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('forest')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #064e3b"></div>
+                    <div class="theme-preview-color" style="background: #10b981"></div>
+                    <div class="theme-preview-color" style="background: #fbbf24"></div>
+                </div>
+                <div class="theme-name">Forest Green</div>
+            </div>
+            <div class="theme-option" onclick="setTheme('sunset')">
+                <div class="theme-preview">
+                    <div class="theme-preview-color" style="background: #7c2d12"></div>
+                    <div class="theme-preview-color" style="background: #f97316"></div>
+                    <div class="theme-preview-color" style="background: #fbbf24"></div>
+                </div>
+                <div class="theme-name">Sunset Orange</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('themeModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer Overlay -->
+    <div id="disclaimerOverlay" class="disclaimer-overlay" onclick="closeDisclaimer()"></div>
+
+    <!-- Disclaimer Drawer -->
+    <div id="disclaimerDrawer" class="disclaimer-drawer">
+        <button class="disclaimer-close" onclick="closeDisclaimer()">×</button>
+        <div class="disclaimer-content">
+            <h3>Disclaimer</h3>
+            <p>This application is provided for personal tracking purposes only. IDK My Groceries is a budgeting tool designed to help you track grocery spending and stay within your budget.</p>
+            <p>Users are solely responsible for the accuracy of data entered and any financial decisions made. This app does not connect to bank accounts or store any sensitive financial information.</p>
+            <p>Logic Nerds and its affiliates assume no liability for any losses, damages, or consequences arising from the use or misuse of this application. This software is provided "as is" without warranty of any kind, express or implied.</p>
+            <p>By using this application, you acknowledge and accept full responsibility for your budgeting decisions and data accuracy.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        © 2026 Logic Nerds. All Rights Reserved. | <a onclick="openDisclaimer()">Disclaimer</a>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, getDocs, onSnapshot, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtBO48uBogqcdv69VO9IH7MIG8Kb1YG10",
+            authDomain: "idk-money-tracker.firebaseapp.com",
+            projectId: "idk-money-tracker",
+            storageBucket: "idk-money-tracker.firebasestorage.app",
+            messagingSenderId: "1033439716188",
+            appId: "1:1033439716188:web:ebf8c149f68d3d568f9799",
+            measurementId: "G-KEZSNJZ4JW"
         };
 
-        /**
-         * Categorizes an item based on its name using keyword matching
-         * @param {string} name - The item name to categorize
-         * @returns {string} - The category name
-         */
-        function categorizeItem(name) {
-            const itemName = name.toLowerCase();
-            
-            // Define category keywords
-            const categories = {
-                'Produce': ['apple', 'banana', 'lettuce', 'tomato', 'onion', 'garlic', 'potato', 
-                           'berries', 'spinach', 'kale', 'pepper', 'cucumber', 'avocado', 'grape', 
-                           'orange', 'lemon', 'lime', 'carrot', 'broccoli', 'celery', 'mushroom', 'corn'],
-                'Meat': ['chicken', 'beef', 'pork', 'steak', 'turkey', 'sausage', 'bacon', 
-                        'ham', 'lamb', 'ground beef', 'ground turkey'],
-                'Dairy': ['milk', 'cheese', 'yogurt', 'butter', 'cream', 'sour cream', 
-                         'half and half', 'cottage cheese', 'eggs'],
-                'Pantry': ['rice', 'pasta', 'beans', 'flour', 'sugar', 'salt', 'oil', 'cereal', 
-                          'oats', 'peanut butter', 'jam', 'sauce', 'spice', 'seasoning', 'broth', 
-                          'canned', 'soup'],
-                'Snacks': ['chips', 'crackers', 'cookies', 'candy', 'chocolate', 'granola', 
-                          'popcorn', 'pretzel'],
-                'Frozen': ['frozen', 'ice cream', 'pizza', 'nuggets', 'fries', 'peas', 'waffles'],
-                'Household': ['soap', 'detergent', 'cleaner', 'bag', 'foil', 'wrap', 'sponge', 
-                             'towel', 'paper towel', 'tissue', 'trash', 'bleach', 'wipes', 'toilet paper'],
-                'Beverages': ['soda', 'juice', 'coffee', 'tea', 'water', 'energy drink']
-            };
-            
-            // Check each category for keyword matches
-            for (const [category, keywords] of Object.entries(categories)) {
-                for (const keyword of keywords) {
-                    if (itemName.includes(keyword)) {
-                        return category;
-                    }
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global variables
+        let currentUser = null;
+        let shoppingLists = [];
+        let currentList = null;
+        let currentItems = [];
+        let unsubscribeLists = null;
+        let draggedElement = null;
+
+        // Make functions globally available
+        window.signInWithGoogle = signInWithGoogle;
+        window.signOut = signOut;
+        window.createNewList = createNewList;
+        window.backToDashboard = backToDashboard;
+        window.deleteList = deleteList;
+        window.addShoppingItem = addShoppingItem;
+        window.deleteItem = deleteItem;
+        window.updateTotal = updateTotal;
+        window.completeShopping = completeShopping;
+        window.formatCurrency = formatCurrency;
+        window.showThemeModal = showThemeModal;
+        window.setTheme = setTheme;
+        window.closeModal = closeModal;
+        window.openDisclaimer = openDisclaimer;
+        window.closeDisclaimer = closeDisclaimer;
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                showMainApp();
+                loadShoppingLists();
+            } else {
+                currentUser = null;
+                showLoginScreen();
+            }
+        });
+
+        // Sign in with Google
+        async function signInWithGoogle() {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error('Sign in error:', error);
+                alert('Sign in failed. Please try again.');
+            }
+        }
+
+        // Sign out
+        async function signOut() {
+            if (confirm('Are you sure you want to sign out?')) {
+                try {
+                    if (unsubscribeLists) unsubscribeLists();
+                    await firebaseSignOut(auth);
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    alert('Sign out failed. Please try again.');
                 }
             }
+        }
+
+        // Show/hide screens
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('shoppingView').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('shoppingView').classList.add('hidden');
             
-            return 'Other';
+            if (currentUser.photoURL) {
+                document.getElementById('userAvatar').src = currentUser.photoURL;
+            }
+        }
+
+        function showShoppingView() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('shoppingView').classList.remove('hidden');
+        }
+
+        // Load shopping lists
+        function loadShoppingLists() {
+            const ninetyDaysAgo = new Date();
+            ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+            
+            const listsQuery = query(
+                collection(db, 'groceryLists'),
+                where('userId', '==', currentUser.uid)
+            );
+            
+            unsubscribeLists = onSnapshot(listsQuery, (snapshot) => {
+                shoppingLists = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const listDate = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+                    
+                    if (listDate >= ninetyDaysAgo) {
+                        shoppingLists.push({ id: doc.id, ...data });
+                    }
+                });
+                updateDashboard();
+            });
+        }
+
+        // Update dashboard
+        function updateDashboard() {
+            updateSpendingOverview();
+            updateListsDisplay();
+        }
+
+        function updateSpendingOverview() {
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - 7);
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            let lastWeekSpend = 0;
+            let lastWeekDelta = 0;
+            let mtdSpend = 0;
+            let mtdDelta = 0;
+
+            shoppingLists.forEach(list => {
+                if (!list.completed) return;
+                
+                const listDate = list.date?.toDate ? list.date.toDate() : new Date(list.date);
+                const spent = list.totalSpent || 0;
+                const delta = (list.budget || 0) - spent;
+
+                if (listDate >= startOfWeek) {
+                    lastWeekSpend += spent;
+                    lastWeekDelta += delta;
+                }
+
+                if (listDate >= startOfMonth) {
+                    mtdSpend += spent;
+                    mtdDelta += delta;
+                }
+            });
+
+            document.getElementById('lastWeekSpend').textContent = '$' + lastWeekSpend.toFixed(2);
+            document.getElementById('mtdSpend').textContent = '$' + mtdSpend.toFixed(2);
+            
+            const lastWeekEl = document.getElementById('lastWeekDelta');
+            lastWeekEl.textContent = '$' + Math.abs(lastWeekDelta).toFixed(2);
+            lastWeekEl.className = 'amount ' + (lastWeekDelta >= 0 ? 'positive' : 'negative');
+            
+            const mtdEl = document.getElementById('mtdDelta');
+            mtdEl.textContent = '$' + Math.abs(mtdDelta).toFixed(2);
+            mtdEl.className = 'amount ' + (mtdDelta >= 0 ? 'positive' : 'negative');
+        }
+
+        function updateListsDisplay() {
+            const container = document.getElementById('shoppingLists');
+            
+            const completedLists = shoppingLists
+                .filter(list => list.completed)
+                .sort((a, b) => {
+                    const aDate = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+                    const bDate = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+                    return bDate - aDate;
+                });
+
+            if (completedLists.length === 0) {
+                container.innerHTML = '<div class="no-lists">No shopping trips yet. Create your first list!</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            completedLists.forEach(list => {
+                const card = document.createElement('div');
+                card.className = 'list-card';
+                
+                const listDate = list.date?.toDate ? list.date.toDate() : new Date(list.date);
+                const dateStr = listDate.toLocaleDateString() + ' ' + listDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                const delta = (list.budget || 0) - (list.totalSpent || 0);
+                const overBudget = delta < 0;
+                
+                card.innerHTML = `
+                    <div class="list-header">
+                        <div class="list-info">
+                            <h4>🛒 ${list.storeName || 'Shopping Trip'}</h4>
+                            <div class="list-date">${dateStr}</div>
+                        </div>
+                        <button class="delete-list-btn" onclick="deleteList('${list.id}', event)">🗑️</button>
+                    </div>
+                    <div class="list-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Budget</div>
+                            <div class="stat-value">$${(list.budget || 0).toFixed(2)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Spent</div>
+                            <div class="stat-value">$${(list.totalSpent || 0).toFixed(2)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">${overBudget ? 'Over' : 'Under'}</div>
+                            <div class="stat-value ${overBudget ? 'over-budget' : ''}">$${Math.abs(delta).toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Create new shopping list
+        function createNewList() {
+            currentList = null;
+            currentItems = [];
+            document.getElementById('storeName').value = '';
+            document.getElementById('budgetAmount').value = '';
+            document.getElementById('itemsContainer').innerHTML = '';
+            addShoppingItem();
+            updateTotal();
+            showShoppingView();
+        }
+
+        function backToDashboard() {
+            if (currentItems.length > 0) {
+                if (!confirm('You have unsaved items. Are you sure you want to go back?')) {
+                    return;
+                }
+            }
+            showMainApp();
+        }
+
+        // Shopping items
+        function addShoppingItem() {
+            const container = document.getElementById('itemsContainer');
+            const item = document.createElement('div');
+            item.className = 'shopping-item';
+            item.draggable = true;
+            
+            const itemId = 'item_' + Date.now() + '_' + Math.random();
+            item.dataset.itemId = itemId;
+            
+            item.innerHTML = `
+                <span class="drag-handle">☰</span>
+                <input type="checkbox" class="item-checkbox" onchange="updateTotal()">
+                <input type="text" class="item-name" placeholder="Item name">
+                <input type="number" class="item-qty" min="1" value="1" onchange="updateTotal()">
+                <div class="price-input-container">
+                    <input type="text" class="item-price" placeholder="0.00" oninput="formatCurrency(this); updateTotal()">
+                </div>
+                <button class="delete-item-btn" onclick="deleteItem(this)">×</button>
+            `;
+            
+            setupDragAndDrop(item);
+            container.appendChild(item);
+            
+            currentItems.push({
+                id: itemId,
+                name: '',
+                qty: 1,
+                price: 0,
+                checked: false
+            });
+        }
+
+        function setupDragAndDrop(item) {
+            item.addEventListener('dragstart', (e) => {
+                draggedElement = item;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                draggedElement = null;
+            });
+
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const container = document.getElementById('itemsContainer');
+                const afterElement = getDragAfterElement(container, e.clientY);
+                
+                if (afterElement == null) {
+                    container.appendChild(draggedElement);
+                } else {
+                    container.insertBefore(draggedElement, afterElement);
+                }
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.shopping-item:not(.dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function deleteItem(btn) {
+            const item = btn.closest('.shopping-item');
+            const itemId = item.dataset.itemId;
+            
+            currentItems = currentItems.filter(i => i.id !== itemId);
+            item.remove();
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const items = document.querySelectorAll('.shopping-item');
+            let total = 0;
+            
+            items.forEach(item => {
+                const qty = parseFloat(item.querySelector('.item-qty').value) || 0;
+                const priceInput = item.querySelector('.item-price').value;
+                const price = parseFloat(priceInput.replace(/[^\d.]/g, '')) || 0;
+                total += qty * price;
+            });
+
+            const budgetInput = document.getElementById('budgetAmount').value;
+            const budget = parseFloat(budgetInput.replace(/[^\d.]/g, '')) || 0;
+            
+            document.getElementById('displayBudget').textContent = '$' + budget.toFixed(2);
+            document.getElementById('displayTotal').textContent = '$' + total.toFixed(2);
+            
+            const overBudgetIcon = document.getElementById('overBudgetIcon');
+            if (total > budget && budget > 0) {
+                overBudgetIcon.textContent = '⚠️';
+            } else {
+                overBudgetIcon.textContent = '';
+            }
+
+            const doneBtn = document.getElementById('doneBtn');
+            const storeName = document.getElementById('storeName').value.trim();
+            doneBtn.disabled = !storeName || items.length === 0;
         }
 
         function formatCurrency(input) {
-            // Get cursor position before we modify the value
-            const cursorPosition = input.selectionStart;
-            const previousLength = input.value.length;
-            
-            // Remove any non-digit characters except decimal point
             let value = input.value.replace(/[^\d.]/g, '');
             
-            // Ensure only one decimal point
             const parts = value.split('.');
             if (parts.length > 2) {
                 value = parts[0] + '.' + parts.slice(1).join('');
             }
             
-            // Limit decimal places to 2
             if (parts[1] && parts[1].length > 2) {
                 value = parts[0] + '.' + parts[1].substring(0, 2);
             }
             
             input.value = value;
-            
-            // Calculate new cursor position
-            const lengthDifference = input.value.length - previousLength;
-            input.setSelectionRange(cursorPosition + lengthDifference, cursorPosition + lengthDifference);
         }
 
-        function saveToSession() {
-            try {
-                const budget = document.getElementById('budget').value;
-                const activeItems = Array.from(document.getElementsByClassName('grocery-item')).map(item => ({
-                    name: item.querySelector('input[type="text"]').value,
-                    quantity: item.querySelector('input[type="number"].qty').value,
-                    price: item.querySelector('.price-input').value,
-                    checked: item.querySelector('input[type="checkbox"]').checked
-                }));
+        // Complete shopping
+        async function completeShopping() {
+            const storeName = document.getElementById('storeName').value.trim();
+            const budgetInput = document.getElementById('budgetAmount').value;
+            const budget = parseFloat(budgetInput.replace(/[^\d.]/g, '')) || 0;
+            
+            if (!storeName) {
+                alert('Please enter a store name!');
+                return;
+            }
+
+            const items = document.querySelectorAll('.shopping-item');
+            let totalSpent = 0;
+            const itemsData = [];
+            
+            items.forEach(item => {
+                const name = item.querySelector('.item-name').value.trim();
+                const qty = parseFloat(item.querySelector('.item-qty').value) || 0;
+                const priceInput = item.querySelector('.item-price').value;
+                const price = parseFloat(priceInput.replace(/[^\d.]/g, '')) || 0;
+                const checked = item.querySelector('.item-checkbox').checked;
                 
-                sessionStorage.setItem('groceryList', JSON.stringify({
-                    budget: budget,
-                    items: activeItems
-                }));
-            } catch (e) {
-                console.log('Session storage not available');
-            }
-        }
-
-        function loadFromSession() {
-            try {
-                const savedData = sessionStorage.getItem('groceryList');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    if (data.budget) {
-                        document.getElementById('budget').value = data.budget;
-                    }
-                    if (data.items && data.items.length > 0) {
-                        document.getElementById('list-container').innerHTML = '';
-                        document.getElementById('purchased-container').innerHTML = '';
-                        data.items.forEach(item => {
-                            addItem(item);
-                        });
-                        updateTotal();
-                        return true;
-                    }
-                }
-            } catch (e) {
-                console.log('Session storage not available');
-            }
-            return false;
-        }
-
-        function updateItemCategory(itemElement) {
-            const nameInput = itemElement.querySelector('input[type="text"]');
-            const categoryLabel = itemElement.querySelector('.category-label');
-            const category = categorizeItem(nameInput.value);
-            categoryLabel.textContent = category;
-        }
-
-        function addItem(savedItem = null) {
-            const item = document.createElement('div');
-            item.className = 'grocery-item';
-            
-            item.innerHTML = `
-                <input type="checkbox" onchange="handleCheck(this)">
-                <input type="text" placeholder="Item" onchange="saveToSession(); updateItemCategory(this.closest('.grocery-item'))" 
-                       onkeyup="saveToSession(); updateItemCategory(this.closest('.grocery-item'))">
-                <span class="category-label">Other</span>
-                <input type="number" class="qty" min="1" value="1" placeholder="Qty" onchange="updateTotal()">
-                <div class="price-input-container">
-                    <input type="text" class="price-input" placeholder="0.00" 
-                           onchange="updateTotal()" oninput="formatCurrency(this)">
-                </div>
-                <button class="delete-btn" onclick="deleteItem(this)">×</button>
-            `;
-            
-            if (savedItem) {
-                const inputs = item.getElementsByTagName('input');
-                inputs[0].checked = savedItem.checked;
-                inputs[1].value = savedItem.name;
-                inputs[2].value = savedItem.quantity;
-                inputs[3].value = savedItem.price;
-                updateItemCategory(item);
-            }
-
-            const container = savedItem?.checked ? 
-                document.getElementById('purchased-container') : 
-                document.getElementById('list-container');
-            container.appendChild(item);
-            
-            setModified();
-        }
-
-        function handleCheck(checkbox) {
-            const item = checkbox.closest('.grocery-item');
-            const targetContainer = checkbox.checked ? 
-                document.getElementById('purchased-container') : 
-                document.getElementById('list-container');
-            targetContainer.appendChild(item);
-            updateTotal();
-        }
-
-        function deleteItem(button) {
-            button.closest('.grocery-item').remove();
-            updateTotal();
-        }
-
-        function updateTotal() {
-            const allItems = document.getElementsByClassName('grocery-item');
-            let total = 0;
-            
-            for (let item of allItems) {
-                const qtyInput = item.querySelector('input[type="number"].qty');
-                const priceInput = item.querySelector('.price-input');
-                const qty = parseFloat(qtyInput.value) || 0;
-                const price = parseFloat(priceInput.value) || 0;
-                total += qty * price;
-            }
-            
-            const totalElement = document.getElementById('total-amount');
-            totalElement.textContent = total.toFixed(2);
-            
-            const budget = parseFloat(document.getElementById('budget').value) || 0;
-            totalElement.parentElement.classList.toggle('over-budget', total > budget);
-            
-            saveToSession();
-            setModified();
-        }
-
-        function clearList() {
-            if (confirm('Are you sure you want to clear the entire list?')) {
-                try {
-                    sessionStorage.removeItem('groceryList');
-                } catch (e) {
-                    // Silently fail if sessionStorage is not available
-                }
-                document.getElementById('list-container').innerHTML = '';
-                document.getElementById('purchased-container').innerHTML = '';
-                document.getElementById('budget').value = '';
-                document.getElementById('total-amount').textContent = '0.00';
-                addItem();
-                listModified = false;
-                updateTotal();
-            }
-        }
-
-        function setModified() {
-            listModified = true;
-        }
-
-        /**
-         * Collects all items and organizes them by category
-         * @returns {Object} - Object with category data and totals
-         */
-        function collectItemsByCategory() {
-            const allItems = document.getElementsByClassName('grocery-item');
-            const categorizedItems = {};
-            const categoryTotals = {};
-            
-            for (let item of allItems) {
-                const nameInput = item.querySelector('input[type="text"]');
-                const qtyInput = item.querySelector('input[type="number"].qty');
-                const priceInput = item.querySelector('.price-input');
-                const categoryLabel = item.querySelector('.category-label');
-                
-                const name = nameInput.value || 'Unnamed Item';
-                const qty = parseFloat(qtyInput.value) || 0;
-                const price = parseFloat(priceInput.value) || 0;
-                const category = categoryLabel.textContent;
-                const itemTotal = qty * price;
-                
-                if (!categorizedItems[category]) {
-                    categorizedItems[category] = [];
-                    categoryTotals[category] = 0;
-                }
-                
-                categorizedItems[category].push({
-                    name: name,
-                    quantity: qty,
-                    price: price,
-                    total: itemTotal
-                });
-                
-                categoryTotals[category] += itemTotal;
-            }
-            
-            return { categorizedItems, categoryTotals };
-        }
-
-        /**
-         * Generates a pie chart and returns it as a data URL
-         * @param {Object} categoryTotals - Object with category totals
-         * @returns {string} - Data URL of the chart image
-         */
-        async function generateChartImage(categoryTotals) {
-            const canvas = document.getElementById('chartCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Clear any existing chart
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Filter out categories with zero totals
-            const categories = [];
-            const totals = [];
-            
-            for (const [category, total] of Object.entries(categoryTotals)) {
-                if (total > 0) {
-                    categories.push(category);
-                    totals.push(total);
-                }
-            }
-            
-            // Define colors for each category
-            const colors = [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
-                '#9966FF', '#FF9F40', '#E7E9ED', '#8BC34A'
-            ];
-            
-            // Create the chart
-            const chart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: categories,
-                    datasets: [{
-                        data: totals,
-                        backgroundColor: colors.slice(0, categories.length),
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    size: 12
-                                },
-                                padding: 10
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Spending by Category',
-                            font: {
-                                size: 16,
-                                weight: 'bold'
-                            },
-                            padding: 20
-                        }
-                    },
-                    layout: {
-                        padding: 20
-                    }
+                if (name) {
+                    itemsData.push({ name, qty, price, checked });
+                    totalSpent += qty * price;
                 }
             });
-            
-            // Wait for chart to render
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Get the chart as an image
-            const imageData = canvas.toDataURL('image/png');
-            
-            // Destroy the chart to clean up
-            chart.destroy();
-            
-            return imageData;
+
+            if (itemsData.length === 0) {
+                alert('Please add at least one item!');
+                return;
+            }
+
+            const delta = budget - totalSpent;
+
+            try {
+                await addDoc(collection(db, 'groceryLists'), {
+                    userId: currentUser.uid,
+                    storeName: storeName,
+                    budget: budget,
+                    totalSpent: totalSpent,
+                    delta: delta,
+                    items: itemsData,
+                    completed: true,
+                    date: serverTimestamp()
+                });
+
+                alert('Shopping trip saved! 🎉');
+                showMainApp();
+            } catch (error) {
+                console.error('Error saving shopping list:', error);
+                alert('Failed to save shopping list. Please try again.');
+            }
         }
 
-        /**
-         * Generates a PDF report of the grocery list
-         */
-        async function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+        // Delete list
+        async function deleteList(listId, event) {
+            event.stopPropagation();
             
-            // Get budget and total
-            const budget = parseFloat(document.getElementById('budget').value) || 0;
-            const totalSpent = parseFloat(document.getElementById('total-amount').textContent) || 0;
-            const difference = budget - totalSpent;
-            
-            // Collect items by category
-            const { categorizedItems, categoryTotals } = collectItemsByCategory();
-            
-            // Title section
-            doc.setFontSize(20);
-            doc.setFont(undefined, 'bold');
-            doc.text('Grocery Budget Report', 105, 20, { align: 'center' });
-            
-            // Budget summary
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
-            let yPos = 35;
-            
-            doc.text(`Budget: $${budget.toFixed(2)}`, 20, yPos);
-            yPos += 8;
-            doc.text(`Total Spent: $${totalSpent.toFixed(2)}`, 20, yPos);
-            yPos += 8;
-            
-            // Difference with color
-            if (difference >= 0) {
-                doc.setTextColor(0, 128, 0); // Green
-                doc.text(`Remaining: $${difference.toFixed(2)}`, 20, yPos);
-            } else {
-                doc.setTextColor(220, 53, 69); // Red
-                doc.text(`Over Budget: $${Math.abs(difference).toFixed(2)}`, 20, yPos);
-            }
-            doc.setTextColor(0, 0, 0); // Reset to black
-            yPos += 15;
-            
-            // Items table grouped by category
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('Items by Category', 20, yPos);
-            yPos += 10;
-            
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
-            
-            // Sort categories alphabetically
-            const sortedCategories = Object.keys(categorizedItems).sort();
-            
-            for (const category of sortedCategories) {
-                // Check if we need a new page
-                if (yPos > 270) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-                
-                // Category header
-                doc.setFont(undefined, 'bold');
-                doc.text(category, 20, yPos);
-                yPos += 6;
-                
-                doc.setFont(undefined, 'normal');
-                
-                // Items in this category
-                const items = categorizedItems[category];
-                for (const item of items) {
-                    if (yPos > 275) {
-                        doc.addPage();
-                        yPos = 20;
-                    }
-                    
-                    const itemText = `  ${item.name} - Qty: ${item.quantity} × $${item.price.toFixed(2)} = $${item.total.toFixed(2)}`;
-                    doc.text(itemText, 20, yPos);
-                    yPos += 5;
-                }
-                
-                // Category subtotal
-                doc.setFont(undefined, 'bold');
-                doc.text(`${category} Subtotal: $${categoryTotals[category].toFixed(2)}`, 25, yPos);
-                doc.setFont(undefined, 'normal');
-                yPos += 10;
-            }
-            
-            // Generate and add pie chart
-            if (Object.keys(categoryTotals).length > 0) {
+            if (confirm('Delete this shopping list?')) {
                 try {
-                    const chartImage = await generateChartImage(categoryTotals);
-                    
-                    // Add new page for chart
-                    doc.addPage();
-                    
-                    // Add chart image (centered)
-                    const imgWidth = 160;
-                    const imgHeight = 160;
-                    const xPos = (210 - imgWidth) / 2; // Center on A4 page
-                    
-                    doc.addImage(chartImage, 'PNG', xPos, 30, imgWidth, imgHeight);
+                    await deleteDoc(doc(db, 'groceryLists', listId));
                 } catch (error) {
-                    console.error('Error generating chart:', error);
+                    console.error('Error deleting list:', error);
+                    alert('Failed to delete. Please try again.');
                 }
             }
-            
-            // Save the PDF
-            const date = new Date().toISOString().split('T')[0];
-            doc.save(`grocery_report_${date}.pdf`);
         }
 
-        // Initialize
-        if (!loadFromSession()) {
-            addItem();
-            listModified = false;
+        // Utility functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
         }
+
+        function openDisclaimer() {
+            document.getElementById('disclaimerDrawer').classList.add('open');
+            document.getElementById('disclaimerOverlay').classList.add('active');
+        }
+
+        function closeDisclaimer() {
+            document.getElementById('disclaimerDrawer').classList.remove('open');
+            document.getElementById('disclaimerOverlay').classList.remove('active');
+        }
+
+        // Theme management
+        const themes = {
+            default: {
+                primaryStart: '#2c5f7a',
+                primaryEnd: '#1a3a4a',
+                accentPrimary: '#0d9488',
+                accentSecondary: '#0f766e',
+                accentBg: '#f0fdfa',
+                balanceStart: '#0d9488',
+                balanceEnd: '#0f766e'
+            },
+            classic: {
+                primaryStart: '#000000',
+                primaryEnd: '#000000',
+                accentPrimary: '#000000',
+                accentSecondary: '#000000',
+                accentBg: '#ffffff',
+                balanceStart: '#000000',
+                balanceEnd: '#000000'
+            },
+            monochrome: {
+                primaryStart: '#000000',
+                primaryEnd: '#1a1a1a',
+                accentPrimary: '#ef4444',
+                accentSecondary: '#dc2626',
+                accentBg: '#fee2e2',
+                balanceStart: '#000000',
+                balanceEnd: '#1a1a1a'
+            },
+            pink: {
+                primaryStart: '#fce7f3',
+                primaryEnd: '#fbcfe8',
+                accentPrimary: '#ec4899',
+                accentSecondary: '#db2777',
+                accentBg: '#fce7f3',
+                balanceStart: '#fce7f3',
+                balanceEnd: '#fbcfe8'
+            },
+            purple: {
+                primaryStart: '#581c87',
+                primaryEnd: '#3b0764',
+                accentPrimary: '#a855f7',
+                accentSecondary: '#9333ea',
+                accentBg: '#f3e8ff',
+                balanceStart: '#a855f7',
+                balanceEnd: '#9333ea'
+            },
+            ocean: {
+                primaryStart: '#0c4a6e',
+                primaryEnd: '#082f49',
+                accentPrimary: '#0ea5e9',
+                accentSecondary: '#0284c7',
+                accentBg: '#e0f2fe',
+                balanceStart: '#0ea5e9',
+                balanceEnd: '#0284c7'
+            },
+            royal: {
+                primaryStart: '#1e3a8a',
+                primaryEnd: '#1e1b4b',
+                accentPrimary: '#6366f1',
+                accentSecondary: '#4f46e5',
+                accentBg: '#e0e7ff',
+                balanceStart: '#6366f1',
+                balanceEnd: '#4f46e5'
+            },
+            forest: {
+                primaryStart: '#064e3b',
+                primaryEnd: '#022c22',
+                accentPrimary: '#10b981',
+                accentSecondary: '#059669',
+                accentBg: '#d1fae5',
+                balanceStart: '#10b981',
+                balanceEnd: '#059669'
+            },
+            sunset: {
+                primaryStart: '#7c2d12',
+                primaryEnd: '#431407',
+                accentPrimary: '#f97316',
+                accentSecondary: '#ea580c',
+                accentBg: '#ffedd5',
+                balanceStart: '#f97316',
+                balanceEnd: '#ea580c'
+            }
+        };
+
+        function showThemeModal() {
+            document.getElementById('themeModal').classList.add('active');
+        }
+
+        function setTheme(themeName) {
+            const theme = themes[themeName];
+            if (!theme) return;
+
+            const root = document.documentElement;
+            root.style.setProperty('--primary-start', theme.primaryStart);
+            root.style.setProperty('--primary-end', theme.primaryEnd);
+            root.style.setProperty('--accent-primary', theme.accentPrimary);
+            root.style.setProperty('--accent-secondary', theme.accentSecondary);
+            root.style.setProperty('--accent-bg', theme.accentBg);
+            root.style.setProperty('--balance-start', theme.balanceStart);
+            root.style.setProperty('--balance-end', theme.balanceEnd);
+
+            localStorage.setItem('idkGroceriesTheme', themeName);
+            closeModal('themeModal');
+        }
+
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('idkGroceriesTheme') || 'default';
+            if (savedTheme && themes[savedTheme]) {
+                setTheme(savedTheme);
+            }
+        });
     </script>
 </body>
 </html>
