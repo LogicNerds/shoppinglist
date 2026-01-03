@@ -190,7 +190,7 @@
 
         .balance-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
         }
 
@@ -796,8 +796,8 @@
 <body>
     <!-- Login Screen -->
     <div id="loginScreen" class="login-screen">
-        <h1>🛒 IDK My Groceries</h1>
-        <p>A grocery budget tracker<br>for staying on budget</p>
+        <h1>💸 IDK My Groceries</h1>
+        <p>A grocery budget tracker<br>for tracking your grocery budget</p>
         <button class="google-signin-btn" onclick="signInWithGoogle()">
             <svg class="google-icon" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -836,6 +836,10 @@
                         <div class="amount" id="mtdSpend">$0.00</div>
                     </div>
                     <div class="balance-item">
+                        <h3>Avg Spend</h3>
+                        <div class="amount" id="avgSpend">$0.00</div>
+                    </div>
+                    <div class="balance-item">
                         <h3>Last Week Delta</h3>
                         <div class="amount" id="lastWeekDelta">$0.00</div>
                     </div>
@@ -843,14 +847,18 @@
                         <h3>MTD Delta</h3>
                         <div class="amount" id="mtdDelta">$0.00</div>
                     </div>
+                    <div class="balance-item">
+                        <h3>Avg Delta</h3>
+                        <div class="amount" id="avgDelta">$0.00</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Shopping Lists -->
             <div class="lists-section">
+                <button class="create-list-btn" onclick="createNewList()">+ Create Shopping List</button>
                 <h3>Shopping Lists (Last 90 Days)</h3>
                 <div id="shoppingLists"></div>
-                <button class="create-list-btn" onclick="createNewList()">+ Create Shopping List</button>
             </div>
         </div>
     </div>
@@ -1150,6 +1158,9 @@
             let lastWeekDelta = 0;
             let mtdSpend = 0;
             let mtdDelta = 0;
+            let totalSpend = 0;
+            let totalDelta = 0;
+            let completedCount = 0;
 
             shoppingLists.forEach(list => {
                 if (!list.completed) return;
@@ -1157,6 +1168,10 @@
                 const listDate = list.date?.toDate ? list.date.toDate() : new Date(list.date);
                 const spent = list.totalSpent || 0;
                 const delta = (list.budget || 0) - spent;
+
+                totalSpend += spent;
+                totalDelta += delta;
+                completedCount++;
 
                 if (listDate >= startOfWeek) {
                     lastWeekSpend += spent;
@@ -1169,8 +1184,12 @@
                 }
             });
 
+            const avgSpend = completedCount > 0 ? totalSpend / completedCount : 0;
+            const avgDelta = completedCount > 0 ? totalDelta / completedCount : 0;
+
             document.getElementById('lastWeekSpend').textContent = '$' + lastWeekSpend.toFixed(2);
             document.getElementById('mtdSpend').textContent = '$' + mtdSpend.toFixed(2);
+            document.getElementById('avgSpend').textContent = '$' + avgSpend.toFixed(2);
             
             const lastWeekEl = document.getElementById('lastWeekDelta');
             lastWeekEl.textContent = '$' + Math.abs(lastWeekDelta).toFixed(2);
@@ -1179,6 +1198,10 @@
             const mtdEl = document.getElementById('mtdDelta');
             mtdEl.textContent = '$' + Math.abs(mtdDelta).toFixed(2);
             mtdEl.className = 'amount ' + (mtdDelta >= 0 ? 'positive' : 'negative');
+
+            const avgDeltaEl = document.getElementById('avgDelta');
+            avgDeltaEl.textContent = '$' + Math.abs(avgDelta).toFixed(2);
+            avgDeltaEl.className = 'amount ' + (avgDelta >= 0 ? 'positive' : 'negative');
         }
 
         function updateListsDisplay() {
@@ -1211,7 +1234,7 @@
                 card.innerHTML = `
                     <div class="list-header">
                         <div class="list-info">
-                            <h4>🛒 ${list.storeName || 'Shopping Trip'}</h4>
+                            <h4>💸 ${list.storeName || 'Shopping Trip'}</h4>
                             <div class="list-date">${dateStr}</div>
                         </div>
                         <button class="delete-list-btn" onclick="deleteList('${list.id}', event)">🗑️</button>
