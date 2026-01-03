@@ -402,12 +402,18 @@
             background: white;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
-            padding: 12px;
+            padding: 15px;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .shopping-item:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.1);
         }
 
         .shopping-item.dragging {
@@ -420,9 +426,7 @@
             background: #f9fafb;
         }
 
-        .shopping-item.checked .item-name,
-        .shopping-item.checked .item-qty,
-        .shopping-item.checked .item-price {
+        .shopping-item.checked .item-details .item-name-text {
             text-decoration: line-through;
             color: #999;
         }
@@ -433,6 +437,7 @@
             cursor: grab;
             padding: 5px;
             user-select: none;
+            flex-shrink: 0;
         }
 
         .drag-handle:active {
@@ -440,67 +445,34 @@
         }
 
         .item-checkbox {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
             flex-shrink: 0;
         }
 
-        .item-name {
+        .item-details {
             flex: 1;
-            padding: 8px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.95em;
+            min-width: 0;
         }
 
-        .item-name:focus {
-            outline: none;
-            border-color: var(--accent-primary);
+        .item-name-text {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+            font-size: 1em;
         }
 
-        .item-qty {
-            width: 50px;
-            padding: 8px 6px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.95em;
-            text-align: center;
-        }
-
-        .item-qty:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-        }
-
-        .price-input-container {
-            position: relative;
-            width: 80px;
-            flex-shrink: 0;
-        }
-
-        .price-input-container::before {
-            content: '$';
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+        .item-info {
+            font-size: 0.85em;
             color: #666;
-            font-size: 0.95em;
-            pointer-events: none;
         }
 
-        .item-price {
-            width: 100%;
-            padding: 8px 8px 8px 22px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.95em;
-        }
-
-        .item-price:focus {
-            outline: none;
-            border-color: var(--accent-primary);
+        .item-total {
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-size: 1.1em;
+            flex-shrink: 0;
         }
 
         .delete-item-btn {
@@ -537,6 +509,36 @@
             background: var(--accent-bg);
         }
 
+        /* Keep List & Done Shopping Buttons */
+        .action-buttons-shopping {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .keep-list-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .keep-list-btn:hover {
+            background: var(--accent-bg);
+        }
+
+        .keep-list-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* Done Shopping Button */
         .done-shopping-btn {
             width: 100%;
@@ -549,7 +551,6 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
-            margin-top: 20px;
         }
 
         .done-shopping-btn:hover {
@@ -561,6 +562,27 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* Price input container for modal */
+        .price-input-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .price-input-container::before {
+            content: '$';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1em;
+            pointer-events: none;
+        }
+
+        .price-input-container input {
+            padding-left: 28px !important;
         }
 
         /* Theme Modal */
@@ -902,11 +924,16 @@
                 <!-- Items will be added here -->
             </div>
 
-            <button class="add-item-btn" onclick="addShoppingItem()">+ Add Item</button>
+            <button class="add-item-btn" onclick="showAddItemModal()">+ Add Item</button>
 
-            <button class="done-shopping-btn" onclick="completeShopping()" id="doneBtn">
-                ✓ Done Shopping!
-            </button>
+            <div class="action-buttons-shopping">
+                <button class="keep-list-btn" onclick="keepList()" id="keepListBtn">
+                    💾 Keep List for Later
+                </button>
+                <button class="done-shopping-btn" onclick="completeShopping()" id="doneBtn">
+                    ✓ Done Shopping!
+                </button>
+            </div>
         </div>
     </div>
 
@@ -992,6 +1019,31 @@
         </div>
     </div>
 
+    <!-- Add/Edit Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <h2 id="itemModalTitle">Add Item</h2>
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="itemName" placeholder="e.g., Milk, Bread, Apples">
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="itemQty" min="1" value="1" step="1">
+            </div>
+            <div class="form-group">
+                <label>Price</label>
+                <div class="price-input-container">
+                    <input type="text" id="itemPrice" placeholder="0.00" oninput="formatCurrency(this)">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('itemModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="saveItem()" id="saveItemBtn">Add</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Disclaimer Overlay -->
     <div id="disclaimerOverlay" class="disclaimer-overlay" onclick="closeDisclaimer()"></div>
 
@@ -1016,7 +1068,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, getDocs, onSnapshot, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, getDocs, onSnapshot, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -1038,7 +1090,9 @@
         let currentUser = null;
         let shoppingLists = [];
         let currentList = null;
+        let currentListId = null;
         let currentItems = [];
+        let editingItemId = null;
         let unsubscribeLists = null;
         let draggedElement = null;
 
@@ -1046,11 +1100,15 @@
         window.signInWithGoogle = signInWithGoogle;
         window.signOut = signOut;
         window.createNewList = createNewList;
+        window.viewList = viewList;
         window.backToDashboard = backToDashboard;
         window.deleteList = deleteList;
-        window.addShoppingItem = addShoppingItem;
+        window.showAddItemModal = showAddItemModal;
+        window.saveItem = saveItem;
+        window.editItem = editItem;
         window.deleteItem = deleteItem;
         window.updateTotal = updateTotal;
+        window.keepList = keepList;
         window.completeShopping = completeShopping;
         window.formatCurrency = formatCurrency;
         window.showThemeModal = showThemeModal;
@@ -1132,9 +1190,10 @@
                 shoppingLists = [];
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    const listDate = data.date?.toDate ? data.date.toDate() : new Date(data.date);
+                    const listDate = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now());
                     
-                    if (listDate >= ninetyDaysAgo) {
+                    // Include completed lists from last 90 days or active lists
+                    if (!data.completed || listDate >= ninetyDaysAgo) {
                         shoppingLists.push({ id: doc.id, ...data });
                     }
                 });
@@ -1207,6 +1266,7 @@
         function updateListsDisplay() {
             const container = document.getElementById('shoppingLists');
             
+            const activeLists = shoppingLists.filter(list => !list.completed);
             const completedLists = shoppingLists
                 .filter(list => list.completed)
                 .sort((a, b) => {
@@ -1215,12 +1275,67 @@
                     return bDate - aDate;
                 });
 
-            if (completedLists.length === 0) {
+            container.innerHTML = '';
+
+            // Show active lists first
+            if (activeLists.length > 0) {
+                const activeHeader = document.createElement('h4');
+                activeHeader.style.cssText = 'color: #666; font-size: 0.9em; margin-bottom: 10px; margin-top: 0;';
+                activeHeader.textContent = 'Active Lists';
+                container.appendChild(activeHeader);
+
+                activeLists.forEach(list => {
+                    const card = document.createElement('div');
+                    card.className = 'list-card';
+                    card.onclick = () => viewList(list.id);
+                    
+                    const listDate = list.createdAt?.toDate ? list.createdAt.toDate() : new Date(list.createdAt || Date.now());
+                    const dateStr = listDate.toLocaleDateString() + ' ' + listDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    const itemCount = list.items?.length || 0;
+                    const totalSpent = list.items?.reduce((sum, item) => sum + (item.qty * item.price), 0) || 0;
+                    
+                    card.innerHTML = `
+                        <div class="list-header">
+                            <div class="list-info">
+                                <h4>📝 ${list.storeName || 'Shopping List'}</h4>
+                                <div class="list-date">${dateStr}</div>
+                            </div>
+                            <button class="delete-list-btn" onclick="deleteList('${list.id}', event)">🗑️</button>
+                        </div>
+                        <div class="list-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Budget</div>
+                                <div class="stat-value">$${(list.budget || 0).toFixed(2)}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Items</div>
+                                <div class="stat-value">${itemCount}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Current</div>
+                                <div class="stat-value">$${totalSpent.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+
+                if (completedLists.length > 0) {
+                    const completedHeader = document.createElement('h4');
+                    completedHeader.style.cssText = 'color: #666; font-size: 0.9em; margin-bottom: 10px; margin-top: 20px;';
+                    completedHeader.textContent = 'Completed';
+                    container.appendChild(completedHeader);
+                }
+            }
+
+            // Show completed lists
+            if (completedLists.length === 0 && activeLists.length === 0) {
                 container.innerHTML = '<div class="no-lists">No shopping trips yet. Create your first list!</div>';
                 return;
             }
 
-            container.innerHTML = '';
             completedLists.forEach(list => {
                 const card = document.createElement('div');
                 card.className = 'list-card';
@@ -1260,57 +1375,165 @@
         }
 
         // Create new shopping list
-        function createNewList() {
-            currentList = null;
+        async function createNewList() {
+            // Check if user has 10+ active lists
+            const activeLists = shoppingLists.filter(list => !list.completed);
+            if (activeLists.length >= 10) {
+                alert('You have reached the maximum of 10 active lists. Please complete or delete some lists before creating new ones.');
+                return;
+            }
+
+            currentListId = null;
             currentItems = [];
             document.getElementById('storeName').value = '';
             document.getElementById('budgetAmount').value = '';
-            document.getElementById('itemsContainer').innerHTML = '';
-            addShoppingItem();
+            renderItems();
+            updateTotal();
+            showShoppingView();
+        }
+
+        // View existing list
+        function viewList(listId) {
+            const list = shoppingLists.find(l => l.id === listId);
+            if (!list) return;
+
+            currentListId = listId;
+            currentItems = list.items || [];
+            document.getElementById('storeName').value = list.storeName || '';
+            document.getElementById('budgetAmount').value = list.budget || '';
+            
+            renderItems();
             updateTotal();
             showShoppingView();
         }
 
         function backToDashboard() {
-            if (currentItems.length > 0) {
+            if (currentItems.length > 0 && !currentListId) {
                 if (!confirm('You have unsaved items. Are you sure you want to go back?')) {
                     return;
                 }
             }
+            currentListId = null;
+            currentItems = [];
             showMainApp();
         }
 
-        // Shopping items
-        function addShoppingItem() {
+        // Item modal functions
+        function showAddItemModal() {
+            editingItemId = null;
+            document.getElementById('itemModalTitle').textContent = 'Add Item';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemQty').value = '1';
+            document.getElementById('itemPrice').value = '';
+            document.getElementById('saveItemBtn').textContent = 'Add';
+            document.getElementById('itemModal').classList.add('active');
+        }
+
+        function editItem(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            editingItemId = itemId;
+            document.getElementById('itemModalTitle').textContent = 'Edit Item';
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemQty').value = item.qty;
+            document.getElementById('itemPrice').value = item.price.toFixed(2);
+            document.getElementById('saveItemBtn').textContent = 'Save';
+            document.getElementById('itemModal').classList.add('active');
+        }
+
+        function saveItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const qty = parseFloat(document.getElementById('itemQty').value) || 1;
+            const priceInput = document.getElementById('itemPrice').value;
+            const price = parseFloat(priceInput.replace(/[^\d.]/g, '')) || 0;
+
+            if (!name) {
+                alert('Please enter an item name!');
+                return;
+            }
+
+            if (editingItemId) {
+                // Update existing item
+                const itemIndex = currentItems.findIndex(i => i.id === editingItemId);
+                if (itemIndex !== -1) {
+                    currentItems[itemIndex] = {
+                        ...currentItems[itemIndex],
+                        name: name,
+                        qty: qty,
+                        price: price
+                    };
+                }
+            } else {
+                // Add new item
+                const newItem = {
+                    id: 'item_' + Date.now() + '_' + Math.random(),
+                    name: name,
+                    qty: qty,
+                    price: price,
+                    checked: false
+                };
+                currentItems.push(newItem);
+            }
+
+            renderItems();
+            updateTotal();
+            closeModal('itemModal');
+        }
+
+        function deleteItem(itemId, event) {
+            event.stopPropagation();
+            
+            if (confirm('Delete this item?')) {
+                currentItems = currentItems.filter(i => i.id !== itemId);
+                renderItems();
+                updateTotal();
+            }
+        }
+
+        function renderItems() {
             const container = document.getElementById('itemsContainer');
-            const item = document.createElement('div');
-            item.className = 'shopping-item';
-            item.draggable = true;
-            
-            const itemId = 'item_' + Date.now() + '_' + Math.random();
-            item.dataset.itemId = itemId;
-            
-            item.innerHTML = `
-                <span class="drag-handle">☰</span>
-                <input type="checkbox" class="item-checkbox" onchange="updateTotal()">
-                <input type="text" class="item-name" placeholder="Item name">
-                <input type="number" class="item-qty" min="1" value="1" onchange="updateTotal()">
-                <div class="price-input-container">
-                    <input type="text" class="item-price" placeholder="0.00" oninput="formatCurrency(this); updateTotal()">
-                </div>
-                <button class="delete-item-btn" onclick="deleteItem(this)">×</button>
-            `;
-            
-            setupDragAndDrop(item);
-            container.appendChild(item);
-            
-            currentItems.push({
-                id: itemId,
-                name: '',
-                qty: 1,
-                price: 0,
-                checked: false
+            container.innerHTML = '';
+
+            if (currentItems.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'no-lists';
+                emptyMsg.textContent = 'No items yet. Add your first item!';
+                container.appendChild(emptyMsg);
+                return;
+            }
+
+            currentItems.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'shopping-item' + (item.checked ? ' checked' : '');
+                itemEl.draggable = true;
+                itemEl.dataset.itemId = item.id;
+                itemEl.onclick = () => editItem(item.id);
+
+                const total = item.qty * item.price;
+
+                itemEl.innerHTML = `
+                    <span class="drag-handle">☰</span>
+                    <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
+                    <div class="item-details">
+                        <div class="item-name-text">${item.name}</div>
+                        <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                    </div>
+                    <div class="item-total">$${total.toFixed(2)}</div>
+                    <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
+                `;
+
+                setupDragAndDrop(itemEl);
+                container.appendChild(itemEl);
             });
+        }
+
+        function toggleItemCheck(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (item) {
+                item.checked = !item.checked;
+                renderItems();
+            }
         }
 
         function setupDragAndDrop(item) {
@@ -1318,10 +1541,21 @@
                 draggedElement = item;
                 item.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
+                e.stopPropagation();
             });
 
             item.addEventListener('dragend', () => {
                 item.classList.remove('dragging');
+                
+                // Update the order in currentItems array based on DOM order
+                const container = document.getElementById('itemsContainer');
+                const itemElements = Array.from(container.querySelectorAll('.shopping-item'));
+                const newOrder = itemElements.map(el => el.dataset.itemId);
+                
+                currentItems.sort((a, b) => {
+                    return newOrder.indexOf(a.id) - newOrder.indexOf(b.id);
+                });
+                
                 draggedElement = null;
             });
 
@@ -1353,24 +1587,11 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
-        function deleteItem(btn) {
-            const item = btn.closest('.shopping-item');
-            const itemId = item.dataset.itemId;
-            
-            currentItems = currentItems.filter(i => i.id !== itemId);
-            item.remove();
-            updateTotal();
-        }
-
         function updateTotal() {
-            const items = document.querySelectorAll('.shopping-item');
             let total = 0;
             
-            items.forEach(item => {
-                const qty = parseFloat(item.querySelector('.item-qty').value) || 0;
-                const priceInput = item.querySelector('.item-price').value;
-                const price = parseFloat(priceInput.replace(/[^\d.]/g, '')) || 0;
-                total += qty * price;
+            currentItems.forEach(item => {
+                total += item.qty * item.price;
             });
 
             const budgetInput = document.getElementById('budgetAmount').value;
@@ -1386,9 +1607,118 @@
                 overBudgetIcon.textContent = '';
             }
 
-            const doneBtn = document.getElementById('doneBtn');
             const storeName = document.getElementById('storeName').value.trim();
-            doneBtn.disabled = !storeName || items.length === 0;
+            const hasItems = currentItems.length > 0;
+            
+            document.getElementById('keepListBtn').disabled = !storeName || !hasItems;
+            document.getElementById('doneBtn').disabled = !storeName || !hasItems;
+        }
+
+        // Keep list for later
+        async function keepList() {
+            const storeName = document.getElementById('storeName').value.trim();
+            const budgetInput = document.getElementById('budgetAmount').value;
+            const budget = parseFloat(budgetInput.replace(/[^\d.]/g, '')) || 0;
+            
+            if (!storeName) {
+                alert('Please enter a store name!');
+                return;
+            }
+
+            if (currentItems.length === 0) {
+                alert('Please add at least one item!');
+                return;
+            }
+
+            try {
+                const listData = {
+                    userId: currentUser.uid,
+                    storeName: storeName,
+                    budget: budget,
+                    items: currentItems.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        qty: item.qty,
+                        price: item.price,
+                        checked: item.checked
+                    })),
+                    completed: false,
+                    createdAt: serverTimestamp()
+                };
+
+                if (currentListId) {
+                    // Update existing list
+                    await updateDoc(doc(db, 'groceryLists', currentListId), listData);
+                    alert('List updated! 📝');
+                } else {
+                    // Create new list
+                    await addDoc(collection(db, 'groceryLists'), listData);
+                    alert('List saved! 📝');
+                }
+
+                showMainApp();
+            } catch (error) {
+                console.error('Error saving list:', error);
+                alert('Failed to save list. Please try again.');
+            }
+        }
+
+        // Complete shopping
+        async function completeShopping() {
+            const storeName = document.getElementById('storeName').value.trim();
+            const budgetInput = document.getElementById('budgetAmount').value;
+            const budget = parseFloat(budgetInput.replace(/[^\d.]/g, '')) || 0;
+            
+            if (!storeName) {
+                alert('Please enter a store name!');
+                return;
+            }
+
+            if (currentItems.length === 0) {
+                alert('Please add at least one item!');
+                return;
+            }
+
+            let totalSpent = 0;
+            currentItems.forEach(item => {
+                totalSpent += item.qty * item.price;
+            });
+
+            const delta = budget - totalSpent;
+
+            try {
+                const listData = {
+                    userId: currentUser.uid,
+                    storeName: storeName,
+                    budget: budget,
+                    totalSpent: totalSpent,
+                    delta: delta,
+                    items: currentItems.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        qty: item.qty,
+                        price: item.price,
+                        checked: item.checked
+                    })),
+                    completed: true,
+                    date: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                };
+
+                if (currentListId) {
+                    // Complete existing list
+                    await updateDoc(doc(db, 'groceryLists', currentListId), listData);
+                } else {
+                    // Create and complete new list
+                    await addDoc(collection(db, 'groceryLists'), listData);
+                }
+
+                alert('Shopping trip completed! 🎉');
+                showMainApp();
+            } catch (error) {
+                console.error('Error completing shopping:', error);
+                alert('Failed to complete shopping. Please try again.');
+            }
         }
 
         function formatCurrency(input) {
@@ -1406,60 +1736,7 @@
             input.value = value;
         }
 
-        // Complete shopping
-        async function completeShopping() {
-            const storeName = document.getElementById('storeName').value.trim();
-            const budgetInput = document.getElementById('budgetAmount').value;
-            const budget = parseFloat(budgetInput.replace(/[^\d.]/g, '')) || 0;
-            
-            if (!storeName) {
-                alert('Please enter a store name!');
-                return;
-            }
-
-            const items = document.querySelectorAll('.shopping-item');
-            let totalSpent = 0;
-            const itemsData = [];
-            
-            items.forEach(item => {
-                const name = item.querySelector('.item-name').value.trim();
-                const qty = parseFloat(item.querySelector('.item-qty').value) || 0;
-                const priceInput = item.querySelector('.item-price').value;
-                const price = parseFloat(priceInput.replace(/[^\d.]/g, '')) || 0;
-                const checked = item.querySelector('.item-checkbox').checked;
-                
-                if (name) {
-                    itemsData.push({ name, qty, price, checked });
-                    totalSpent += qty * price;
-                }
-            });
-
-            if (itemsData.length === 0) {
-                alert('Please add at least one item!');
-                return;
-            }
-
-            const delta = budget - totalSpent;
-
-            try {
-                await addDoc(collection(db, 'groceryLists'), {
-                    userId: currentUser.uid,
-                    storeName: storeName,
-                    budget: budget,
-                    totalSpent: totalSpent,
-                    delta: delta,
-                    items: itemsData,
-                    completed: true,
-                    date: serverTimestamp()
-                });
-
-                alert('Shopping trip saved! 🎉');
-                showMainApp();
-            } catch (error) {
-                console.error('Error saving shopping list:', error);
-                alert('Failed to save shopping list. Please try again.');
-            }
-        }
+        window.toggleItemCheck = toggleItemCheck;
 
         // Delete list
         async function deleteList(listId, event) {
