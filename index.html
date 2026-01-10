@@ -167,7 +167,7 @@
 
         /* Main Content */
         .main-content {
-            padding: 100px 20px 80px 20px;
+            padding: 20px 20px 80px 20px;
         }
 
         /* Financial Overview Card */
@@ -357,6 +357,17 @@
         .form-group input:focus {
             outline: none;
             border-color: var(--accent-primary);
+        }
+
+        /* Make price field wider for easier one-handed use */
+        .form-group.price-field input {
+            font-size: 1.5em;
+            padding: 18px 12px 18px 38px;
+        }
+
+        .form-group.price-field .price-input-container::before {
+            font-size: 1.5em;
+            left: 18px;
         }
 
         .budget-display {
@@ -808,7 +819,7 @@
                 font-size: 0.9em;
             }
 
-            .price-input-container {
+            .shopping-item .price-input-container {
                 width: 70px;
             }
 
@@ -1034,7 +1045,7 @@
                 <label>Quantity</label>
                 <input type="number" id="itemQty" min="1" value="1" step="1">
             </div>
-            <div class="form-group">
+            <div class="form-group price-field">
                 <label>Price</label>
                 <div class="price-input-container">
                     <input type="text" id="itemPrice" placeholder="0.00" oninput="formatCurrency(this)">
