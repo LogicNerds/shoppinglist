@@ -167,7 +167,7 @@
 
         /* Main Content */
         .main-content {
-            padding: 20px 20px 120px 20px;
+            padding: 100px 20px 80px 20px;
         }
 
         /* Financial Overview Card */
@@ -326,7 +326,7 @@
         /* Shopping List View */
         .shopping-view {
             padding: 20px;
-            padding-bottom: 120px;
+            padding-bottom: 80px;
         }
 
         .shopping-header {
@@ -569,6 +569,7 @@
         .price-input-container {
             position: relative;
             display: inline-block;
+            width: 100%;
         }
 
         .price-input-container::before {
@@ -584,6 +585,7 @@
 
         .price-input-container input {
             padding-left: 28px !important;
+            width: 100%;
         }
 
         /* Theme Modal */
@@ -852,7 +854,7 @@
                 <div class="balance-grid">
                     <div class="balance-item">
                         <h3>Last Trip Spend</h3>
-                        <div class="amount" id="lastWeekSpend">$0.00</div>
+                        <div class="amount" id="lastTripSpend">$0.00</div>
                     </div>
                     <div class="balance-item">
                         <h3>MTD Spend</h3>
@@ -864,7 +866,7 @@
                     </div>
                     <div class="balance-item">
                         <h3>Last Trip Delta</h3>
-                        <div class="amount" id="lastWeekDelta">$0.00</div>
+                        <div class="amount" id="lastTripDelta">$0.00</div>
                     </div>
                     <div class="balance-item">
                         <h3>MTD Delta</h3>
@@ -1210,20 +1212,23 @@
 
         function updateSpendingOverview() {
             const now = new Date();
-            const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() - 7);
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-            let lastWeekSpend = 0;
-            let lastWeekDelta = 0;
+            let lastTripSpend = 0;
+            let lastTripDelta = 0;
             let mtdSpend = 0;
             let mtdDelta = 0;
             let totalSpend = 0;
             let totalDelta = 0;
             let completedCount = 0;
 
+            // Find most recent completed list for "Last Trip"
+            let mostRecentList = null;
+            let mostRecentDate = null;
+
             shoppingLists.forEach(list => {
                 if (!list.completed) return;
+                if (!list.date) return; // Skip lists with pending timestamps
                 
                 const listDate = list.date?.toDate ? list.date.toDate() : new Date(list.date);
                 const spent = list.totalSpent || 0;
@@ -1233,9 +1238,10 @@
                 totalDelta += delta;
                 completedCount++;
 
-                if (listDate >= startOfWeek) {
-                    lastWeekSpend += spent;
-                    lastWeekDelta += delta;
+                // Track most recent list
+                if (!mostRecentDate || listDate > mostRecentDate) {
+                    mostRecentDate = listDate;
+                    mostRecentList = { spent, delta };
                 }
 
                 if (listDate >= startOfMonth) {
@@ -1244,16 +1250,22 @@
                 }
             });
 
+            // Set Last Trip values from most recent list
+            if (mostRecentList) {
+                lastTripSpend = mostRecentList.spent;
+                lastTripDelta = mostRecentList.delta;
+            }
+
             const avgSpend = completedCount > 0 ? totalSpend / completedCount : 0;
             const avgDelta = completedCount > 0 ? totalDelta / completedCount : 0;
 
-            document.getElementById('lastWeekSpend').textContent = '$' + lastWeekSpend.toFixed(2);
+            document.getElementById('lastTripSpend').textContent = '$' + lastTripSpend.toFixed(2);
             document.getElementById('mtdSpend').textContent = '$' + mtdSpend.toFixed(2);
             document.getElementById('avgSpend').textContent = '$' + avgSpend.toFixed(2);
             
-            const lastWeekEl = document.getElementById('lastWeekDelta');
-            lastWeekEl.textContent = '$' + Math.abs(lastWeekDelta).toFixed(2);
-            lastWeekEl.className = 'amount ' + (lastWeekDelta >= 0 ? 'positive' : 'negative');
+            const lastTripEl = document.getElementById('lastTripDelta');
+            lastTripEl.textContent = '$' + Math.abs(lastTripDelta).toFixed(2);
+            lastTripEl.className = 'amount ' + (lastTripDelta >= 0 ? 'positive' : 'negative');
             
             const mtdEl = document.getElementById('mtdDelta');
             mtdEl.textContent = '$' + Math.abs(mtdDelta).toFixed(2);
