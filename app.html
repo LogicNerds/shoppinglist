@@ -202,24 +202,17 @@
 
         .health-bar-track {
             position: relative;
-            height: 42px;
+            height: 28px;
             background: #e0e0e0;
             border-radius: 8px;
             overflow: hidden;
-            display: flex;
-            align-items: center;
         }
 
         .health-bar-fill {
             height: 100%;
             background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             transition: width 0.4s ease;
-            min-width: 0;
-            flex-shrink: 0;
         }
 
         .health-bar-fill.over {
@@ -228,28 +221,26 @@
             border-radius: 8px;
         }
 
-        .health-bar-fill-label {
+        .health-bar-sub {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+        }
+
+        .health-bar-spend-label {
             font-size: 0.78em;
-            font-weight: 700;
-            color: white;
-            white-space: nowrap;
-            padding: 0 8px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-weight: 600;
+            color: #555;
         }
 
         .health-bar-diff-label {
             font-size: 0.78em;
             font-weight: 600;
-            color: #666;
-            white-space: nowrap;
-            padding: 0 8px;
-            flex: 1;
-            text-align: center;
+            color: #555;
         }
 
         .health-bar-diff-label.over {
-            color: white;
+            color: #ef4444;
         }
 
         .health-bar-empty {
@@ -930,9 +921,10 @@
                     <span class="health-bar-budget" id="healthBarBudget"></span>
                 </div>
                 <div class="health-bar-track" id="healthBarTrack">
-                    <div class="health-bar-fill" id="healthBarFill">
-                        <span class="health-bar-fill-label" id="healthBarSpendLabel"></span>
-                    </div>
+                    <div class="health-bar-fill" id="healthBarFill"></div>
+                </div>
+                <div class="health-bar-sub" id="healthBarSub">
+                    <span class="health-bar-spend-label" id="healthBarSpendLabel"></span>
                     <span class="health-bar-diff-label" id="healthBarDiffLabel"></span>
                 </div>
                 <div class="health-bar-empty hidden" id="healthBarEmpty">Complete a shopping trip to see your averages.</div>
@@ -1291,6 +1283,7 @@
             if (completedCount === 0) {
                 emptyEl.classList.remove('hidden');
                 trackEl.style.display = 'none';
+                document.getElementById('healthBarSub').style.display = 'none';
                 document.getElementById('healthBarBudget').textContent = '';
                 return;
             }
@@ -1308,19 +1301,22 @@
             const fill = document.getElementById('healthBarFill');
             const spendLabel = document.getElementById('healthBarSpendLabel');
             const diffLabel = document.getElementById('healthBarDiffLabel');
+            const subEl = document.getElementById('healthBarSub');
+
+            subEl.style.display = 'flex';
 
             if (isOver) {
                 fill.style.width = '100%';
                 fill.classList.add('over');
-                spendLabel.textContent = 'Avg Spend - $' + avgSpend.toFixed(2);
-                diffLabel.textContent = 'Avg Difference - $' + Math.abs(avgDiff).toFixed(2) + ' OVER';
+                spendLabel.textContent = 'Avg Spend: $' + avgSpend.toFixed(2);
+                diffLabel.textContent = 'Avg Difference: $' + Math.abs(avgDiff).toFixed(2) + ' OVER';
                 diffLabel.classList.add('over');
             } else {
                 const pct = avgBudget > 0 ? (avgSpend / avgBudget) * 100 : 0;
                 fill.style.width = pct + '%';
                 fill.classList.remove('over');
-                spendLabel.textContent = 'Avg Spend - $' + avgSpend.toFixed(2);
-                diffLabel.textContent = 'Avg Difference - $' + Math.abs(avgDiff).toFixed(2) + ' under';
+                spendLabel.textContent = 'Avg Spend: $' + avgSpend.toFixed(2);
+                diffLabel.textContent = 'Avg Difference: $' + Math.abs(avgDiff).toFixed(2) + ' under';
                 diffLabel.classList.remove('over');
             }
         }
