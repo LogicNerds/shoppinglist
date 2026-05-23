@@ -170,49 +170,126 @@
             padding: 20px 20px 80px 20px;
         }
 
-        /* Financial Overview Card */
-        .total-balance {
-            background: linear-gradient(135deg, var(--balance-start) 0%, var(--balance-end) 100%);
-            border-radius: 16px;
-            padding: 25px;
-            color: white;
+        /* Health Bar */
+        .health-bar-section {
             margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+            padding: 18px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
         }
 
-        .total-balance h2 {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 15px;
-            font-weight: 500;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        .health-bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .balance-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
+        .health-bar-label {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .balance-item h3 {
-            font-size: 0.75em;
-            opacity: 0.8;
-            margin-bottom: 5px;
-            font-weight: 400;
-        }
-
-        .balance-item .amount {
-            font-size: 1.4em;
+        .health-bar-budget {
+            font-size: 0.95em;
             font-weight: 700;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            color: #333;
         }
 
-        .amount.positive {
-            color: rgba(255,255,255,0.95);
+        .health-bar-track {
+            position: relative;
+            height: 42px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
         }
 
-        .amount.negative {
-            color: #fef08a;
+        .health-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 0.4s ease;
+            min-width: 0;
+            flex-shrink: 0;
+        }
+
+        .health-bar-fill.over {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            width: 100% !important;
+            border-radius: 8px;
+        }
+
+        .health-bar-fill-label {
+            font-size: 0.78em;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            padding: 0 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .health-bar-diff-label {
+            font-size: 0.78em;
+            font-weight: 600;
+            color: #666;
+            white-space: nowrap;
+            padding: 0 8px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .health-bar-diff-label.over {
+            color: white;
+        }
+
+        .health-bar-empty {
+            font-size: 0.85em;
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 4px 0;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 0.9em;
+            font-weight: 600;
+            z-index: 2000;
+            transition: top 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .toast.show {
+            top: 20px;
+        }
+
+        .toast.warning {
+            background: #f97316;
+        }
+
+        .toast.danger {
+            background: #ef4444;
         }
 
         /* Shopping Lists Section */
@@ -846,35 +923,19 @@
         </div>
 
         <div class="main-content">
-            <!-- Financial Overview -->
-            <div class="total-balance">
-                <h2>Spending Overview</h2>
-                <div class="balance-grid">
-                    <div class="balance-item">
-                        <h3>Last Trip Spend</h3>
-                        <div class="amount" id="lastTripSpend">$0.00</div>
-                    </div>
-                    <div class="balance-item">
-                        <h3>MTD Spend</h3>
-                        <div class="amount" id="mtdSpend">$0.00</div>
-                    </div>
-                    <div class="balance-item">
-                        <h3>Avg Spend</h3>
-                        <div class="amount" id="avgSpend">$0.00</div>
-                    </div>
-                    <div class="balance-item">
-                        <h3>Last Trip Delta</h3>
-                        <div class="amount" id="lastTripDelta">$0.00</div>
-                    </div>
-                    <div class="balance-item">
-                        <h3>MTD Delta</h3>
-                        <div class="amount" id="mtdDelta">$0.00</div>
-                    </div>
-                    <div class="balance-item">
-                        <h3>Avg Delta</h3>
-                        <div class="amount" id="avgDelta">$0.00</div>
-                    </div>
+            <!-- Health Bar -->
+            <div class="health-bar-section">
+                <div class="health-bar-header">
+                    <span class="health-bar-label">Avg Budget</span>
+                    <span class="health-bar-budget" id="healthBarBudget"></span>
                 </div>
+                <div class="health-bar-track" id="healthBarTrack">
+                    <div class="health-bar-fill" id="healthBarFill">
+                        <span class="health-bar-fill-label" id="healthBarSpendLabel"></span>
+                    </div>
+                    <span class="health-bar-diff-label" id="healthBarDiffLabel"></span>
+                </div>
+                <div class="health-bar-empty hidden" id="healthBarEmpty">Complete a shopping trip to see your averages.</div>
             </div>
 
             <!-- Shopping Lists -->
@@ -1060,6 +1121,9 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
     <!-- Footer -->
     <div class="footer">
         © 2026 Logic Nerds. All Rights Reserved. | <a onclick="openDisclaimer()">Disclaimer</a>
@@ -1095,6 +1159,7 @@
         let editingItemId = null;
         let unsubscribeLists = null;
         let draggedElement = null;
+        let milestonesHit = { fifty: false, seventyfive: false, over: false };
 
         // Make functions globally available
         window.signInWithGoogle = signInWithGoogle;
@@ -1208,69 +1273,56 @@
         }
 
         function updateSpendingOverview() {
-            const now = new Date();
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-            let lastTripSpend = 0;
-            let lastTripDelta = 0;
-            let mtdSpend = 0;
-            let mtdDelta = 0;
             let totalSpend = 0;
-            let totalDelta = 0;
+            let totalBudget = 0;
             let completedCount = 0;
-
-            // Find most recent completed list for "Last Trip"
-            let mostRecentList = null;
-            let mostRecentDate = null;
 
             shoppingLists.forEach(list => {
                 if (!list.completed) return;
-                if (!list.date) return; // Skip lists with pending timestamps
-                
-                const listDate = list.date?.toDate ? list.date.toDate() : new Date(list.date);
-                const spent = list.totalSpent || 0;
-                const delta = (list.budget || 0) - spent;
-
-                totalSpend += spent;
-                totalDelta += delta;
+                if (!list.date) return;
+                totalSpend += list.totalSpent || 0;
+                totalBudget += list.budget || 0;
                 completedCount++;
-
-                // Track most recent list
-                if (!mostRecentDate || listDate > mostRecentDate) {
-                    mostRecentDate = listDate;
-                    mostRecentList = { spent, delta };
-                }
-
-                if (listDate >= startOfMonth) {
-                    mtdSpend += spent;
-                    mtdDelta += delta;
-                }
             });
 
-            // Set Last Trip values from most recent list
-            if (mostRecentList) {
-                lastTripSpend = mostRecentList.spent;
-                lastTripDelta = mostRecentList.delta;
+            const emptyEl = document.getElementById('healthBarEmpty');
+            const trackEl = document.getElementById('healthBarTrack');
+
+            if (completedCount === 0) {
+                emptyEl.classList.remove('hidden');
+                trackEl.style.display = 'none';
+                document.getElementById('healthBarBudget').textContent = '';
+                return;
             }
 
-            const avgSpend = completedCount > 0 ? totalSpend / completedCount : 0;
-            const avgDelta = completedCount > 0 ? totalDelta / completedCount : 0;
+            emptyEl.classList.add('hidden');
+            trackEl.style.display = 'flex';
 
-            document.getElementById('lastTripSpend').textContent = '$' + lastTripSpend.toFixed(2);
-            document.getElementById('mtdSpend').textContent = '$' + mtdSpend.toFixed(2);
-            document.getElementById('avgSpend').textContent = '$' + avgSpend.toFixed(2);
-            
-            const lastTripEl = document.getElementById('lastTripDelta');
-            lastTripEl.textContent = '$' + Math.abs(lastTripDelta).toFixed(2);
-            lastTripEl.className = 'amount ' + (lastTripDelta >= 0 ? 'positive' : 'negative');
-            
-            const mtdEl = document.getElementById('mtdDelta');
-            mtdEl.textContent = '$' + Math.abs(mtdDelta).toFixed(2);
-            mtdEl.className = 'amount ' + (mtdDelta >= 0 ? 'positive' : 'negative');
+            const avgSpend = totalSpend / completedCount;
+            const avgBudget = totalBudget / completedCount;
+            const avgDiff = avgBudget - avgSpend;
+            const isOver = avgSpend > avgBudget;
 
-            const avgDeltaEl = document.getElementById('avgDelta');
-            avgDeltaEl.textContent = '$' + Math.abs(avgDelta).toFixed(2);
-            avgDeltaEl.className = 'amount ' + (avgDelta >= 0 ? 'positive' : 'negative');
+            document.getElementById('healthBarBudget').textContent = '$' + avgBudget.toFixed(2);
+
+            const fill = document.getElementById('healthBarFill');
+            const spendLabel = document.getElementById('healthBarSpendLabel');
+            const diffLabel = document.getElementById('healthBarDiffLabel');
+
+            if (isOver) {
+                fill.style.width = '100%';
+                fill.classList.add('over');
+                spendLabel.textContent = 'Avg Spend - $' + avgSpend.toFixed(2);
+                diffLabel.textContent = 'Avg Difference - $' + Math.abs(avgDiff).toFixed(2) + ' OVER';
+                diffLabel.classList.add('over');
+            } else {
+                const pct = avgBudget > 0 ? (avgSpend / avgBudget) * 100 : 0;
+                fill.style.width = pct + '%';
+                fill.classList.remove('over');
+                spendLabel.textContent = 'Avg Spend - $' + avgSpend.toFixed(2);
+                diffLabel.textContent = 'Avg Difference - $' + Math.abs(avgDiff).toFixed(2) + ' under';
+                diffLabel.classList.remove('over');
+            }
         }
 
         function updateListsDisplay() {
@@ -1395,6 +1447,7 @@
 
             currentListId = null;
             currentItems = [];
+            milestonesHit = { fifty: false, seventyfive: false, over: false };
             document.getElementById('storeName').value = '';
             document.getElementById('budgetAmount').value = '';
             renderItems();
@@ -1409,6 +1462,7 @@
 
             currentListId = listId;
             currentItems = list.items || [];
+            milestonesHit = { fifty: false, seventyfive: false, over: false };
             document.getElementById('storeName').value = list.storeName || '';
             document.getElementById('budgetAmount').value = list.budget || '';
             
@@ -1622,6 +1676,31 @@
             
             document.getElementById('keepListBtn').disabled = !storeName || !hasItems;
             document.getElementById('doneBtn').disabled = !storeName || !hasItems;
+
+            // Budget milestone toasts
+            if (budget > 0) {
+                const pct = (total / budget) * 100;
+                if (pct >= 100 && !milestonesHit.over) {
+                    milestonesHit.over = true;
+                    showToast("⚠️ You're over budget!", "danger");
+                } else if (pct >= 75 && !milestonesHit.seventyfive) {
+                    milestonesHit.seventyfive = true;
+                    showToast('75% of your budget used', 'warning');
+                } else if (pct >= 50 && !milestonesHit.fifty) {
+                    milestonesHit.fifty = true;
+                    showToast('50% of your budget used', '');
+                }
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (type ? ' ' + type : '');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         // Keep list for later
