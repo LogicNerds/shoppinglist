@@ -498,11 +498,6 @@
             box-shadow: 0 2px 8px rgba(13, 148, 136, 0.1);
         }
 
-        .shopping-item.dragging {
-            opacity: 0.5;
-            border-color: var(--accent-primary);
-        }
-
         .shopping-item.checked {
             opacity: 0.6;
             background: #f9fafb;
@@ -511,19 +506,6 @@
         .shopping-item.checked .item-details .item-name-text {
             text-decoration: line-through;
             color: #999;
-        }
-
-        .drag-handle {
-            font-size: 1.2em;
-            color: #999;
-            cursor: grab;
-            padding: 5px;
-            user-select: none;
-            flex-shrink: 0;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
         }
 
         .item-checkbox {
@@ -891,6 +873,227 @@
             min-height: 60px;
         }
 
+
+        /* Category styles */
+        .category-group {
+            margin-bottom: 15px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--accent-bg, #f0fdfa);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.85em;
+            color: var(--accent-primary, #0d9488);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .category-toggle {
+            font-size: 0.8em;
+            color: var(--accent-primary, #0d9488);
+            transition: transform 0.2s;
+        }
+
+        .category-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .category-items {
+            transition: max-height 0.2s ease;
+            overflow: hidden;
+        }
+
+        .category-items.collapsed {
+            max-height: 0 !important;
+        }
+
+        /* Typeahead */
+        .typeahead-container {
+            position: relative;
+        }
+
+        .typeahead-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--accent-primary, #0d9488);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .typeahead-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 0.95em;
+            color: #333;
+            transition: background 0.15s;
+        }
+
+        .typeahead-option:hover {
+            background: var(--accent-bg, #f0fdfa);
+        }
+
+        /* My Shoppers Modal */
+        .shoppers-code {
+            text-align: center;
+            padding: 20px;
+            background: var(--accent-bg, #f0fdfa);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .shoppers-code-label {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .shoppers-code-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--accent-primary, #0d9488);
+            letter-spacing: 0.15em;
+            margin-bottom: 12px;
+        }
+
+        .shoppers-qr {
+            margin: 12px auto;
+            display: block;
+        }
+
+        .shoppers-share-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent-primary, #0d9488);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .shoppers-member {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .shoppers-member-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-primary, #0d9488);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1em;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .shoppers-member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .shoppers-member-name {
+            flex: 1;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .shoppers-remove-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 4px 8px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .shoppers-remove-btn:hover {
+            opacity: 1;
+        }
+
+        .join-shopper-btn {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px dashed var(--accent-primary, #0d9488);
+            color: var(--accent-primary, #0d9488);
+            border-radius: 12px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: background 0.2s;
+        }
+
+        .join-shopper-btn:hover {
+            background: var(--accent-bg, #f0fdfa);
+        }
+
+        .shopper-code-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            transition: border-color 0.2s;
+        }
+
+        .shopper-code-input:focus {
+            outline: none;
+            border-color: var(--accent-primary, #0d9488);
+        }
+
+        .guest-badge {
+            background: var(--accent-primary, #0d9488);
+            color: white;
+            font-size: 0.7em;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
         /* Hamburger Menu */
         .hamburger-menu {
             position: absolute;
@@ -1108,6 +1311,7 @@
             <div class="header-left" style="position: relative;">
                 <button class="theme-btn" onclick="toggleHamburgerMenu()" title="Menu" id="hamburgerBtn">☰</button>
                 <div class="hamburger-menu hidden" id="hamburgerMenu">
+                    <button class="hamburger-item" onclick="showMyShoppers(); toggleHamburgerMenu()">👨‍👩‍👧‍👦 My Shoppers</button>
                     <button class="hamburger-item" onclick="showThemeModal(); toggleHamburgerMenu()">🎨 Change Theme</button>
                     <button class="hamburger-item" onclick="startTutorial(); toggleHamburgerMenu()">❓ Start Tutorial</button>
                 </div>
@@ -1138,6 +1342,9 @@
 
             <!-- Shopping Lists -->
             <div class="lists-section">
+                <div id="joinShopperBtnContainer">
+                    <button class="join-shopper-btn hidden" id="joinShopperBtn" onclick="showJoinShoppers()">🔗 Join My Shoppers</button>
+                </div>
                 <button class="create-list-btn" id="createListBtn" onclick="createNewList()">+ Create Shopping List</button>
                 <h3>Shopping Lists (Last 90 Days)</h3>
                 <div id="shoppingLists"></div>
@@ -1323,6 +1530,13 @@
                     <input type="text" id="itemPrice" placeholder="0.00" oninput="formatCurrency(this)">
                 </div>
             </div>
+            <div class="form-group">
+                <label>Category <span style="color:#999; font-weight:400;">(optional)</span></label>
+                <div class="typeahead-container">
+                    <input type="text" id="itemCategory" placeholder="e.g. Produce, Dairy..." autocomplete="off" oninput="filterCategories(this.value)" onfocus="filterCategories(this.value)">
+                    <div class="typeahead-dropdown hidden" id="categoryDropdown"></div>
+                </div>
+            </div>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal('itemModal')">Cancel</button>
                 <button class="modal-btn primary" onclick="saveItem()" id="saveItemBtn">Add</button>
@@ -1342,6 +1556,46 @@
             <p>Users are solely responsible for the accuracy of data entered and any financial decisions made. This app does not connect to bank accounts or store any sensitive financial information.</p>
             <p>Logic Nerds and its affiliates assume no liability for any losses, damages, or consequences arising from the use or misuse of this application. This software is provided "as is" without warranty of any kind, express or implied.</p>
             <p>By using this application, you acknowledge and accept full responsibility for your budgeting decisions and data accuracy.</p>
+        </div>
+    </div>
+
+    <!-- My Shoppers Modal -->
+    <div id="myShoppersModal" class="modal">
+        <div class="modal-content" style="max-height: 85vh;">
+            <h2>👨‍👩‍👧‍👦 My Shoppers</h2>
+            <div id="shoppersOwnerView">
+                <div class="shoppers-code">
+                    <div class="shoppers-code-label">Your Invite Code</div>
+                    <div class="shoppers-code-value" id="shoppersCodeDisplay">------</div>
+                    <canvas id="shoppersQR" class="shoppers-qr" width="150" height="150"></canvas>
+                    <button class="shoppers-share-btn" onclick="copyShopperLink()">📋 Copy Invite Link</button>
+                </div>
+                <div id="shoppersMembersList"></div>
+            </div>
+            <div id="shoppersGuestView" class="hidden">
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 16px;">You are shopping with:</p>
+                <div id="shoppersOwnerInfo"></div>
+                <button class="modal-btn secondary" style="width:100%; margin-top: 16px;" onclick="leaveShoppers()">Leave My Shoppers</button>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('myShoppersModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Shoppers Modal -->
+    <div id="joinShoppersModal" class="modal">
+        <div class="modal-content">
+            <h2>🔗 Join My Shoppers</h2>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">Enter the invite code from the person you want to shop with.</p>
+            <div class="form-group">
+                <label>Invite Code</label>
+                <input type="text" class="shopper-code-input" id="joinCodeInput" placeholder="ABC123" maxlength="6">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('joinShoppersModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="joinShoppers()" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white;">Join</button>
+            </div>
         </div>
     </div>
 
@@ -1397,10 +1651,11 @@
     </div>
 
     <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -1425,8 +1680,20 @@
         let currentItems = [];
         let editingItemId = null;
         let unsubscribeLists = null;
-        let draggedElement = null;
         let milestonesHit = { fifty: false, seventyfive: false, over: false };
+        let isGuest = false;
+        let ownerUid = null;
+        let familyCode = null;
+        let familyMembers = [];
+        let unsubscribeFamily = null;
+        let knownMemberIds = new Set();
+
+        const PREDEFINED_CATEGORIES = [
+            'Produce', 'Dairy', 'Meat & Seafood', 'Frozen', 'Bakery',
+            'Snacks & Candy', 'Beverages', 'Canned & Dry Goods',
+            'Condiments & Sauces', 'Breakfast', 'Personal Care',
+            'Household', 'Baby', 'Pet', 'Deli', 'Alcohol', 'Other'
+        ];
 
         // Make functions globally available
         window.signInWithGoogle = signInWithGoogle;
@@ -1453,13 +1720,102 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                showMainApp();
-                loadShoppingLists();
+                initializeUser();
             } else {
                 currentUser = null;
+                isGuest = false;
+                ownerUid = null;
                 showLoginScreen();
             }
         });
+
+        async function initializeUser() {
+            // Check if this user is a guest in someone else's account
+            const memberQuery = query(
+                collection(db, 'familyMembers'),
+                where('guestUid', '==', currentUser.uid)
+            );
+            const memberSnap = await getDoc(doc(db, 'familyMembers', currentUser.uid)).catch(() => null);
+            
+            // Check familyMembers collection for this user as a guest
+            const guestQuery = query(collection(db, 'familyMembers'), where('guestUid', '==', currentUser.uid));
+            const guestSnap = await new Promise((resolve) => {
+                const unsub = onSnapshot(guestQuery, (snap) => {
+                    unsub();
+                    resolve(snap);
+                });
+            });
+
+            if (!guestSnap.empty) {
+                isGuest = true;
+                ownerUid = guestSnap.docs[0].data().ownerUid;
+            } else {
+                isGuest = false;
+                ownerUid = null;
+                // Ensure family code exists for this user
+                await ensureFamilyCode();
+            }
+
+            // Check URL for invite code
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlCode = urlParams.get('code');
+            if (urlCode && !isGuest) {
+                setTimeout(() => {
+                    document.getElementById('joinCodeInput').value = urlCode.toUpperCase();
+                    showJoinShoppers();
+                }, 800);
+            }
+
+            showMainApp();
+            loadShoppingLists();
+            startFamilyListener();
+        }
+
+        async function ensureFamilyCode() {
+            const codeDoc = await getDoc(doc(db, 'familyCodes', currentUser.uid));
+            if (codeDoc.exists()) {
+                familyCode = codeDoc.data().code;
+            } else {
+                familyCode = generateCode();
+                await setDoc(doc(db, 'familyCodes', currentUser.uid), {
+                    ownerUid: currentUser.uid,
+                    code: familyCode,
+                    createdAt: serverTimestamp()
+                });
+            }
+        }
+
+        function generateCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function startFamilyListener() {
+            if (isGuest) return;
+            if (unsubscribeFamily) unsubscribeFamily();
+
+            const membersQuery = query(
+                collection(db, 'familyMembers'),
+                where('ownerUid', '==', currentUser.uid)
+            );
+
+            unsubscribeFamily = onSnapshot(membersQuery, (snapshot) => {
+                familyMembers = [];
+                snapshot.forEach((d) => {
+                    const data = { id: d.id, ...d.data() };
+                    familyMembers.push(data);
+                    // Toast for new members
+                    if (!knownMemberIds.has(d.id) && knownMemberIds.size > 0) {
+                        showToast('👋 ' + (data.guestName || 'Someone') + ' joined My Shoppers!', '');
+                    }
+                    knownMemberIds.add(d.id);
+                });
+            });
+        }
 
         // Sign in with Google
         async function signInWithGoogle() {
@@ -1500,6 +1856,20 @@
             if (currentUser.photoURL) {
                 document.getElementById('userAvatar').src = currentUser.photoURL;
             }
+
+            // Show/hide join button based on guest status
+            const joinBtn = document.getElementById('joinShopperBtn');
+            if (!isGuest) {
+                joinBtn.classList.remove('hidden');
+            } else {
+                joinBtn.classList.add('hidden');
+                // Add guest badge to header
+                const headerTitle = document.querySelector('#mainApp .header-left span');
+                if (headerTitle && !headerTitle.querySelector('.guest-badge')) {
+                    headerTitle.innerHTML += '<span class="guest-badge">Guest</span>';
+                }
+            }
+
             checkFirstLogin();
         }
 
@@ -1507,16 +1877,25 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('shoppingView').classList.remove('hidden');
+            
+            // Hide Done Shopping for guests
+            const doneBtn = document.getElementById('doneBtn');
+            if (isGuest) {
+                doneBtn.style.display = 'none';
+            } else {
+                doneBtn.style.display = '';
+            }
         }
 
         // Load shopping lists
         function loadShoppingLists() {
             const ninetyDaysAgo = new Date();
             ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+            const queryUid = isGuest ? ownerUid : currentUser.uid;
             
             const listsQuery = query(
                 collection(db, 'groceryLists'),
-                where('userId', '==', currentUser.uid)
+                where('userId', '==', queryUid)
             );
             
             unsubscribeLists = onSnapshot(listsQuery, (snapshot) => {
@@ -1761,6 +2140,8 @@
             document.getElementById('itemName').value = '';
             document.getElementById('itemQty').value = '1';
             document.getElementById('itemPrice').value = '';
+            document.getElementById('itemCategory').value = '';
+            document.getElementById('categoryDropdown').classList.add('hidden');
             document.getElementById('saveItemBtn').textContent = 'Add';
             document.getElementById('itemModal').classList.add('active');
         }
@@ -1774,6 +2155,8 @@
             document.getElementById('itemName').value = item.name;
             document.getElementById('itemQty').value = item.qty;
             document.getElementById('itemPrice').value = item.price.toFixed(2);
+            document.getElementById('itemCategory').value = item.category || '';
+            document.getElementById('categoryDropdown').classList.add('hidden');
             document.getElementById('saveItemBtn').textContent = 'Save';
             document.getElementById('itemModal').classList.add('active');
         }
@@ -1783,6 +2166,7 @@
             const qty = parseFloat(document.getElementById('itemQty').value) || 1;
             const priceInput = document.getElementById('itemPrice').value;
             const price = parseFloat(priceInput.replace(/[^\d.]/g, '')) || 0;
+            const category = document.getElementById('itemCategory').value.trim();
 
             if (!name) {
                 alert('Please enter an item name!');
@@ -1790,24 +2174,24 @@
             }
 
             if (editingItemId) {
-                // Update existing item
                 const itemIndex = currentItems.findIndex(i => i.id === editingItemId);
                 if (itemIndex !== -1) {
                     currentItems[itemIndex] = {
                         ...currentItems[itemIndex],
                         name: name,
                         qty: qty,
-                        price: price
+                        price: price,
+                        category: category
                     };
                 }
             } else {
-                // Add new item
                 const newItem = {
                     id: 'item_' + Date.now() + '_' + Math.random(),
                     name: name,
                     qty: qty,
                     price: price,
-                    checked: false
+                    checked: false,
+                    category: category
                 };
                 currentItems.push(newItem);
             }
@@ -1815,6 +2199,7 @@
             renderItems();
             updateTotal();
             closeModal('itemModal');
+            document.getElementById('categoryDropdown').classList.add('hidden');
         }
 
         function deleteItem(itemId, event) {
@@ -1839,29 +2224,81 @@
                 return;
             }
 
+            // Group items by category
+            const groups = {};
             currentItems.forEach(item => {
-                const itemEl = document.createElement('div');
-                itemEl.className = 'shopping-item' + (item.checked ? ' checked' : '');
-                itemEl.draggable = true;
-                itemEl.dataset.itemId = item.id;
-                itemEl.onclick = () => editItem(item.id);
-
-                const total = item.qty * item.price;
-
-                itemEl.innerHTML = `
-                    <span class="drag-handle">☰</span>
-                    <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
-                    <div class="item-details">
-                        <div class="item-name-text">${item.name}</div>
-                        <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
-                    </div>
-                    <div class="item-total">$${total.toFixed(2)}</div>
-                    <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
-                `;
-
-                setupDragAndDrop(itemEl);
-                container.appendChild(itemEl);
+                const cat = item.category || 'Uncategorized';
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push(item);
             });
+
+            // Sort: named categories first, Uncategorized last
+            const sortedCats = Object.keys(groups).sort((a, b) => {
+                if (a === 'Uncategorized') return 1;
+                if (b === 'Uncategorized') return -1;
+                return a.localeCompare(b);
+            });
+
+            sortedCats.forEach(cat => {
+                const groupEl = document.createElement('div');
+                groupEl.className = 'category-group';
+                groupEl.dataset.category = cat;
+
+                const headerEl = document.createElement('div');
+                headerEl.className = 'category-header';
+                headerEl.onclick = () => toggleCategory(cat);
+                headerEl.innerHTML = `
+                    <div class="category-header-left">
+                        <span>${cat}</span>
+                        <span style="color: #999; font-weight: 400; text-transform: none; letter-spacing: 0;">(${groups[cat].length})</span>
+                    </div>
+                    <span class="category-toggle" id="toggle-${cat.replace(/\s/g,'-')}">▼</span>
+                `;
+                groupEl.appendChild(headerEl);
+
+                const itemsEl = document.createElement('div');
+                itemsEl.className = 'category-items';
+                itemsEl.id = 'catItems-' + cat.replace(/\s/g, '-');
+                itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
+
+                groups[cat].forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'shopping-item' + (item.checked ? ' checked' : '');
+                    itemEl.dataset.itemId = item.id;
+                    itemEl.onclick = () => editItem(item.id);
+
+                    const total = item.qty * item.price;
+
+                    itemEl.innerHTML = `
+                        <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
+                        <div class="item-details">
+                            <div class="item-name-text">${item.name}</div>
+                            <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                        </div>
+                        <div class="item-total">$${total.toFixed(2)}</div>
+                        <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
+                    `;
+
+                    itemsEl.appendChild(itemEl);
+                });
+
+                groupEl.appendChild(itemsEl);
+                container.appendChild(groupEl);
+
+                // Set height after render
+                requestAnimationFrame(() => {
+                    itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
+                });
+            });
+        }
+
+        function toggleCategory(cat) {
+            const key = cat.replace(/\s/g, '-');
+            const itemsEl = document.getElementById('catItems-' + key);
+            const toggleEl = document.getElementById('toggle-' + key);
+            if (!itemsEl) return;
+            itemsEl.classList.toggle('collapsed');
+            if (toggleEl) toggleEl.classList.toggle('collapsed');
         }
 
         function toggleItemCheck(itemId) {
@@ -1870,57 +2307,6 @@
                 item.checked = !item.checked;
                 renderItems();
             }
-        }
-
-        function setupDragAndDrop(item) {
-            item.addEventListener('dragstart', (e) => {
-                draggedElement = item;
-                item.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
-                e.stopPropagation();
-            });
-
-            item.addEventListener('dragend', () => {
-                item.classList.remove('dragging');
-                
-                // Update the order in currentItems array based on DOM order
-                const container = document.getElementById('itemsContainer');
-                const itemElements = Array.from(container.querySelectorAll('.shopping-item'));
-                const newOrder = itemElements.map(el => el.dataset.itemId);
-                
-                currentItems.sort((a, b) => {
-                    return newOrder.indexOf(a.id) - newOrder.indexOf(b.id);
-                });
-                
-                draggedElement = null;
-            });
-
-            item.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                const container = document.getElementById('itemsContainer');
-                const afterElement = getDragAfterElement(container, e.clientY);
-                
-                if (afterElement == null) {
-                    container.appendChild(draggedElement);
-                } else {
-                    container.insertBefore(draggedElement, afterElement);
-                }
-            });
-        }
-
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.shopping-item:not(.dragging)')];
-
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
         function updateTotal() {
@@ -1993,7 +2379,7 @@
 
             try {
                 const listData = {
-                    userId: currentUser.uid,
+                    userId: isGuest ? ownerUid : currentUser.uid,
                     storeName: storeName,
                     budget: budget,
                     items: currentItems.map(item => ({
@@ -2001,7 +2387,8 @@
                         name: item.name,
                         qty: item.qty,
                         price: item.price,
-                        checked: item.checked
+                        checked: item.checked,
+                        category: item.category || ''
                     })),
                     completed: false
                 };
@@ -2048,7 +2435,7 @@
 
             try {
                 const listData = {
-                    userId: currentUser.uid,
+                    userId: isGuest ? ownerUid : currentUser.uid,
                     storeName: storeName,
                     budget: budget,
                     totalSpent: totalSpent,
@@ -2058,7 +2445,8 @@
                         name: item.name,
                         qty: item.qty,
                         price: item.price,
-                        checked: item.checked
+                        checked: item.checked,
+                        category: item.category || ''
                     })),
                     completed: true,
                     date: serverTimestamp(),
@@ -2168,12 +2556,17 @@
             {
                 targetId: 'createListBtn',
                 title: 'Create a Shopping List',
-                text: 'Tap here to start a new shopping list. Enter your store name, set a budget, and add your items.'
+                text: 'Tap here to start a new shopping list. Enter your store name, set a budget, and add your items. You can also assign items to categories like Produce or Dairy to shop by aisle.'
             },
             {
                 targetId: 'shoppingLists',
                 title: 'Your Shopping Lists',
-                text: 'Your active and completed lists from the last 90 days appear here. Tap any list to open it.'
+                text: 'Your active and completed lists from the last 90 days appear here. Tap any list to open it. Once you tap Done Shopping and confirm, the list is locked and cannot be edited.'
+            },
+            {
+                targetId: 'hamburgerBtn',
+                title: 'My Shoppers',
+                text: 'Tap the menu icon to access My Shoppers. Share your invite code or QR with family or roommates so they can add items and check things off your list together.'
             }
         ];
 
@@ -2238,9 +2631,204 @@
         }
 
         window.toggleHamburgerMenu = toggleHamburgerMenu;
+        window.showMyShoppers = showMyShoppers;
+        window.showJoinShoppers = showJoinShoppers;
+        window.joinShoppers = joinShoppers;
+        window.leaveShoppers = leaveShoppers;
+        window.removeShopper = removeShopper;
+        window.copyShopperLink = copyShopperLink;
+        window.filterCategories = filterCategories;
+        window.selectCategory = selectCategory;
+        window.toggleCategory = toggleCategory;
         window.startTutorial = startTutorial;
         window.nextTutorialStep = nextTutorialStep;
         window.endTutorial = endTutorial;
+
+        // Category typeahead
+        function filterCategories(value) {
+            const dropdown = document.getElementById('categoryDropdown');
+            const filtered = value.trim() === ''
+                ? PREDEFINED_CATEGORIES
+                : PREDEFINED_CATEGORIES.filter(c => c.toLowerCase().includes(value.toLowerCase()));
+
+            if (filtered.length === 0) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+
+            dropdown.innerHTML = filtered.map(c =>
+                `<div class="typeahead-option" onclick="selectCategory('${c}')">${c}</div>`
+            ).join('');
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectCategory(cat) {
+            document.getElementById('itemCategory').value = cat;
+            document.getElementById('categoryDropdown').classList.add('hidden');
+        }
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('categoryDropdown');
+            const input = document.getElementById('itemCategory');
+            if (dropdown && !dropdown.contains(e.target) && e.target !== input) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // My Shoppers functions
+        async function showMyShoppers() {
+            const modal = document.getElementById('myShoppersModal');
+            modal.classList.add('active');
+
+            if (isGuest) {
+                document.getElementById('shoppersOwnerView').classList.add('hidden');
+                document.getElementById('shoppersGuestView').classList.remove('hidden');
+
+                // Show owner info
+                const ownerCodeSnap = await getDoc(doc(db, 'familyCodes', ownerUid));
+                const ownerData = ownerCodeSnap.exists() ? ownerCodeSnap.data() : {};
+                document.getElementById('shoppersOwnerInfo').innerHTML = `
+                    <div class="shoppers-member">
+                        <div class="shoppers-member-avatar">👑</div>
+                        <div class="shoppers-member-name">Account Owner</div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('shoppersOwnerView').classList.remove('hidden');
+                document.getElementById('shoppersGuestView').classList.add('hidden');
+
+                // Show code
+                document.getElementById('shoppersCodeDisplay').textContent = familyCode || '------';
+
+                // Generate QR
+                const canvas = document.getElementById('shoppersQR');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, 150, 150);
+                if (familyCode && typeof QRCode !== 'undefined') {
+                    const qr = new QRCode(document.createElement('div'), {
+                        text: `https://www.myidk.app/app.html?code=${familyCode}`,
+                        width: 150,
+                        height: 150,
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                    setTimeout(() => {
+                        const img = qr._oDrawing._elImage;
+                        const tempImg = new Image();
+                        tempImg.onload = () => ctx.drawImage(tempImg, 0, 0, 150, 150);
+                        tempImg.src = img.src;
+                    }, 100);
+                }
+
+                // Render members list
+                renderMembersList();
+            }
+        }
+
+        function renderMembersList() {
+            const container = document.getElementById('shoppersMembersList');
+            if (familyMembers.length === 0) {
+                container.innerHTML = '<p style="color:#999; font-size:0.9em; text-align:center; padding: 10px 0;">No one has joined yet. Share your code!</p>';
+                return;
+            }
+
+            container.innerHTML = familyMembers.map(m => `
+                <div class="shoppers-member">
+                    <div class="shoppers-member-avatar">
+                        ${m.guestPhoto ? `<img src="${m.guestPhoto}" onerror="this.parentElement.textContent='${(m.guestName||'?')[0].toUpperCase()}'">` : (m.guestName||'?')[0].toUpperCase()}
+                    </div>
+                    <div class="shoppers-member-name">${m.guestName || 'Unknown'}</div>
+                    <button class="shoppers-remove-btn" onclick="removeShopper('${m.guestUid}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        function showJoinShoppers() {
+            document.getElementById('joinShoppersModal').classList.add('active');
+        }
+
+        async function joinShoppers() {
+            const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+            if (!code || code.length !== 6) {
+                alert('Please enter a valid 6-character code.');
+                return;
+            }
+
+            // Look up code
+            const codeQuery = query(collection(db, 'familyCodes'), where('code', '==', code));
+            const codeSnap = await new Promise((resolve) => {
+                const unsub = onSnapshot(codeQuery, (snap) => { unsub(); resolve(snap); });
+            });
+
+            if (codeSnap.empty) {
+                alert('Code not found. Please check and try again.');
+                return;
+            }
+
+            const ownerData = codeSnap.docs[0].data();
+            if (ownerData.ownerUid === currentUser.uid) {
+                alert("That's your own code!");
+                return;
+            }
+
+            // Check member count
+            const membersQuery = query(collection(db, 'familyMembers'), where('ownerUid', '==', ownerData.ownerUid));
+            const membersSnap = await new Promise((resolve) => {
+                const unsub = onSnapshot(membersQuery, (snap) => { unsub(); resolve(snap); });
+            });
+
+            if (membersSnap.size >= 6) {
+                alert('This account already has the maximum of 6 shoppers.');
+                return;
+            }
+
+            // Add to family
+            await setDoc(doc(db, 'familyMembers', currentUser.uid), {
+                ownerUid: ownerData.ownerUid,
+                guestUid: currentUser.uid,
+                guestName: currentUser.displayName || 'Unknown',
+                guestPhoto: currentUser.photoURL || '',
+                joinedAt: serverTimestamp()
+            });
+
+            isGuest = true;
+            ownerUid = ownerData.ownerUid;
+            closeModal('joinShoppersModal');
+            closeModal('myShoppersModal');
+            showToast('✅ Joined! Loading shared lists...', '');
+
+            // Reload with owner data
+            if (unsubscribeLists) unsubscribeLists();
+            loadShoppingLists();
+            showMainApp();
+        }
+
+        async function leaveShoppers() {
+            if (!confirm('Are you sure you want to leave My Shoppers?')) return;
+            await deleteDoc(doc(db, 'familyMembers', currentUser.uid));
+            isGuest = false;
+            ownerUid = null;
+            closeModal('myShoppersModal');
+            showToast('You have left My Shoppers', '');
+            if (unsubscribeLists) unsubscribeLists();
+            await ensureFamilyCode();
+            loadShoppingLists();
+            showMainApp();
+        }
+
+        async function removeShopper(guestUid) {
+            if (!confirm('Remove this shopper from your account?')) return;
+            await deleteDoc(doc(db, 'familyMembers', guestUid));
+            showToast('Shopper removed', '');
+            renderMembersList();
+        }
+
+        function copyShopperLink() {
+            const link = `https://www.myidk.app/app.html?code=${familyCode}`;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('📋 Link copied!', '');
+            });
+        }
 
         // Theme management
         const themes = {
