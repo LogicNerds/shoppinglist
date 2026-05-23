@@ -884,6 +884,200 @@
                 width: 70px;
             }
         }
+
+        /* Hamburger Menu */
+        .hamburger-menu {
+            position: absolute;
+            top: 48px;
+            left: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 1100;
+            min-width: 180px;
+            overflow: hidden;
+        }
+
+        .hamburger-item {
+            display: block;
+            width: 100%;
+            padding: 14px 18px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .hamburger-item:hover {
+            background: #f5f5f5;
+        }
+
+        /* Tutorial Overlay */
+        .tutorial-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .tutorial-overlay.active {
+            display: block;
+        }
+
+        .tutorial-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            pointer-events: all;
+        }
+
+        .tutorial-spotlight {
+            position: absolute;
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
+            z-index: 2001;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .tutorial-tooltip {
+            position: absolute;
+            background: white;
+            border-radius: 14px;
+            padding: 18px 20px;
+            max-width: 280px;
+            z-index: 2002;
+            pointer-events: all;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .tutorial-tooltip h3 {
+            font-size: 1em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .tutorial-tooltip p {
+            font-size: 0.88em;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .tutorial-tooltip-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tutorial-next-btn {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tutorial-skip-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 0.85em;
+            cursor: pointer;
+            padding: 9px 0;
+        }
+
+        .tutorial-step-count {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        /* First Login Modal */
+        .welcome-modal-content {
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .welcome-modal-content .welcome-emoji {
+            font-size: 3em;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .welcome-modal-content h2 {
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .welcome-modal-content p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        .welcome-modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .welcome-tour-btn {
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .welcome-skip-btn {
+            padding: 14px;
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Done Confirm Modal */
+        .done-confirm-content {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .done-confirm-content .done-emoji {
+            font-size: 2.5em;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .done-confirm-content p {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+
+        .done-confirm-content .warning-text {
+            color: #dc2626;
+            font-weight: 600;
+            font-size: 0.88em;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -905,8 +1099,12 @@
     <!-- Main App - Dashboard -->
     <div id="mainApp" class="container hidden">
         <div class="header">
-            <div class="header-left">
-                <button class="theme-btn" onclick="showThemeModal()" title="Change Theme">🎨</button>
+            <div class="header-left" style="position: relative;">
+                <button class="theme-btn" onclick="toggleHamburgerMenu()" title="Menu" id="hamburgerBtn">☰</button>
+                <div class="hamburger-menu hidden" id="hamburgerMenu">
+                    <button class="hamburger-item" onclick="showThemeModal(); toggleHamburgerMenu()">🎨 Change Theme</button>
+                    <button class="hamburger-item" onclick="startTutorial(); toggleHamburgerMenu()">❓ Start Tutorial</button>
+                </div>
                 <span style="margin-left: 15px; font-size: 1.2em; font-weight: 600;">My Groceries</span>
             </div>
             <div class="header-right">
@@ -917,7 +1115,7 @@
 
         <div class="main-content">
             <!-- Health Bar -->
-            <div class="health-bar-section">
+            <div class="health-bar-section" id="healthBarSection">
                 <div class="health-bar-header">
                     <span class="health-bar-label">Avg Budget</span>
                     <span class="health-bar-budget" id="healthBarBudget"></span>
@@ -934,7 +1132,7 @@
 
             <!-- Shopping Lists -->
             <div class="lists-section">
-                <button class="create-list-btn" onclick="createNewList()">+ Create Shopping List</button>
+                <button class="create-list-btn" id="createListBtn" onclick="createNewList()">+ Create Shopping List</button>
                 <h3>Shopping Lists (Last 90 Days)</h3>
                 <div id="shoppingLists"></div>
             </div>
@@ -986,7 +1184,7 @@
                 <button class="keep-list-btn" onclick="keepList()" id="keepListBtn">
                     💾 Keep List for Later
                 </button>
-                <button class="done-shopping-btn" onclick="completeShopping()" id="doneBtn">
+                <button class="done-shopping-btn" onclick="showDoneConfirmModal()" id="doneBtn">
                     ✓ Done Shopping!
                 </button>
             </div>
@@ -1115,6 +1313,49 @@
         </div>
     </div>
 
+    <!-- Tutorial Overlay -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-spotlight" id="tutorialSpotlight"></div>
+        <div class="tutorial-tooltip" id="tutorialTooltip">
+            <h3 id="tutorialTitle"></h3>
+            <p id="tutorialText"></p>
+            <div class="tutorial-tooltip-buttons">
+                <button class="tutorial-skip-btn" onclick="endTutorial()">Skip</button>
+                <span class="tutorial-step-count" id="tutorialStepCount"></span>
+                <button class="tutorial-next-btn" onclick="nextTutorialStep()">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome / First Login Modal -->
+    <div id="welcomeModal" class="modal">
+        <div class="modal-content welcome-modal-content">
+            <span class="welcome-emoji">💸</span>
+            <h2>Welcome to IDK My Shopping List!</h2>
+            <p>Know your total before you get to the register. Want a quick tour of how it works?</p>
+            <div class="welcome-modal-buttons">
+                <button class="welcome-tour-btn" onclick="closeModal('welcomeModal'); startTutorial()">Show Me Around</button>
+                <button class="welcome-skip-btn" onclick="closeModal('welcomeModal')">Skip for Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Done Shopping Confirmation Modal -->
+    <div id="doneConfirmModal" class="modal">
+        <div class="modal-content">
+            <div class="done-confirm-content">
+                <span class="done-emoji">🛒</span>
+                <h2>Done Shopping?</h2>
+                <p>This will save your trip and lock the list.</p>
+                <p class="warning-text">⚠️ You won't be able to edit this list after confirming.</p>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('doneConfirmModal')">Go Back</button>
+                <button class="modal-btn primary" onclick="closeModal('doneConfirmModal'); completeShopping()" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white;">Yes, I'm Done</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
@@ -1227,6 +1468,7 @@
             if (currentUser.photoURL) {
                 document.getElementById('userAvatar').src = currentUser.photoURL;
             }
+            checkFirstLogin();
         }
 
         function showShoppingView() {
@@ -1852,6 +2094,114 @@
             document.getElementById('disclaimerDrawer').classList.remove('open');
             document.getElementById('disclaimerOverlay').classList.remove('active');
         }
+
+        // Hamburger menu
+        function toggleHamburgerMenu() {
+            const menu = document.getElementById('hamburgerMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close hamburger if clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('hamburgerMenu');
+            const btn = document.getElementById('hamburgerBtn');
+            if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && e.target !== btn) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Done confirm modal
+        function showDoneConfirmModal() {
+            document.getElementById('doneConfirmModal').classList.add('active');
+        }
+        window.showDoneConfirmModal = showDoneConfirmModal;
+
+        // First login check
+        function checkFirstLogin() {
+            const seen = localStorage.getItem('idkTutorialSeen');
+            if (!seen) {
+                setTimeout(() => {
+                    document.getElementById('welcomeModal').classList.add('active');
+                }, 600);
+            }
+        }
+
+        // Tutorial steps
+        const tutorialSteps = [
+            {
+                targetId: 'healthBarSection',
+                title: 'Your Spending Overview',
+                text: 'Once you complete a shopping trip, this bar shows your average budget vs. average spend at a glance.'
+            },
+            {
+                targetId: 'createListBtn',
+                title: 'Create a Shopping List',
+                text: 'Tap here to start a new shopping list. Enter your store name, set a budget, and add your items.'
+            },
+            {
+                targetId: 'shoppingLists',
+                title: 'Your Shopping Lists',
+                text: 'Your active and completed lists from the last 90 days appear here. Tap any list to open it.'
+            }
+        ];
+
+        let currentTutorialStep = 0;
+
+        function startTutorial() {
+            localStorage.setItem('idkTutorialSeen', 'true');
+            currentTutorialStep = 0;
+            document.getElementById('tutorialOverlay').classList.add('active');
+            showTutorialStep(0);
+        }
+
+        function showTutorialStep(index) {
+            const step = tutorialSteps[index];
+            const target = document.getElementById(step.targetId);
+            if (!target) return;
+
+            const rect = target.getBoundingClientRect();
+            const padding = 8;
+
+            const spotlight = document.getElementById('tutorialSpotlight');
+            spotlight.style.left = (rect.left - padding) + 'px';
+            spotlight.style.top = (rect.top - padding) + 'px';
+            spotlight.style.width = (rect.width + padding * 2) + 'px';
+            spotlight.style.height = (rect.height + padding * 2) + 'px';
+
+            document.getElementById('tutorialTitle').textContent = step.title;
+            document.getElementById('tutorialText').textContent = step.text;
+            document.getElementById('tutorialStepCount').textContent = (index + 1) + ' / ' + tutorialSteps.length;
+
+            // Position tooltip below or above spotlight
+            const tooltip = document.getElementById('tutorialTooltip');
+            const tooltipTop = rect.bottom + padding + 16;
+            const tooltipLeft = Math.max(16, Math.min(rect.left, window.innerWidth - 296));
+            tooltip.style.top = tooltipTop + 'px';
+            tooltip.style.left = tooltipLeft + 'px';
+
+            // Update next button text on last step
+            const nextBtn = tooltip.querySelector('.tutorial-next-btn');
+            nextBtn.textContent = index === tutorialSteps.length - 1 ? 'Done ✓' : 'Next →';
+        }
+
+        function nextTutorialStep() {
+            currentTutorialStep++;
+            if (currentTutorialStep >= tutorialSteps.length) {
+                endTutorial();
+            } else {
+                showTutorialStep(currentTutorialStep);
+            }
+        }
+
+        function endTutorial() {
+            localStorage.setItem('idkTutorialSeen', 'true');
+            document.getElementById('tutorialOverlay').classList.remove('active');
+        }
+
+        window.toggleHamburgerMenu = toggleHamburgerMenu;
+        window.startTutorial = startTutorial;
+        window.nextTutorialStep = nextTutorialStep;
+        window.endTutorial = endTutorial;
 
         // Theme management
         const themes = {
