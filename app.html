@@ -1367,7 +1367,7 @@
             <p>Know your total before you get to the register. Want a quick tour of how it works?</p>
             <div class="welcome-modal-buttons">
                 <button class="welcome-tour-btn" onclick="closeModal('welcomeModal'); startTutorial()">Show Me Around</button>
-                <button class="welcome-skip-btn" onclick="closeModal('welcomeModal')">Skip for Now</button>
+                <button class="welcome-skip-btn" onclick="localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal')">Skip for Now</button>
             </div>
         </div>
     </div>
