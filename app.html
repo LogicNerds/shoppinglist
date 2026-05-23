@@ -2172,10 +2172,17 @@
             document.getElementById('tutorialText').textContent = step.text;
             document.getElementById('tutorialStepCount').textContent = (index + 1) + ' / ' + tutorialSteps.length;
 
-            // Position tooltip below or above spotlight
+            // Position tooltip below or above spotlight depending on space
             const tooltip = document.getElementById('tutorialTooltip');
-            const tooltipTop = rect.bottom + padding + 16;
+            const tooltipHeight = 160;
+            const spaceBelow = window.innerHeight - rect.bottom;
             const tooltipLeft = Math.max(16, Math.min(rect.left, window.innerWidth - 296));
+            let tooltipTop;
+            if (spaceBelow >= tooltipHeight + 24) {
+                tooltipTop = rect.bottom + padding + 16;
+            } else {
+                tooltipTop = Math.max(16, rect.top - tooltipHeight - 16);
+            }
             tooltip.style.top = tooltipTop + 'px';
             tooltip.style.left = tooltipLeft + 'px';
 
