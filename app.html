@@ -810,21 +810,8 @@
                 padding: 10px;
             }
 
-            .item-name {
-                font-size: 0.9em;
-            }
-
-            .item-qty {
-                width: 45px;
-                font-size: 0.9em;
-            }
-
             .shopping-item .price-input-container {
                 width: 70px;
-            }
-
-            .item-price {
-                font-size: 0.9em;
             }
         }
     </style>
@@ -1082,7 +1069,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, getDocs, onSnapshot, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -1103,7 +1090,6 @@
         // Global variables
         let currentUser = null;
         let shoppingLists = [];
-        let currentList = null;
         let currentListId = null;
         let currentItems = [];
         let editingItemId = null;
@@ -1666,17 +1652,16 @@
                         price: item.price,
                         checked: item.checked
                     })),
-                    completed: false,
-                    createdAt: serverTimestamp()
+                    completed: false
                 };
 
                 if (currentListId) {
-                    // Update existing list
+                    // Update existing list - don't overwrite createdAt
                     await updateDoc(doc(db, 'groceryLists', currentListId), listData);
                     alert('List updated! 📝');
                 } else {
-                    // Create new list
-                    await addDoc(collection(db, 'groceryLists'), listData);
+                    // Create new list - set createdAt only on creation
+                    await addDoc(collection(db, 'groceryLists'), { ...listData, createdAt: serverTimestamp() });
                     alert('List saved! 📝');
                 }
 
