@@ -1594,7 +1594,8 @@
         <div class="modal-content">
             <h2 id="itemModalTitle">Add Item</h2>
             <div class="form-group">
-                <label>Item Name <button class="scan-btn" onclick="startScanner()" title="Scan barcode">📷</button></label>
+                <label>Item Name</label>
+                <button class="scan-btn" onclick="startScanner()" style="width:100%; padding:10px; background:white; border:2px dashed var(--accent-primary); color:var(--accent-primary); border-radius:10px; font-size:0.95em; font-weight:600; cursor:pointer; margin-bottom:8px; display:block;">📷 Scan Barcode to Add Item</button>
                 <input type="text" id="itemName" placeholder="e.g., Milk, Bread, Apples">
             </div>
             <div class="form-group">
@@ -2795,9 +2796,14 @@
 
         function matchCategory(rawCategories) {
             if (!rawCategories) return '';
-            const lower = rawCategories.toLowerCase();
+            // Handle both plain strings and arrays of tags
+            const raw = Array.isArray(rawCategories) ? rawCategories.join(', ') : rawCategories;
+            // Strip en: prefixes and replace hyphens with spaces
+            const cleaned = raw.toLowerCase()
+                .replace(/[a-z]{2}:/g, '')
+                .replace(/-/g, ' ');
             for (const [keyword, category] of Object.entries(CATEGORY_MAP)) {
-                if (lower.includes(keyword)) return category;
+                if (cleaned.includes(keyword)) return category;
             }
             return '';
         }
@@ -2860,7 +2866,7 @@
                 if (data.status === 1 && data.product) {
                     const product = data.product;
                     const name = product.product_name_en || product.product_name || '';
-                    const rawCats = product.categories || product.categories_tags?.join(', ') || '';
+                    const rawCats = product.categories_tags || product.categories || '';
                     const category = matchCategory(rawCats);
 
                     if (name) {
