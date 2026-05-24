@@ -1422,9 +1422,6 @@
 
             <!-- Shopping Lists -->
             <div class="lists-section">
-                <div id="joinShopperBtnContainer">
-                    <button class="join-shopper-btn hidden" id="joinShopperBtn" onclick="showJoinShoppers()">🔗 Join My Shoppers</button>
-                </div>
                 <button class="create-list-btn" id="createListBtn" onclick="createNewList()">+ Create Shopping List</button>
                 <h3>Shopping Lists (Last 90 Days)</h3>
                 <div id="shoppingLists"></div>
@@ -1647,10 +1644,11 @@
                 <div class="shoppers-code">
                     <div class="shoppers-code-label">Your Invite Code</div>
                     <div class="shoppers-code-value" id="shoppersCodeDisplay">------</div>
-                    <canvas id="shoppersQR" class="shoppers-qr" width="150" height="150"></canvas>
+                    <div id="shoppersQR" class="shoppers-qr" style="display:flex; justify-content:center;"></div>
                     <button class="shoppers-share-btn" onclick="copyShopperLink()">📋 Copy Invite Link</button>
                 </div>
                 <div id="shoppersMembersList"></div>
+                <button class="join-shopper-btn" onclick="closeModal('myShoppersModal'); showJoinShoppers()">🔗 Join Someone's Shoppers</button>
             </div>
             <div id="shoppersGuestView" class="hidden">
                 <p style="color: #666; font-size: 0.9em; margin-bottom: 16px;">You are shopping with:</p>
@@ -1947,13 +1945,8 @@
                 document.getElementById('userAvatar').src = currentUser.photoURL;
             }
 
-            // Show/hide join button based on guest status
-            const joinBtn = document.getElementById('joinShopperBtn');
-            if (!isGuest) {
-                joinBtn.classList.remove('hidden');
-            } else {
-                joinBtn.classList.add('hidden');
-                // Add guest badge to header
+            // Add guest badge if applicable
+            if (isGuest) {
                 const headerTitle = document.querySelector('#mainApp .header-left span');
                 if (headerTitle && !headerTitle.querySelector('.guest-badge')) {
                     headerTitle.innerHTML += '<span class="guest-badge">Guest</span>';
@@ -2948,22 +2941,15 @@
                 document.getElementById('shoppersCodeDisplay').textContent = familyCode || '------';
 
                 // Generate QR
-                const canvas = document.getElementById('shoppersQR');
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, 150, 150);
+                const qrContainer = document.getElementById('shoppersQR');
+                qrContainer.innerHTML = '';
                 if (familyCode && typeof QRCode !== 'undefined') {
-                    const qr = new QRCode(document.createElement('div'), {
+                    new QRCode(qrContainer, {
                         text: `https://www.myidk.app/app.html?code=${familyCode}`,
                         width: 150,
                         height: 150,
                         correctLevel: QRCode.CorrectLevel.M
                     });
-                    setTimeout(() => {
-                        const img = qr._oDrawing._elImage;
-                        const tempImg = new Image();
-                        tempImg.onload = () => ctx.drawImage(tempImg, 0, 0, 150, 150);
-                        tempImg.src = img.src;
-                    }, 100);
                 }
 
                 // Render members list
