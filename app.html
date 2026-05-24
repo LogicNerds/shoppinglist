@@ -1175,6 +1175,66 @@
             opacity: 0.7;
         }
 
+        /* Add to Meal button */
+        .add-to-meal-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 0.75em;
+            cursor: pointer;
+            padding: 2px 6px;
+            white-space: nowrap;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .add-to-meal-btn:hover {
+            color: var(--accent-primary);
+        }
+
+        /* Add to Meal Modal */
+        .meal-day-picker {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .meal-day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+            border: 1.5px solid #e0e0e0;
+            transition: all 0.15s;
+            line-height: 1.2;
+        }
+
+        .meal-day-cell:hover {
+            border-color: var(--accent-primary);
+            background: var(--accent-bg);
+        }
+
+        .meal-day-cell.selected {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .meal-day-cell .day-num {
+            font-weight: 700;
+            font-size: 1em;
+        }
+
+        .meal-day-cell .day-name {
+            font-size: 0.75em;
+            opacity: 0.8;
+        }
+
         /* Meal Planner */
         .meal-planner-view {
             padding: 20px 20px 80px 20px;
@@ -1389,62 +1449,7 @@
         }
 
         /* Meal Modal */
-        .recipe-search-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
 
-        .recipe-search-input {
-            flex: 1;
-            padding: 10px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 0.95em;
-            transition: border-color 0.2s;
-        }
-
-        .recipe-search-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-        }
-
-        .recipe-search-btn {
-            padding: 10px 16px;
-            background: var(--accent-primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .recipe-results {
-            max-height: 160px;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 14px;
-        }
-
-        .recipe-result-item {
-            padding: 10px 12px;
-            cursor: pointer;
-            font-size: 0.9em;
-            color: #333;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.15s;
-        }
-
-        .recipe-result-item:last-child {
-            border-bottom: none;
-        }
-
-        .recipe-result-item:hover {
-            background: var(--accent-bg);
-        }
 
         .ingredient-editor {
             max-height: 180px;
@@ -1980,6 +1985,27 @@
         </div>
     </div>
 
+    <!-- Add to Meal Modal -->
+    <div id="addToMealModal" class="modal">
+        <div class="modal-content">
+            <h2>Add to Meal Plan</h2>
+            <p style="color:#666; font-size:0.85em; margin-bottom:14px;" id="addToMealItemName"></p>
+            <div class="form-group">
+                <label>Pick a Day</label>
+                <div class="meal-day-picker" id="mealDayPicker"></div>
+            </div>
+            <div class="form-group">
+                <label>Meal Name</label>
+                <input type="text" id="addToMealName" placeholder="e.g., Dinner, Spaghetti Night...">
+                <div id="existingMealsSuggestions" style="margin-top:6px;"></div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('addToMealModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="confirmAddToMeal()" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white;">Add to Meal</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Meal Planner View -->
     <div id="mealPlannerView" class="container hidden">
         <div class="header">
@@ -2013,14 +2039,7 @@
                 <label>Meal Name</label>
                 <input type="text" id="mealName" placeholder="e.g., Spaghetti Bolognese">
             </div>
-            <div class="form-group">
-                <label>Search Recipes (optional)</label>
-                <div class="recipe-search-container">
-                    <input type="text" class="recipe-search-input" id="recipeSearchInput" placeholder="Search TheMealDB...">
-                    <button class="recipe-search-btn" onclick="searchRecipes()">Search</button>
-                </div>
-                <div class="recipe-results hidden" id="recipeResults"></div>
-            </div>
+
             <div class="form-group">
                 <label>Ingredients</label>
                 <div class="ingredient-editor" id="ingredientEditor"></div>
@@ -2266,6 +2285,7 @@
             showMainApp();
             loadShoppingLists();
             startFamilyListener();
+            loadMealPlans();
         }
 
         async function ensureFamilyCode() {
@@ -2771,6 +2791,7 @@
                             <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
                         </div>
                         <div class="item-total">$${total.toFixed(2)}</div>
+                        <button class="add-to-meal-btn" onclick="event.stopPropagation(); showAddToMealModal('${item.id}')">🍽️</button>
                         <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
                     `;
 
@@ -3282,9 +3303,6 @@
             pendingMealIngredients = [];
             document.getElementById('mealModalTitle').textContent = 'Add Meal';
             document.getElementById('mealName').value = '';
-            document.getElementById('recipeSearchInput').value = '';
-            document.getElementById('recipeResults').classList.add('hidden');
-            document.getElementById('recipeResults').innerHTML = '';
             renderIngredientEditor();
             document.getElementById('mealModal').classList.add('active');
         }
@@ -3296,9 +3314,6 @@
             pendingMealIngredients = meal.ingredients ? [...meal.ingredients] : [];
             document.getElementById('mealModalTitle').textContent = 'Edit Meal';
             document.getElementById('mealName').value = meal.mealName;
-            document.getElementById('recipeSearchInput').value = '';
-            document.getElementById('recipeResults').classList.add('hidden');
-            document.getElementById('recipeResults').innerHTML = '';
             renderIngredientEditor();
             document.getElementById('mealModal').classList.add('active');
         }
@@ -3335,57 +3350,6 @@
         function removeIngredient(idx) {
             pendingMealIngredients.splice(idx, 1);
             renderIngredientEditor();
-        }
-
-        // Recipe search
-        async function searchRecipes() {
-            const query_str = document.getElementById('recipeSearchInput').value.trim();
-            if (!query_str) return;
-
-            const resultsEl = document.getElementById('recipeResults');
-            resultsEl.classList.remove('hidden');
-            resultsEl.innerHTML = '<div style="padding:10px; color:#999; font-size:0.9em;">Searching...</div>';
-
-            try {
-                const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query_str)}`);
-                const data = await res.json();
-
-                if (!data.meals || data.meals.length === 0) {
-                    resultsEl.innerHTML = '<div style="padding:10px; color:#999; font-size:0.9em;">No results found.</div>';
-                    return;
-                }
-
-                resultsEl.innerHTML = data.meals.slice(0, 8).map(m =>
-                    `<div class="recipe-result-item" onclick="selectRecipe('${m.idMeal}', '${m.strMeal.replace(/'/g, "\'")}')">
-                        ${m.strMeal}
-                    </div>`
-                ).join('');
-            } catch (e) {
-                resultsEl.innerHTML = '<div style="padding:10px; color:#999; font-size:0.9em;">Search failed. Try again.</div>';
-            }
-        }
-
-        async function selectRecipe(mealDbId, mealName) {
-            document.getElementById('mealName').value = mealName;
-            document.getElementById('recipeResults').classList.add('hidden');
-
-            try {
-                const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealDbId}`);
-                const data = await res.json();
-                const meal = data.meals[0];
-
-                pendingMealIngredients = [];
-                for (let i = 1; i <= 20; i++) {
-                    const ing = meal['strIngredient' + i];
-                    const measure = meal['strMeasure' + i];
-                    if (ing && ing.trim()) {
-                        pendingMealIngredients.push({ name: ing.trim(), qty: measure ? measure.trim() : '' });
-                    }
-                }
-                renderIngredientEditor();
-            } catch (e) {
-                showToast('Could not load ingredients', 'warning');
-            }
         }
 
         async function saveMeal() {
@@ -3521,11 +3485,98 @@
         window.addIngredientRow = addIngredientRow;
         window.removeIngredient = removeIngredient;
         window.updateIngredient = updateIngredient;
-        window.searchRecipes = searchRecipes;
-        window.selectRecipe = selectRecipe;
         window.showSelectListModal = showSelectListModal;
         window.addMealToExistingList = addMealToExistingList;
         window.addMealToNewList = addMealToNewList;
+
+
+        // Add item to meal plan from shopping view
+        let addToMealItemId = null;
+        let addToMealSelectedDate = null;
+
+        function showAddToMealModal(itemId) {
+            addToMealItemId = itemId;
+            addToMealSelectedDate = null;
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('addToMealItemName').textContent = 'Item: ' + item.name;
+            document.getElementById('addToMealName').value = '';
+            document.getElementById('existingMealsSuggestions').innerHTML = '';
+
+            // Build 7-day picker starting today
+            const picker = document.getElementById('mealDayPicker');
+            picker.innerHTML = '';
+            const today = new Date();
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                const cell = document.createElement('div');
+                cell.className = 'meal-day-cell';
+                cell.innerHTML = `<span class="day-num">${d.getDate()}</span><span class="day-name">${dayNames[d.getDay()]}</span>`;
+                cell.dataset.date = dateStr;
+                cell.onclick = () => selectAddToMealDay(dateStr, cell);
+                picker.appendChild(cell);
+            }
+
+            document.getElementById('addToMealModal').classList.add('active');
+        }
+
+        function selectAddToMealDay(dateStr, cell) {
+            addToMealSelectedDate = dateStr;
+            document.querySelectorAll('.meal-day-cell').forEach(c => c.classList.remove('selected'));
+            cell.classList.add('selected');
+
+            // Show existing meals for that day as suggestions
+            const dayMeals = mealPlans.filter(m => m.date === dateStr);
+            const suggestEl = document.getElementById('existingMealsSuggestions');
+            if (dayMeals.length > 0) {
+                suggestEl.innerHTML = '<div style="font-size:0.78em; color:#999; margin-bottom:4px;">Existing meals this day:</div>' +
+                    dayMeals.map(m => `<div style="font-size:0.85em; color:var(--accent-primary); cursor:pointer; padding:4px 0;" onclick="document.getElementById('addToMealName').value='${m.mealName}'">${m.mealName}</div>`).join('');
+            } else {
+                suggestEl.innerHTML = '';
+            }
+        }
+
+        async function confirmAddToMeal() {
+            if (!addToMealSelectedDate) { alert('Please pick a day.'); return; }
+            const mealName = document.getElementById('addToMealName').value.trim();
+            if (!mealName) { alert('Please enter a meal name.'); return; }
+
+            const item = currentItems.find(i => i.id === addToMealItemId);
+            if (!item) return;
+
+            const ingredient = { name: item.name, qty: String(item.qty) };
+            const queryUid = isGuest ? ownerUid : currentUser.uid;
+
+            // Check if a meal with this name already exists on this date
+            const existing = mealPlans.find(m => m.date === addToMealSelectedDate && m.mealName.toLowerCase() === mealName.toLowerCase());
+
+            try {
+                if (existing) {
+                    const updatedIngredients = [...(existing.ingredients || []), ingredient];
+                    await updateDoc(doc(db, 'mealPlans', existing.id), { ingredients: updatedIngredients });
+                } else {
+                    await addDoc(collection(db, 'mealPlans'), {
+                        userId: queryUid,
+                        date: addToMealSelectedDate,
+                        mealName: mealName,
+                        ingredients: [ingredient],
+                        createdAt: serverTimestamp()
+                    });
+                }
+                closeModal('addToMealModal');
+                showToast('Added to ' + mealName + '!', '');
+            } catch (e) {
+                alert('Failed to add to meal plan.');
+            }
+        }
+
+        window.showAddToMealModal = showAddToMealModal;
+        window.selectAddToMealDay = selectAddToMealDay;
+        window.confirmAddToMeal = confirmAddToMeal;
 
         // ── END MEAL PLANNER ───────────────────────────────────────────
 
