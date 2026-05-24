@@ -2815,7 +2815,7 @@
 
             try {
                 scannerStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
+                    video: { facingMode: 'environment', focusMode: 'continuous', advanced: [{ focusMode: 'continuous' }] }
                 });
 
                 const video = document.getElementById('scannerVideo');
@@ -2824,16 +2824,14 @@
                 scannerActive = true;
 
                 scannerDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
-                lastDetectedCode = null;
-                detectionCount = 0;
+                recentScans = [];
                 scanLoop();
             } catch (err) {
                 showToast('Camera access denied', 'danger');
             }
         }
 
-        let lastDetectedCode = null;
-        let detectionCount = 0;
+        let recentScans = [];
 
         async function scanLoop() {
             if (!scannerActive) return;
@@ -2843,24 +2841,18 @@
                     const barcodes = await scannerDetector.detect(video);
                     if (barcodes.length > 0) {
                         const code = barcodes[0].rawValue;
-                        if (code === lastDetectedCode) {
-                            detectionCount++;
-                        } else {
-                            lastDetectedCode = code;
-                            detectionCount = 1;
-                        }
-                        // Require same barcode detected 3 times before triggering
-                        if (detectionCount >= 3) {
+                        recentScans.push(code);
+                        if (recentScans.length > 5) recentScans.shift();
+                        const matches = recentScans.filter(c => c === code).length;
+                        if (matches >= 2) {
                             closeScanner();
                             await lookupBarcode(code);
                             return;
                         }
-                    } else {
-                        detectionCount = 0;
                     }
                 } catch (e) {}
             }
-            if (scannerActive) setTimeout(scanLoop, 300);
+            if (scannerActive) setTimeout(scanLoop, 500);
         }
 
         function closeScanner() {
