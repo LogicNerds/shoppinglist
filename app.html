@@ -2761,7 +2761,6 @@
             'drink': 'Beverages',
             'juice': 'Beverages',
             'soda': 'Beverages',
-            'water': 'Beverages',
             'coffee': 'Beverages',
             'tea': 'Beverages',
             'canned': 'Canned & Dry Goods',
@@ -2802,7 +2801,8 @@
                 .replace(/-/g, ' ')
                 .replace(/_/g, ' ');
             for (const [keyword, category] of Object.entries(CATEGORY_MAP)) {
-                if (cleaned.includes(keyword)) return category;
+                const regex = new RegExp('\\b' + keyword.replace(' ', '\\s+') + '\\b');
+                if (regex.test(cleaned)) return category;
             }
             return '';
         }
@@ -2875,8 +2875,9 @@
                         product.categories
                     ].filter(Boolean);
 
-                    // Fall back to matching against product name
-                    const category = matchCategory(rawCats) || matchCategory([name]);
+                    // Fall back to matching against product name if API data is unhelpful
+                    const apiCategory = rawCats.filter(c => c && c !== 'unknown').length > 0 ? matchCategory(rawCats) : '';
+                    const category = apiCategory || matchCategory([name]);
 
                     if (name) {
                         document.getElementById('itemName').value = name;
