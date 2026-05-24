@@ -2796,12 +2796,11 @@
 
         function matchCategory(rawCategories) {
             if (!rawCategories) return '';
-            // Handle both plain strings and arrays of tags
-            const raw = Array.isArray(rawCategories) ? rawCategories.join(', ') : rawCategories;
-            // Strip en: prefixes and replace hyphens with spaces
+            const raw = Array.isArray(rawCategories) ? rawCategories.join(', ') : String(rawCategories);
             const cleaned = raw.toLowerCase()
                 .replace(/[a-z]{2}:/g, '')
-                .replace(/-/g, ' ');
+                .replace(/-/g, ' ')
+                .replace(/_/g, ' ');
             for (const [keyword, category] of Object.entries(CATEGORY_MAP)) {
                 if (cleaned.includes(keyword)) return category;
             }
@@ -2860,13 +2859,22 @@
         async function lookupBarcode(barcode) {
             showToast('Looking up product...', '');
             try {
-                const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const fields = 'product_name,product_name_en,categories,categories_tags,pnns_groups_1,pnns_groups_2';
+                const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}?fields=${fields}`);
                 const data = await res.json();
 
                 if (data.status === 1 && data.product) {
                     const product = data.product;
                     const name = product.product_name_en || product.product_name || '';
-                    const rawCats = product.categories_tags || product.categories || '';
+
+                    // Try multiple category sources in order of reliability
+                    const rawCats = [
+                        product.pnns_groups_2,
+                        product.pnns_groups_1,
+                        ...(product.categories_tags || []),
+                        product.categories
+                    ].filter(Boolean);
+
                     const category = matchCategory(rawCats);
 
                     if (name) {
@@ -2875,7 +2883,7 @@
                             document.getElementById('itemCategory').value = category;
                             showToast('✅ ' + name + ' → ' + category, '');
                         } else {
-                            showToast('✅ ' + name + ' (no category found)', '');
+                            showToast('✅ ' + name + ' (select category manually)', '');
                         }
                     } else {
                         showToast('Product found but no name — enter manually', 'warning');
