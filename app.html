@@ -1175,6 +1175,68 @@
             opacity: 0.7;
         }
 
+
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #ccc;
+            border-radius: 26px;
+            transition: background 0.2s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--accent-primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(22px);
+        }
+
+        /* Item row layout */
+        .shopping-item {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .item-row-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .item-row-sub {
+            padding: 4px 0 0 34px;
+        }
+
         /* Add to Meal button */
         .add-to-meal-btn {
             background: none;
@@ -1741,6 +1803,7 @@
                     <button class="hamburger-item" onclick="showMealPlanner(); toggleHamburgerMenu()">📅 Meal Planner</button>
                     <button class="hamburger-item" onclick="showMyShoppers(); toggleHamburgerMenu()">👨‍👩‍👧‍👦 My Shoppers</button>
                     <button class="hamburger-item" onclick="showThemeModal(); toggleHamburgerMenu()">🎨 Change Theme</button>
+                    <button class="hamburger-item" onclick="showSettings(); toggleHamburgerMenu()">⚙️ Settings</button>
                     <button class="hamburger-item" onclick="startTutorial(); toggleHamburgerMenu()">❓ Start Tutorial</button>
                 </div>
                 <span style="margin-left: 15px; font-size: 1.2em; font-weight: 600;">My Groceries</span>
@@ -1982,6 +2045,50 @@
             <p>Users are solely responsible for the accuracy of data entered and any financial decisions made. This app does not connect to bank accounts or store any sensitive financial information.</p>
             <p>Logic Nerds and its affiliates assume no liability for any losses, damages, or consequences arising from the use or misuse of this application. This software is provided "as is" without warranty of any kind, express or implied.</p>
             <p>By using this application, you acknowledge and accept full responsibility for your budgeting decisions and data accuracy.</p>
+        </div>
+    </div>
+
+    <!-- Milestone Modal -->
+    <div id="milestoneModal" class="modal" style="z-index: 2100;">
+        <div class="modal-content" style="text-align:center; padding: 30px 24px;">
+            <div id="milestoneEmoji" style="font-size: 2.5em; margin-bottom: 12px;"></div>
+            <h2 id="milestoneTitle" style="margin-bottom: 10px;"></h2>
+            <p id="milestoneText" style="color:#666; font-size:0.95em; margin-bottom: 24px;"></p>
+            <button class="modal-btn primary" onclick="closeModal('milestoneModal')" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white; max-width: 200px; margin: 0 auto;">OK</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>⚙️ Settings</h2>
+            <div class="form-group">
+                <label style="display:flex; align-items:center; justify-content:space-between;">
+                    Budget Milestones
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="milestonesToggle" onchange="saveMilestoneSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </label>
+            </div>
+            <div id="milestoneThresholds" class="hidden">
+                <p style="color:#666; font-size:0.85em; margin-bottom:12px;">Alert me when I reach these percentages of my budget:</p>
+                <div class="form-group">
+                    <label>First Alert (%)</label>
+                    <input type="number" id="threshold1" min="1" max="99" value="50" oninput="saveMilestoneSettings()">
+                </div>
+                <div class="form-group">
+                    <label>Second Alert (%)</label>
+                    <input type="number" id="threshold2" min="1" max="99" value="75" oninput="saveMilestoneSettings()">
+                </div>
+                <div class="form-group">
+                    <label>Final Alert (%)</label>
+                    <input type="number" id="threshold3" min="1" max="200" value="100" oninput="saveMilestoneSettings()">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('settingsModal')">Done</button>
+            </div>
         </div>
     </div>
 
@@ -2785,15 +2892,17 @@
                     const total = item.qty * item.price;
 
                     itemEl.innerHTML = `
-                        <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
-                        <div class="item-details">
-                            <div class="item-name-text">${item.name}</div>
-                            <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                        <div class="item-row-main">
+                            <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
+                            <div class="item-details">
+                                <div class="item-name-text">${item.name}</div>
+                                <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                            </div>
+                            <div class="item-total">$${total.toFixed(2)}</div>
+                            <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
                         </div>
-                        <div class="item-total">$${total.toFixed(2)}</div>
-                        <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
-                        <div style="width:100%; padding: 2px 0 0 34px; font-size: 0.78em; grid-column: 1/-1;">
-                            <a onclick="event.stopPropagation(); showAddToMealModal('${item.id}')" style="color:var(--accent-primary); cursor:pointer; text-decoration:none;">add to meal plan</a>
+                        <div class="item-row-sub">
+                            <a onclick="event.stopPropagation(); showAddToMealModal('${item.id}')" style="color:var(--accent-primary); cursor:pointer; text-decoration:none; font-size:0.78em;">add to meal plan</a>
                         </div>
                     `;
 
@@ -2853,18 +2962,20 @@
             document.getElementById('keepListBtn').disabled = !storeName || !hasItems;
             document.getElementById('doneBtn').disabled = !storeName || !hasItems;
 
-            // Budget milestone toasts
-            if (budget > 0) {
+            // Budget milestone modals
+            const milestoneSettings = getMilestoneSettings();
+            if (budget > 0 && milestoneSettings.enabled) {
                 const pct = (total / budget) * 100;
-                if (pct >= 100 && !milestonesHit.over) {
+                const t = milestoneSettings.thresholds;
+                if (pct >= t[2] && !milestonesHit.over) {
                     milestonesHit.over = true;
-                    showToast("⚠️ You're over budget!", "danger");
-                } else if (pct >= 75 && !milestonesHit.seventyfive) {
+                    showMilestoneModal('⚠️', "Over Budget!", `You've hit ${t[2]}% of your budget.`);
+                } else if (pct >= t[1] && !milestonesHit.seventyfive) {
                     milestonesHit.seventyfive = true;
-                    showToast('75% of your budget used', 'warning');
-                } else if (pct >= 50 && !milestonesHit.fifty) {
+                    showMilestoneModal('🟡', `${t[1]}% Used`, `You've used ${t[1]}% of your budget.`);
+                } else if (pct >= t[0] && !milestonesHit.fifty) {
                     milestonesHit.fifty = true;
-                    showToast('50% of your budget used', '');
+                    showMilestoneModal('💰', `${t[0]}% Used`, `You've used ${t[0]}% of your budget.`);
                 }
             }
         }
@@ -3211,6 +3322,47 @@
         window.endTutorial = endTutorial;
 
 
+
+
+        // ── SETTINGS & MILESTONES ─────────────────────────────────────
+
+        function getMilestoneSettings() {
+            const saved = localStorage.getItem('idkMilestoneSettings');
+            if (saved) return JSON.parse(saved);
+            return { enabled: true, thresholds: [50, 75, 100] };
+        }
+
+        function saveMilestoneSettings() {
+            const enabled = document.getElementById('milestonesToggle').checked;
+            const t1 = parseInt(document.getElementById('threshold1').value) || 50;
+            const t2 = parseInt(document.getElementById('threshold2').value) || 75;
+            const t3 = parseInt(document.getElementById('threshold3').value) || 100;
+            const settings = { enabled, thresholds: [t1, t2, t3] };
+            localStorage.setItem('idkMilestoneSettings', JSON.stringify(settings));
+            document.getElementById('milestoneThresholds').classList.toggle('hidden', !enabled);
+        }
+
+        function showSettings() {
+            const settings = getMilestoneSettings();
+            document.getElementById('milestonesToggle').checked = settings.enabled;
+            document.getElementById('threshold1').value = settings.thresholds[0];
+            document.getElementById('threshold2').value = settings.thresholds[1];
+            document.getElementById('threshold3').value = settings.thresholds[2];
+            document.getElementById('milestoneThresholds').classList.toggle('hidden', !settings.enabled);
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function showMilestoneModal(emoji, title, text) {
+            document.getElementById('milestoneEmoji').textContent = emoji;
+            document.getElementById('milestoneTitle').textContent = title;
+            document.getElementById('milestoneText').textContent = text;
+            document.getElementById('milestoneModal').classList.add('active');
+        }
+
+        window.showSettings = showSettings;
+        window.saveMilestoneSettings = saveMilestoneSettings;
+
+        // ── END SETTINGS ──────────────────────────────────────────────
 
         // ── MEAL PLANNER ──────────────────────────────────────────────
 
