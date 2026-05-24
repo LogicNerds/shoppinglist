@@ -2815,8 +2815,17 @@
 
             try {
                 scannerStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment', focusMode: 'continuous', advanced: [{ focusMode: 'continuous' }] }
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
                 });
+
+                // Apply continuous autofocus via track constraints after stream starts
+                const track = scannerStream.getVideoTracks()[0];
+                if (track && track.getCapabilities) {
+                    const caps = track.getCapabilities();
+                    if (caps.focusMode && caps.focusMode.includes('continuous')) {
+                        await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+                    }
+                }
 
                 const video = document.getElementById('scannerVideo');
                 video.srcObject = scannerStream;
