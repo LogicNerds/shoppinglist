@@ -1094,6 +1094,86 @@
             margin-left: 8px;
             vertical-align: middle;
         }
+
+        /* Barcode Scanner */
+        .scanner-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 3000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scanner-overlay.active {
+            display: flex;
+        }
+
+        .scanner-viewfinder {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            border: 3px solid var(--accent-primary, #0d9488);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .scanner-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-primary, #0d9488);
+            opacity: 0.8;
+            animation: scanLine 2s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .scanner-label {
+            color: white;
+            font-size: 0.9em;
+            margin-top: 20px;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .scanner-cancel-btn {
+            margin-top: 24px;
+            padding: 12px 32px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 24px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .scan-btn {
+            background: none;
+            border: none;
+            font-size: 1.4em;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--accent-primary, #0d9488);
+            vertical-align: middle;
+            transition: opacity 0.2s;
+        }
+
+        .scan-btn:hover {
+            opacity: 0.7;
+        }
         /* Hamburger Menu */
         .hamburger-menu {
             position: absolute;
@@ -1517,7 +1597,7 @@
         <div class="modal-content">
             <h2 id="itemModalTitle">Add Item</h2>
             <div class="form-group">
-                <label>Item Name</label>
+                <label>Item Name <button class="scan-btn" onclick="startScanner()" title="Scan barcode">📷</button></label>
                 <input type="text" id="itemName" placeholder="e.g., Milk, Bread, Apples">
             </div>
             <div class="form-group">
@@ -1640,6 +1720,16 @@
                 <button class="modal-btn primary" onclick="closeModal('doneConfirmModal'); completeShopping()" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white;">Yes, I'm Done</button>
             </div>
         </div>
+    </div>
+
+    <!-- Barcode Scanner Overlay -->
+    <div class="scanner-overlay" id="scannerOverlay">
+        <div class="scanner-viewfinder">
+            <video class="scanner-video" id="scannerVideo" autoplay muted playsinline></video>
+            <div class="scanner-line"></div>
+        </div>
+        <p class="scanner-label">Point at a barcode to scan</p>
+        <button class="scanner-cancel-btn" onclick="closeScanner()">Cancel</button>
     </div>
 
     <!-- Toast Notification -->
@@ -2643,6 +2733,162 @@
         window.startTutorial = startTutorial;
         window.nextTutorialStep = nextTutorialStep;
         window.endTutorial = endTutorial;
+
+
+        // Barcode Scanner
+        let scannerStream = null;
+        let scannerDetector = null;
+        let scannerActive = false;
+
+        const CATEGORY_MAP = {
+            'dairies': 'Dairy',
+            'dairy': 'Dairy',
+            'milk': 'Dairy',
+            'cheese': 'Dairy',
+            'yogurt': 'Dairy',
+            'produce': 'Produce',
+            'fruits': 'Produce',
+            'vegetables': 'Produce',
+            'fresh': 'Produce',
+            'meat': 'Meat & Seafood',
+            'seafood': 'Meat & Seafood',
+            'fish': 'Meat & Seafood',
+            'poultry': 'Meat & Seafood',
+            'frozen': 'Frozen',
+            'ice cream': 'Frozen',
+            'bread': 'Bakery',
+            'bakery': 'Bakery',
+            'pastry': 'Bakery',
+            'snack': 'Snacks & Candy',
+            'candy': 'Snacks & Candy',
+            'chips': 'Snacks & Candy',
+            'chocolate': 'Snacks & Candy',
+            'beverage': 'Beverages',
+            'drink': 'Beverages',
+            'juice': 'Beverages',
+            'soda': 'Beverages',
+            'water': 'Beverages',
+            'coffee': 'Beverages',
+            'tea': 'Beverages',
+            'canned': 'Canned & Dry Goods',
+            'pasta': 'Canned & Dry Goods',
+            'rice': 'Canned & Dry Goods',
+            'cereal': 'Breakfast',
+            'breakfast': 'Breakfast',
+            'oat': 'Breakfast',
+            'condiment': 'Condiments & Sauces',
+            'sauce': 'Condiments & Sauces',
+            'dressing': 'Condiments & Sauces',
+            'oil': 'Condiments & Sauces',
+            'vinegar': 'Condiments & Sauces',
+            'personal': 'Personal Care',
+            'shampoo': 'Personal Care',
+            'soap': 'Personal Care',
+            'toothpaste': 'Personal Care',
+            'household': 'Household',
+            'cleaning': 'Household',
+            'paper': 'Household',
+            'baby': 'Baby',
+            'diaper': 'Baby',
+            'pet': 'Pet',
+            'dog': 'Pet',
+            'cat': 'Pet',
+            'deli': 'Deli',
+            'alcohol': 'Alcohol',
+            'beer': 'Alcohol',
+            'wine': 'Alcohol',
+            'spirits': 'Alcohol'
+        };
+
+        function matchCategory(rawCategories) {
+            if (!rawCategories) return '';
+            const lower = rawCategories.toLowerCase();
+            for (const [keyword, category] of Object.entries(CATEGORY_MAP)) {
+                if (lower.includes(keyword)) return category;
+            }
+            return '';
+        }
+
+        async function startScanner() {
+            if (!('BarcodeDetector' in window)) {
+                showToast('Barcode scanning not supported on this browser', 'warning');
+                return;
+            }
+
+            try {
+                scannerStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+
+                const video = document.getElementById('scannerVideo');
+                video.srcObject = scannerStream;
+                document.getElementById('scannerOverlay').classList.add('active');
+                scannerActive = true;
+
+                scannerDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
+                scanLoop();
+            } catch (err) {
+                showToast('Camera access denied', 'danger');
+            }
+        }
+
+        async function scanLoop() {
+            if (!scannerActive) return;
+            const video = document.getElementById('scannerVideo');
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                try {
+                    const barcodes = await scannerDetector.detect(video);
+                    if (barcodes.length > 0) {
+                        const code = barcodes[0].rawValue;
+                        closeScanner();
+                        await lookupBarcode(code);
+                        return;
+                    }
+                } catch (e) {}
+            }
+            if (scannerActive) requestAnimationFrame(scanLoop);
+        }
+
+        function closeScanner() {
+            scannerActive = false;
+            if (scannerStream) {
+                scannerStream.getTracks().forEach(t => t.stop());
+                scannerStream = null;
+            }
+            document.getElementById('scannerOverlay').classList.remove('active');
+        }
+
+        async function lookupBarcode(barcode) {
+            showToast('Looking up product...', '');
+            try {
+                const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const data = await res.json();
+
+                if (data.status === 1 && data.product) {
+                    const product = data.product;
+                    const name = product.product_name_en || product.product_name || '';
+                    const rawCats = product.categories || product.categories_tags?.join(', ') || '';
+                    const category = matchCategory(rawCats);
+
+                    if (name) {
+                        document.getElementById('itemName').value = name;
+                        if (category) {
+                            document.getElementById('itemCategory').value = category;
+                        }
+                        showToast('✅ Product found!', '');
+                    } else {
+                        showToast('Product found but no name — enter manually', 'warning');
+                    }
+                } else {
+                    showToast('Product not found — enter manually', 'warning');
+                }
+            } catch (err) {
+                showToast('Lookup failed — enter manually', 'warning');
+            }
+        }
+
+        window.startScanner = startScanner;
+        window.closeScanner = closeScanner;
 
         // Category typeahead
         function filterCategories(value) {
