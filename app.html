@@ -2875,6 +2875,8 @@
                         product.categories
                     ].filter(Boolean);
 
+                    alert('DEBUG - pnns2: ' + product.pnns_groups_2 + '\npnns1: ' + product.pnns_groups_1 + '\ntags: ' + JSON.stringify(product.categories_tags) + '\ncats: ' + product.categories);
+
                     const category = matchCategory(rawCats);
 
                     if (name) {
