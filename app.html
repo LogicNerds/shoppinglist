@@ -2873,8 +2873,10 @@
                         document.getElementById('itemName').value = name;
                         if (category) {
                             document.getElementById('itemCategory').value = category;
+                            showToast('✅ ' + name + ' → ' + category, '');
+                        } else {
+                            showToast('✅ ' + name + ' (no category found)', '');
                         }
-                        showToast('✅ Product found!', '');
                     } else {
                         showToast('Product found but no name — enter manually', 'warning');
                     }
