@@ -2791,8 +2791,10 @@
                             <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
                         </div>
                         <div class="item-total">$${total.toFixed(2)}</div>
-                        <button class="add-to-meal-btn" onclick="event.stopPropagation(); showAddToMealModal('${item.id}')">🍽️</button>
                         <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
+                        <div style="width:100%; padding: 2px 0 0 34px; font-size: 0.78em; grid-column: 1/-1;">
+                            <a onclick="event.stopPropagation(); showAddToMealModal('${item.id}')" style="color:var(--accent-primary); cursor:pointer; text-decoration:none;">add to meal plan</a>
+                        </div>
                     `;
 
                     itemsEl.appendChild(itemEl);
@@ -3067,22 +3069,52 @@
             {
                 targetId: 'healthBarSection',
                 title: 'Your Spending Overview',
-                text: 'Once you complete a shopping trip, this bar shows your average budget vs. average spend at a glance.'
+                text: 'Once you complete a shopping trip, this bar shows your average budget vs. average spend at a glance.',
+                view: 'dashboard'
             },
             {
                 targetId: 'createListBtn',
                 title: 'Create a Shopping List',
-                text: 'Tap here to start a new shopping list. Enter your store name, set a budget, and add your items. You can also assign items to categories like Produce or Dairy to shop by aisle.'
+                text: 'Tap here to start a new shopping list. Enter your store name, set a budget, and add your items. You can also assign items to categories like Produce or Dairy to shop by aisle.',
+                view: 'dashboard'
             },
             {
                 targetId: 'shoppingLists',
                 title: 'Your Shopping Lists',
-                text: 'Your active and completed lists from the last 90 days appear here. Tap any list to open it. Once you tap Done Shopping and confirm, the list is locked and cannot be edited.'
+                text: 'Your active and completed lists from the last 90 days appear here. Tap any list to open it. Once you tap Done Shopping and confirm, the list is locked and cannot be edited.',
+                view: 'dashboard'
             },
             {
                 targetId: 'hamburgerBtn',
                 title: 'My Shoppers',
-                text: 'Tap the menu icon to access My Shoppers. Share your invite code or QR with family or roommates so they can add items and check things off your list together.'
+                text: 'Tap the menu icon to access My Shoppers. Share your invite code or QR with family or roommates so they can add items and check things off your list together.',
+                view: 'dashboard'
+            },
+            {
+                targetId: 'calendarGrid',
+                title: 'Meal Planner',
+                text: 'Plan your meals for the month. Tap any day to select it — days with meals show a dot.',
+                view: 'mealPlanner',
+                onEnter: () => {
+                    showMealPlanner();
+                    // Select today so the calendar renders properly
+                    const today = new Date();
+                    const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+                    setTimeout(() => selectCalendarDay(dateStr), 300);
+                }
+            },
+            {
+                targetId: 'addMealBtn',
+                title: 'Add a Meal',
+                text: 'Give your meal a name and build out the ingredient list. Simple and quick.',
+                view: 'mealPlanner'
+            },
+            {
+                targetId: 'dayMealsList',
+                title: 'Your Meals',
+                text: "Meals for the selected day show here. Tap 'Add to List' to send ingredients straight to your shopping list.",
+                view: 'mealPlanner',
+                isLast: true
             }
         ];
 
@@ -3096,6 +3128,18 @@
         }
 
         function showTutorialStep(index) {
+            const step = tutorialSteps[index];
+
+            // Handle view switching
+            if (step.onEnter) {
+                step.onEnter();
+                setTimeout(() => positionTutorialStep(index), 400);
+                return;
+            }
+            positionTutorialStep(index);
+        }
+
+        function positionTutorialStep(index) {
             const step = tutorialSteps[index];
             const target = document.getElementById(step.targetId);
             if (!target) return;
@@ -3113,7 +3157,6 @@
             document.getElementById('tutorialText').textContent = step.text;
             document.getElementById('tutorialStepCount').textContent = (index + 1) + ' / ' + tutorialSteps.length;
 
-            // Position tooltip below or above spotlight depending on space
             const tooltip = document.getElementById('tutorialTooltip');
             const tooltipHeight = 160;
             const spaceBelow = window.innerHeight - rect.bottom;
@@ -3127,23 +3170,30 @@
             tooltip.style.top = tooltipTop + 'px';
             tooltip.style.left = tooltipLeft + 'px';
 
-            // Update next button text on last step
             const nextBtn = tooltip.querySelector('.tutorial-next-btn');
-            nextBtn.textContent = index === tutorialSteps.length - 1 ? 'Done ✓' : 'Next →';
+            const isLast = index === tutorialSteps.length - 1 || step.isLast;
+            nextBtn.textContent = isLast ? 'Done ✓' : 'Next →';
         }
 
         function nextTutorialStep() {
-            currentTutorialStep++;
-            if (currentTutorialStep >= tutorialSteps.length) {
+            const step = tutorialSteps[currentTutorialStep];
+            // If this is marked as last or is the final step, end
+            if (step.isLast || currentTutorialStep >= tutorialSteps.length - 1) {
                 endTutorial();
-            } else {
-                showTutorialStep(currentTutorialStep);
+                return;
             }
+            currentTutorialStep++;
+            showTutorialStep(currentTutorialStep);
         }
 
         function endTutorial() {
             localStorage.setItem('idkTutorialSeen', 'true');
             document.getElementById('tutorialOverlay').classList.remove('active');
+            // Return to dashboard if we're in meal planner
+            const mealView = document.getElementById('mealPlannerView');
+            if (!mealView.classList.contains('hidden')) {
+                backFromMealPlanner();
+            }
         }
 
         window.toggleHamburgerMenu = toggleHamburgerMenu;
