@@ -1595,8 +1595,8 @@
             <h2 id="itemModalTitle">Add Item</h2>
             <div class="form-group">
                 <label>Item Name</label>
-                <button class="scan-btn" onclick="startScanner()" style="width:100%; padding:10px; background:white; border:2px dashed var(--accent-primary); color:var(--accent-primary); border-radius:10px; font-size:0.95em; font-weight:600; cursor:pointer; margin-bottom:8px; display:block;">📷 Scan Barcode to Add Item</button>
-                <input type="text" id="itemName" placeholder="e.g., Milk, Bread, Apples">
+                <input type="text" id="itemName" placeholder="e.g., Milk, Bread, Apples" oninput="autoCategoryFromName(this.value)">
+                <a onclick="startScanner()" style="display:block; margin-top:6px; font-size:0.82em; color:var(--accent-primary); cursor:pointer; text-decoration:none;">or scan barcode to add item</a>
             </div>
             <div class="form-group">
                 <label>Quantity</label>
@@ -2875,9 +2875,8 @@
                         product.categories
                     ].filter(Boolean);
 
-                    alert('DEBUG - pnns2: ' + product.pnns_groups_2 + '\npnns1: ' + product.pnns_groups_1 + '\ntags: ' + JSON.stringify(product.categories_tags) + '\ncats: ' + product.categories);
-
-                    const category = matchCategory(rawCats);
+                    // Fall back to matching against product name
+                    const category = matchCategory(rawCats) || matchCategory([name]);
 
                     if (name) {
                         document.getElementById('itemName').value = name;
@@ -2900,6 +2899,16 @@
 
         window.startScanner = startScanner;
         window.closeScanner = closeScanner;
+
+        // Auto-category from item name
+        function autoCategoryFromName(name) {
+            if (!name) return;
+            const catField = document.getElementById('itemCategory');
+            if (catField.value) return; // Don't overwrite manual selection
+            const matched = matchCategory([name]);
+            if (matched) catField.value = matched;
+        }
+        window.autoCategoryFromName = autoCategoryFromName;
 
         // Category typeahead
         function filterCategories(value) {
