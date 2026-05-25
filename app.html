@@ -4039,19 +4039,18 @@
                 document.getElementById('scannerOverlay').classList.add('active');
                 scannerActive = true;
 
-                // Get back camera
-                const devices = await zxingReader.listVideoInputDevices();
-                const backCamera = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[devices.length - 1];
-                const deviceId = backCamera ? backCamera.deviceId : undefined;
-
-                await zxingReader.decodeFromVideoDevice(deviceId, videoEl, async (result, err) => {
-                    if (result && scannerActive) {
-                        scannerActive = false;
-                        const code = result.getText();
-                        closeScanner();
-                        await lookupBarcode(code);
+                await zxingReader.decodeFromConstraints(
+                    { video: { facingMode: 'environment' } },
+                    videoEl,
+                    async (result, err) => {
+                        if (result && scannerActive) {
+                            scannerActive = false;
+                            const code = result.getText();
+                            closeScanner();
+                            await lookupBarcode(code);
+                        }
                     }
-                });
+                );
 
                 // 30 second timeout
                 setTimeout(() => {
@@ -4062,7 +4061,7 @@
                 }, 30000);
 
             } catch (err) {
-                showToast('Error: ' + err.name + ' — ' + err.message, 'danger');
+                showToast('Camera error: ' + err.message, 'danger');
                 closeScanner();
             }
         }
