@@ -4040,12 +4040,7 @@
                 document.getElementById('scannerOverlay').classList.add('active');
                 scannerActive = true;
 
-                // Get back camera
-                const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
-                const backCamera = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[devices.length - 1];
-                const deviceId = backCamera ? backCamera.deviceId : undefined;
-
-                await zxingReader.decodeFromVideoDevice(deviceId, videoEl, async (result, err) => {
+                await zxingReader.decodeFromVideoDevice(undefined, videoEl, async (result, err) => {
                     if (result && scannerActive) {
                         scannerActive = false;
                         const code = result.getText();
@@ -4063,7 +4058,7 @@
                 }, 30000);
 
             } catch (err) {
-                showToast('Scanner error: ' + err.message, 'danger');
+                alert('Scanner error: ' + err.message);
                 closeScanner();
             }
         }
