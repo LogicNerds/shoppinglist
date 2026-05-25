@@ -2553,6 +2553,10 @@
                 document.getElementById('userAvatar').src = currentUser.photoURL;
             }
 
+            // Hide guest banners for logged-in users
+            document.getElementById('guestBannerDash').classList.add('hidden');
+            document.getElementById('guestBannerShopping').classList.add('hidden');
+
             // Hide account-only hamburger items for guest mode
             const menuMealPlanner = document.getElementById('menuMealPlanner');
             const menuMyShoppers = document.getElementById('menuMyShoppers');
