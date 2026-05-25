@@ -1838,6 +1838,25 @@
             margin-bottom: 10px;
             display: inline-block;
         }
+
+        .recipe-load-more-btn {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px dashed var(--accent-primary);
+            color: var(--accent-primary);
+            border-radius: 12px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 12px 20px;
+            width: calc(100% - 40px);
+            transition: background 0.2s;
+        }
+
+        .recipe-load-more-btn:hover {
+            background: var(--accent-bg);
+        }
         /* Hamburger Menu */
         .hamburger-menu {
             position: absolute;
@@ -2418,6 +2437,7 @@
             <div class="recipe-grid" id="recipeGrid">
                 <div class="recipe-loading">Loading recipes...</div>
             </div>
+            <button class="recipe-load-more-btn hidden" id="recipeLoadMoreBtn" onclick="loadMoreRecipes()">Load More</button>
         </div>
     </div>
 
@@ -4014,6 +4034,8 @@
         let currentRecipeCategory = 0;
         let currentRecipeDetail = null;
         let recipeCache = {};
+        let currentRecipeOffset = 0;
+        let currentRecipeResults = [];
 
         function getWeekNumber() {
             const d = new Date();
@@ -4061,6 +4083,8 @@
 
         async function loadRecipesForCategory(idx) {
             currentRecipeCategory = idx;
+            currentRecipeOffset = 0;
+            currentRecipeResults = [];
 
             // Update active tab
             document.querySelectorAll('.recipe-tab').forEach((t, i) => {
@@ -4071,31 +4095,75 @@
             document.getElementById('recipeSearchInput').value = '';
             document.getElementById('recipeIngredientFilter').value = '';
             document.getElementById('recipeFeaturedLabel').textContent = idx === 0 ? "This Week's Picks" : RECIPE_CATEGORIES[idx].label;
+            document.getElementById('recipeLoadMoreBtn').classList.add('hidden');
 
             const cat = RECIPE_CATEGORIES[idx];
-            const cacheKey = getCacheKey('cat', idx);
+            const isFeatured = idx === 0;
 
-            // Check cache
-            const cached = localStorage.getItem(cacheKey);
-            if (cached) {
-                renderRecipeCards(JSON.parse(cached));
-                return;
+            if (isFeatured) {
+                // Featured: 5 rotating weekly, cached
+                const cacheKey = getCacheKey('cat', idx);
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                    currentRecipeResults = JSON.parse(cached);
+                    renderRecipeCards(currentRecipeResults);
+                    return;
+                }
+                showRecipeLoading();
+                try {
+                    const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=5&addRecipeInformation=false&offset=${(getWeekNumber() * 5) % 50}`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    currentRecipeResults = data.results || [];
+                    localStorage.setItem(cacheKey, JSON.stringify(currentRecipeResults));
+                    renderRecipeCards(currentRecipeResults);
+                } catch (e) {
+                    document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Failed to load recipes.</div>';
+                }
+            } else {
+                // Category: 20 results with load more
+                showRecipeLoading();
+                try {
+                    let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=0&tags=${cat.tag}`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    currentRecipeResults = data.results || [];
+                    currentRecipeOffset = currentRecipeResults.length;
+                    renderRecipeCards(currentRecipeResults);
+                    if (data.totalResults > currentRecipeResults.length) {
+                        document.getElementById('recipeLoadMoreBtn').classList.remove('hidden');
+                    }
+                } catch (e) {
+                    document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Failed to load recipes.</div>';
+                }
             }
+        }
 
-            showRecipeLoading();
+        async function loadMoreRecipes() {
+            const cat = RECIPE_CATEGORIES[currentRecipeCategory];
+            if (!cat || !cat.tag) return;
+
+            document.getElementById('recipeLoadMoreBtn').textContent = 'Loading...';
 
             try {
-                let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=5&addRecipeInformation=false&offset=${(getWeekNumber() * 5) % 50}`;
-                if (cat.tag) url += `&tags=${cat.tag}`;
-
+                const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=${currentRecipeOffset}&tags=${cat.tag}`;
                 const res = await fetch(url);
                 const data = await res.json();
-                const recipes = data.results || [];
+                const more = data.results || [];
+                currentRecipeResults = [...currentRecipeResults, ...more];
+                currentRecipeOffset += more.length;
+                renderRecipeCards(currentRecipeResults);
 
-                localStorage.setItem(cacheKey, JSON.stringify(recipes));
-                renderRecipeCards(recipes);
+                const btn = document.getElementById('recipeLoadMoreBtn');
+                if (data.totalResults > currentRecipeOffset) {
+                    btn.textContent = 'Load More';
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
             } catch (e) {
-                document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Failed to load recipes. Check your connection.</div>';
+                document.getElementById('recipeLoadMoreBtn').textContent = 'Load More';
+                showToast('Failed to load more', 'warning');
             }
         }
 
@@ -4107,6 +4175,7 @@
             }
 
             document.getElementById('recipeFeaturedLabel').textContent = 'Results for "' + query + '"';
+            document.getElementById('recipeLoadMoreBtn').classList.add('hidden');
             showRecipeLoading();
 
             const cacheKey = getCacheKey('search', query.toLowerCase());
@@ -4339,6 +4408,7 @@
 
 
         window.showRecipeBrowser = showRecipeBrowser;
+        window.loadMoreRecipes = loadMoreRecipes;
         window.backFromRecipes = backFromRecipes;
         window.backFromRecipeDetail = backFromRecipeDetail;
         window.loadRecipesForCategory = loadRecipesForCategory;
