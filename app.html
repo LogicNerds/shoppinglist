@@ -4019,16 +4019,16 @@
 
         const SPOONACULAR_KEY = '7f63bb14706747698400d5450e7b8928';
         const RECIPE_CATEGORIES = [
-            { label: 'Featured', tag: null },
-            { label: 'Under 30 Min', tag: 'under30minutes' },
-            { label: 'Slow Cook', tag: 'slowcooker' },
-            { label: 'Healthy', tag: 'healthy' },
-            { label: 'Kid-friendly', tag: 'kid-friendly' },
-            { label: 'Meal Prep', tag: 'mealprep' },
-            { label: 'Budget', tag: 'budget' },
-            { label: 'Chicken', tag: 'chicken' },
-            { label: 'Beef', tag: 'beef' },
-            { label: 'Vegetarian', tag: 'vegetarian' }
+            { label: 'Featured', query: null, maxReadyTime: null, diet: null, type: null },
+            { label: 'Under 30 Min', query: null, maxReadyTime: 30, diet: null, type: null },
+            { label: 'Slow Cook', query: 'slow cooker', maxReadyTime: null, diet: null, type: null },
+            { label: 'Healthy', query: null, maxReadyTime: null, diet: 'whole30', type: null },
+            { label: 'Kid-friendly', query: 'kid friendly', maxReadyTime: null, diet: null, type: null },
+            { label: 'Meal Prep', query: 'meal prep', maxReadyTime: null, diet: null, type: null },
+            { label: 'Budget', query: 'budget friendly cheap', maxReadyTime: null, diet: null, type: null },
+            { label: 'Chicken', query: 'chicken', maxReadyTime: null, diet: null, type: null },
+            { label: 'Beef', query: 'beef', maxReadyTime: null, diet: null, type: null },
+            { label: 'Vegetarian', query: null, maxReadyTime: null, diet: 'vegetarian', type: null }
         ];
 
         let currentRecipeCategory = 0;
@@ -4124,7 +4124,11 @@
                 // Category: 20 results with load more
                 showRecipeLoading();
                 try {
-                    let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=0&tags=${cat.tag}`;
+                    let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=0`;
+                    if (cat.query) url += `&query=${encodeURIComponent(cat.query)}`;
+                    if (cat.maxReadyTime) url += `&maxReadyTime=${cat.maxReadyTime}`;
+                    if (cat.diet) url += `&diet=${cat.diet}`;
+                    if (cat.type) url += `&type=${cat.type}`;
                     const res = await fetch(url);
                     const data = await res.json();
                     currentRecipeResults = data.results || [];
@@ -4141,12 +4145,16 @@
 
         async function loadMoreRecipes() {
             const cat = RECIPE_CATEGORIES[currentRecipeCategory];
-            if (!cat || !cat.tag) return;
+            if (!cat || currentRecipeCategory === 0) return;
 
             document.getElementById('recipeLoadMoreBtn').textContent = 'Loading...';
 
             try {
-                const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=${currentRecipeOffset}&tags=${cat.tag}`;
+                let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=${currentRecipeOffset}`;
+                if (cat.query) url += `&query=${encodeURIComponent(cat.query)}`;
+                if (cat.maxReadyTime) url += `&maxReadyTime=${cat.maxReadyTime}`;
+                if (cat.diet) url += `&diet=${cat.diet}`;
+                if (cat.type) url += `&type=${cat.type}`;
                 const res = await fetch(url);
                 const data = await res.json();
                 const more = data.results || [];
