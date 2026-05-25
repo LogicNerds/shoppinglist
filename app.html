@@ -4062,8 +4062,9 @@
         }
 
         function addRecipeIngredientsToList(listId) {
-            viewList(listId);
             const ings = window._recipeTempIngredients || [];
+            viewList(listId);
+            // viewList resets currentItems from Firestore data, so add after
             ings.forEach(ing => {
                 if (!ing.name) return;
                 currentItems.push({
@@ -4137,39 +4138,7 @@
         }
 
         // Override confirmAddToMeal to handle recipe case
-        const _originalConfirmAddToMeal = confirmAddToMeal;
-        window.confirmAddToMeal = async function() {
-            if (addToMealItemId === '__recipe__') {
-                if (!addToMealSelectedDate) { alert('Please pick a day.'); return; }
-                const mealName = document.getElementById('addToMealName').value.trim();
-                if (!mealName) { alert('Please enter a meal name.'); return; }
 
-                const ings = window._recipeTempIngredients || [];
-                const queryUid = isGuest ? ownerUid : currentUser.uid;
-                const existing = mealPlans.find(m => m.date === addToMealSelectedDate && m.mealName.toLowerCase() === mealName.toLowerCase());
-
-                try {
-                    if (existing) {
-                        const updated = [...(existing.ingredients || []), ...ings];
-                        await updateDoc(doc(db, 'mealPlans', existing.id), { ingredients: updated });
-                    } else {
-                        await addDoc(collection(db, 'mealPlans'), {
-                            userId: queryUid,
-                            date: addToMealSelectedDate,
-                            mealName: mealName,
-                            ingredients: ings,
-                            createdAt: serverTimestamp()
-                        });
-                    }
-                    closeModal('addToMealModal');
-                    showToast('Added to ' + mealName + '!', '');
-                } catch (e) {
-                    alert('Failed to add to meal plan.');
-                }
-            } else {
-                await _originalConfirmAddToMeal();
-            }
-        };
 
         window.showRecipeBrowser = showRecipeBrowser;
         window.backFromRecipes = backFromRecipes;
@@ -4568,25 +4537,31 @@
             const mealName = document.getElementById('addToMealName').value.trim();
             if (!mealName) { alert('Please enter a meal name.'); return; }
 
-            const item = currentItems.find(i => i.id === addToMealItemId);
-            if (!item) return;
-
-            const ingredient = { name: item.name, qty: String(item.qty) };
             const queryUid = isGuest ? ownerUid : currentUser.uid;
-
-            // Check if a meal with this name already exists on this date
             const existing = mealPlans.find(m => m.date === addToMealSelectedDate && m.mealName.toLowerCase() === mealName.toLowerCase());
+
+            let ingredients;
+
+            if (addToMealItemId === '__recipe__') {
+                // Recipe flow — use stored recipe ingredients
+                ingredients = window._recipeTempIngredients || [];
+            } else {
+                // Single item flow
+                const item = currentItems.find(i => i.id === addToMealItemId);
+                if (!item) return;
+                ingredients = [{ name: item.name, qty: String(item.qty) }];
+            }
 
             try {
                 if (existing) {
-                    const updatedIngredients = [...(existing.ingredients || []), ingredient];
-                    await updateDoc(doc(db, 'mealPlans', existing.id), { ingredients: updatedIngredients });
+                    const updated = [...(existing.ingredients || []), ...ingredients];
+                    await updateDoc(doc(db, 'mealPlans', existing.id), { ingredients: updated });
                 } else {
                     await addDoc(collection(db, 'mealPlans'), {
                         userId: queryUid,
                         date: addToMealSelectedDate,
                         mealName: mealName,
-                        ingredients: [ingredient],
+                        ingredients: ingredients,
                         createdAt: serverTimestamp()
                     });
                 }
