@@ -1551,6 +1551,246 @@
             border-color: var(--accent-primary);
             background: var(--accent-bg);
         }
+
+        /* Recipe Browser */
+        .recipe-browser-view {
+            padding: 0 0 80px 0;
+        }
+
+        .recipe-search-bar {
+            padding: 16px 20px 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .recipe-search-input {
+            flex: 1;
+            padding: 11px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95em;
+            transition: border-color 0.2s;
+        }
+
+        .recipe-search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .recipe-search-btn {
+            padding: 11px 16px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .recipe-filter-bar {
+            padding: 10px 20px 0;
+        }
+
+        .recipe-filter-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.88em;
+            transition: border-color 0.2s;
+        }
+
+        .recipe-filter-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .recipe-category-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .recipe-category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .recipe-tab {
+            padding: 7px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            color: #666;
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .recipe-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .recipe-featured-label {
+            padding: 4px 20px 8px;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .recipe-grid {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .recipe-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .recipe-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 3px 10px rgba(13,148,136,0.15);
+        }
+
+        .recipe-card-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #f0f0f0;
+        }
+
+        .recipe-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recipe-card-name {
+            font-weight: 700;
+            color: #333;
+            font-size: 0.95em;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .recipe-card-meta {
+            font-size: 0.78em;
+            color: #999;
+        }
+
+        .recipe-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        /* Recipe Detail View */
+        .recipe-detail-view {
+            padding: 0 0 80px 0;
+        }
+
+        .recipe-detail-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .recipe-detail-body {
+            padding: 20px;
+        }
+
+        .recipe-detail-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .recipe-detail-meta {
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .recipe-detail-section {
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        .recipe-ingredient-item {
+            font-size: 0.9em;
+            color: #333;
+            padding: 6px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .recipe-instruction-step {
+            font-size: 0.9em;
+            color: #333;
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+            line-height: 1.5;
+        }
+
+        .recipe-action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .recipe-action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .recipe-action-btn.primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+        }
+
+        .recipe-action-btn.secondary {
+            background: white;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+        }
         /* Hamburger Menu */
         .hamburger-menu {
             position: absolute;
@@ -1770,6 +2010,7 @@
                 <button class="theme-btn" onclick="toggleHamburgerMenu()" title="Menu" id="hamburgerBtn">☰</button>
                 <div class="hamburger-menu hidden" id="hamburgerMenu">
                     <button class="hamburger-item" id="menuMealPlanner" onclick="showMealPlanner(); toggleHamburgerMenu()">📅 Meal Planner</button>
+                    <button class="hamburger-item" id="menuRecipes" onclick="showRecipeBrowser(); toggleHamburgerMenu()">🍽️ Recipes</button>
                     <button class="hamburger-item" id="menuMyShoppers" onclick="showMyShoppers(); toggleHamburgerMenu()">👨‍👩‍👧‍👦 My Shoppers</button>
                     <button class="hamburger-item" onclick="showThemeModal(); toggleHamburgerMenu()">🎨 Change Theme</button>
                     <button class="hamburger-item" onclick="showSettings(); toggleHamburgerMenu()">⚙️ Settings</button>
@@ -2091,6 +2332,55 @@
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal('addToMealModal')">Cancel</button>
                 <button class="modal-btn primary" onclick="confirmAddToMeal()" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white;">Add to Meal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Browser View -->
+    <div id="recipeBrowserView" class="container hidden">
+        <div class="header">
+            <div class="header-left">
+                <button class="back-btn" onclick="backFromRecipes()">←</button>
+                <span style="font-size: 1.2em; font-weight: 600;">Recipes</span>
+            </div>
+        </div>
+        <div class="recipe-browser-view">
+            <div class="recipe-search-bar">
+                <input type="text" class="recipe-search-input" id="recipeSearchInput" placeholder="Search recipes...">
+                <button class="recipe-search-btn" onclick="searchRecipes()">Search</button>
+            </div>
+            <div class="recipe-filter-bar">
+                <input type="text" class="recipe-filter-input" id="recipeIngredientFilter" placeholder="Filter by ingredients (e.g. chicken, rice, sour cream)" oninput="filterByIngredients()">
+            </div>
+            <div class="recipe-category-tabs" id="recipeCategoryTabs"></div>
+            <div class="recipe-featured-label" id="recipeFeaturedLabel">This Week's Picks</div>
+            <div class="recipe-grid" id="recipeGrid">
+                <div class="recipe-loading">Loading recipes...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Detail View -->
+    <div id="recipeDetailView" class="container hidden">
+        <div class="header">
+            <div class="header-left">
+                <button class="back-btn" onclick="backFromRecipeDetail()">←</button>
+                <span style="font-size: 1.2em; font-weight: 600;">Recipe</span>
+            </div>
+        </div>
+        <div class="recipe-detail-view">
+            <img class="recipe-detail-img" id="recipeDetailImg" src="" alt="">
+            <div class="recipe-detail-body">
+                <div class="recipe-detail-title" id="recipeDetailTitle"></div>
+                <div class="recipe-detail-meta" id="recipeDetailMeta"></div>
+                <div class="recipe-detail-section">Ingredients</div>
+                <div id="recipeDetailIngredients"></div>
+                <div class="recipe-detail-section">Instructions</div>
+                <div id="recipeDetailInstructions"></div>
+                <div class="recipe-action-buttons">
+                    <button class="recipe-action-btn primary" onclick="addRecipeToShoppingList()">+ Add to Shopping List</button>
+                    <button class="recipe-action-btn secondary" onclick="addRecipeToMealPlan()">📅 Add to Meal Plan</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2450,6 +2740,8 @@
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('shoppingView').classList.add('hidden');
             document.getElementById('mealPlannerView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.add('hidden');
         }
 
         function showMainApp() {
@@ -2457,6 +2749,8 @@
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('shoppingView').classList.add('hidden');
             document.getElementById('mealPlannerView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.add('hidden');
             
             if (currentUser.photoURL) {
                 document.getElementById('userAvatar').src = currentUser.photoURL;
@@ -2469,11 +2763,14 @@
             // Hide account-only hamburger items for guest mode
             const menuMealPlanner = document.getElementById('menuMealPlanner');
             const menuMyShoppers = document.getElementById('menuMyShoppers');
+            const menuRecipes = document.getElementById('menuRecipes');
             if (isGuestMode) {
                 if (menuMealPlanner) menuMealPlanner.style.display = 'none';
+                if (menuRecipes) menuRecipes.style.display = 'none';
                 if (menuMyShoppers) menuMyShoppers.style.display = 'none';
             } else {
                 if (menuMealPlanner) menuMealPlanner.style.display = '';
+                if (menuRecipes) menuRecipes.style.display = '';
                 if (menuMyShoppers) menuMyShoppers.style.display = '';
             }
 
@@ -2493,6 +2790,8 @@
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('shoppingView').classList.remove('hidden');
             document.getElementById('mealPlannerView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.add('hidden');
             
             const doneBtn = document.getElementById('doneBtn');
             const guestDoneBtn = document.getElementById('guestDoneBtn');
@@ -3373,6 +3672,8 @@
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('shoppingView').classList.add('hidden');
             document.getElementById('mealPlannerView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.add('hidden');
 
             // Show guest banner
             document.getElementById('guestBannerDash').classList.remove('hidden');
@@ -3478,6 +3779,410 @@
 
         // ── END SETTINGS ──────────────────────────────────────────────
 
+
+        // ── RECIPES ───────────────────────────────────────────────────
+
+        const SPOONACULAR_KEY = '7f63bb14706747698400d5450e7b8928';
+        const RECIPE_CATEGORIES = [
+            { label: 'Featured', tag: null },
+            { label: 'Under 30 Min', tag: 'under30minutes' },
+            { label: 'Slow Cook', tag: 'slowcooker' },
+            { label: 'Healthy', tag: 'healthy' },
+            { label: 'Kid-friendly', tag: 'kid-friendly' },
+            { label: 'Meal Prep', tag: 'mealprep' },
+            { label: 'Budget', tag: 'budget' },
+            { label: 'Chicken', tag: 'chicken' },
+            { label: 'Beef', tag: 'beef' },
+            { label: 'Vegetarian', tag: 'vegetarian' }
+        ];
+
+        let currentRecipeCategory = 0;
+        let currentRecipeDetail = null;
+        let recipeCache = {};
+
+        function getWeekNumber() {
+            const d = new Date();
+            const onejan = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+        }
+
+        function getCacheKey(type, value) {
+            return 'recipe_' + type + '_' + value + '_w' + getWeekNumber();
+        }
+
+        function showRecipeBrowser() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('shoppingView').classList.add('hidden');
+            document.getElementById('mealPlannerView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.remove('hidden');
+
+            buildCategoryTabs();
+            loadRecipesForCategory(0);
+        }
+
+        function backFromRecipes() {
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        function backFromRecipeDetail() {
+            document.getElementById('recipeDetailView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.remove('hidden');
+        }
+
+        function buildCategoryTabs() {
+            const tabs = document.getElementById('recipeCategoryTabs');
+            tabs.innerHTML = RECIPE_CATEGORIES.map((cat, idx) => `
+                <button class="recipe-tab ${idx === 0 ? 'active' : ''}" onclick="loadRecipesForCategory(${idx})">${cat.label}</button>
+            `).join('');
+        }
+
+        async function loadRecipesForCategory(idx) {
+            currentRecipeCategory = idx;
+
+            // Update active tab
+            document.querySelectorAll('.recipe-tab').forEach((t, i) => {
+                t.classList.toggle('active', i === idx);
+            });
+
+            // Clear filters
+            document.getElementById('recipeSearchInput').value = '';
+            document.getElementById('recipeIngredientFilter').value = '';
+            document.getElementById('recipeFeaturedLabel').textContent = idx === 0 ? "This Week's Picks" : RECIPE_CATEGORIES[idx].label;
+
+            const cat = RECIPE_CATEGORIES[idx];
+            const cacheKey = getCacheKey('cat', idx);
+
+            // Check cache
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                renderRecipeCards(JSON.parse(cached));
+                return;
+            }
+
+            showRecipeLoading();
+
+            try {
+                let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=5&addRecipeInformation=false&offset=${(getWeekNumber() * 5) % 50}`;
+                if (cat.tag) url += `&tags=${cat.tag}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+                const recipes = data.results || [];
+
+                localStorage.setItem(cacheKey, JSON.stringify(recipes));
+                renderRecipeCards(recipes);
+            } catch (e) {
+                document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Failed to load recipes. Check your connection.</div>';
+            }
+        }
+
+        async function searchRecipes() {
+            const query = document.getElementById('recipeSearchInput').value.trim();
+            if (!query) {
+                loadRecipesForCategory(currentRecipeCategory);
+                return;
+            }
+
+            document.getElementById('recipeFeaturedLabel').textContent = 'Results for "' + query + '"';
+            showRecipeLoading();
+
+            const cacheKey = getCacheKey('search', query.toLowerCase());
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                renderRecipeCards(JSON.parse(cached));
+                return;
+            }
+
+            try {
+                const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&query=${encodeURIComponent(query)}&number=10&addRecipeInformation=false`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const recipes = data.results || [];
+                localStorage.setItem(cacheKey, JSON.stringify(recipes));
+                renderRecipeCards(recipes);
+            } catch (e) {
+                document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Search failed. Try again.</div>';
+            }
+        }
+
+        let filterTimeout = null;
+        function filterByIngredients() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(async () => {
+                const val = document.getElementById('recipeIngredientFilter').value.trim();
+                if (!val) {
+                    loadRecipesForCategory(currentRecipeCategory);
+                    return;
+                }
+
+                const ingredients = val.split(',').map(s => s.trim()).filter(Boolean).join(',');
+                document.getElementById('recipeFeaturedLabel').textContent = 'Filtered by: ' + ingredients;
+                showRecipeLoading();
+
+                const cacheKey = getCacheKey('ing', ingredients.toLowerCase());
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) {
+                    renderRecipeCards(JSON.parse(cached));
+                    return;
+                }
+
+                try {
+                    const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&includeIngredients=${encodeURIComponent(ingredients)}&number=10&addRecipeInformation=false&ranking=2`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    const recipes = data.results || [];
+                    localStorage.setItem(cacheKey, JSON.stringify(recipes));
+                    renderRecipeCards(recipes);
+                } catch (e) {
+                    document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Filter failed. Try again.</div>';
+                }
+            }, 600);
+        }
+
+        function showRecipeLoading() {
+            document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Loading recipes...</div>';
+        }
+
+        function renderRecipeCards(recipes) {
+            const grid = document.getElementById('recipeGrid');
+            if (!recipes || recipes.length === 0) {
+                grid.innerHTML = '<div class="recipe-loading">No recipes found.</div>';
+                return;
+            }
+            grid.innerHTML = recipes.map(r => `
+                <div class="recipe-card" onclick="showRecipeDetail(${r.id})">
+                    <img class="recipe-card-img" src="${r.image || ''}" alt="${r.title}" onerror="this.style.display='none'">
+                    <div class="recipe-card-info">
+                        <div class="recipe-card-name">${r.title}</div>
+                        <div class="recipe-card-meta">Tap to see ingredients & instructions</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function showRecipeDetail(recipeId) {
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.remove('hidden');
+
+            // Show loading state
+            document.getElementById('recipeDetailTitle').textContent = 'Loading...';
+            document.getElementById('recipeDetailMeta').textContent = '';
+            document.getElementById('recipeDetailIngredients').innerHTML = '';
+            document.getElementById('recipeDetailInstructions').innerHTML = '';
+            document.getElementById('recipeDetailImg').src = '';
+
+            const cacheKey = 'recipe_detail_' + recipeId;
+            const cached = localStorage.getItem(cacheKey);
+            let recipe;
+
+            if (cached) {
+                recipe = JSON.parse(cached);
+            } else {
+                try {
+                    const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${SPOONACULAR_KEY}`;
+                    const res = await fetch(url);
+                    recipe = await res.json();
+                    localStorage.setItem(cacheKey, JSON.stringify(recipe));
+                } catch (e) {
+                    document.getElementById('recipeDetailTitle').textContent = 'Failed to load recipe.';
+                    return;
+                }
+            }
+
+            currentRecipeDetail = recipe;
+
+            document.getElementById('recipeDetailImg').src = recipe.image || '';
+            document.getElementById('recipeDetailTitle').textContent = recipe.title || '';
+            document.getElementById('recipeDetailMeta').textContent =
+                (recipe.readyInMinutes ? recipe.readyInMinutes + ' min' : '') +
+                (recipe.servings ? ' · ' + recipe.servings + ' servings' : '');
+
+            // Ingredients
+            const ings = (recipe.extendedIngredients || []);
+            document.getElementById('recipeDetailIngredients').innerHTML = ings.length > 0
+                ? ings.map(i => `<div class="recipe-ingredient-item">${i.original}</div>`).join('')
+                : '<div class="recipe-ingredient-item" style="color:#999;">No ingredients available.</div>';
+
+            // Instructions
+            let steps = [];
+            if (recipe.analyzedInstructions && recipe.analyzedInstructions.length > 0) {
+                steps = recipe.analyzedInstructions[0].steps || [];
+            }
+            document.getElementById('recipeDetailInstructions').innerHTML = steps.length > 0
+                ? steps.map(s => `<div class="recipe-instruction-step"><strong>${s.number}.</strong> ${s.step}</div>`).join('')
+                : recipe.instructions
+                    ? `<div class="recipe-instruction-step">${recipe.instructions.replace(/<[^>]*>/g, '')}</div>`
+                    : '<div class="recipe-instruction-step" style="color:#999;">No instructions available.</div>';
+        }
+
+        function addRecipeToShoppingList() {
+            if (!currentRecipeDetail) return;
+            const ings = (currentRecipeDetail.extendedIngredients || []).map(i => ({
+                name: i.name,
+                qty: i.amount ? String(i.amount) + ' ' + (i.unit || '') : '1'
+            }));
+            // Reuse existing select list modal
+            const mealId = '__recipe__';
+            // Store ingredients temporarily
+            window._recipeTempIngredients = ings;
+            window._recipeTempName = currentRecipeDetail.title;
+            showRecipeSelectListModal();
+        }
+
+        function showRecipeSelectListModal() {
+            const activeLists = shoppingLists.filter(l => !l.completed);
+            const container = document.getElementById('selectListOptions');
+
+            container.innerHTML = '';
+            if (activeLists.length > 0) {
+                activeLists.forEach(l => {
+                    const div = document.createElement('div');
+                    div.className = 'list-select-item';
+                    div.textContent = l.storeName || 'Shopping List';
+                    div.onclick = () => {
+                        closeModal('selectListModal');
+                        addRecipeIngredientsToList(l.id);
+                    };
+                    container.appendChild(div);
+                });
+            }
+            const newBtn = document.createElement('div');
+            newBtn.className = 'list-select-item';
+            newBtn.style.color = 'var(--accent-primary)';
+            newBtn.textContent = '+ Create New Shopping List';
+            newBtn.onclick = () => {
+                closeModal('selectListModal');
+                addRecipeIngredientsToNewList();
+            };
+            container.appendChild(newBtn);
+            document.getElementById('selectListModal').classList.add('active');
+        }
+
+        function addRecipeIngredientsToList(listId) {
+            viewList(listId);
+            const ings = window._recipeTempIngredients || [];
+            ings.forEach(ing => {
+                if (!ing.name) return;
+                currentItems.push({
+                    id: 'item_' + Date.now() + '_' + Math.random(),
+                    name: ing.name,
+                    qty: parseFloat(ing.qty) || 1,
+                    price: 0,
+                    checked: false,
+                    category: matchCategory([ing.name])
+                });
+            });
+            renderItems();
+            updateTotal();
+            showToast('Ingredients added!', '');
+        }
+
+        function addRecipeIngredientsToNewList() {
+            createNewList();
+            setTimeout(() => {
+                const ings = window._recipeTempIngredients || [];
+                ings.forEach(ing => {
+                    if (!ing.name) return;
+                    currentItems.push({
+                        id: 'item_' + Date.now() + '_' + Math.random(),
+                        name: ing.name,
+                        qty: parseFloat(ing.qty) || 1,
+                        price: 0,
+                        checked: false,
+                        category: matchCategory([ing.name])
+                    });
+                });
+                renderItems();
+                updateTotal();
+                showToast('Ingredients added!', '');
+            }, 200);
+        }
+
+        function addRecipeToMealPlan() {
+            if (!currentRecipeDetail) return;
+            const ings = (currentRecipeDetail.extendedIngredients || []).map(i => ({
+                name: i.name,
+                qty: i.amount ? String(i.amount) + ' ' + (i.unit || '') : '1'
+            }));
+            window._recipeTempIngredients = ings;
+            window._recipeTempName = currentRecipeDetail.title;
+
+            // Use addToMeal modal with recipe ingredients
+            addToMealItemId = '__recipe__';
+            addToMealSelectedDate = null;
+            document.getElementById('addToMealItemName').textContent = 'Recipe: ' + currentRecipeDetail.title;
+            document.getElementById('addToMealName').value = currentRecipeDetail.title;
+            document.getElementById('existingMealsSuggestions').innerHTML = '';
+
+            const picker = document.getElementById('mealDayPicker');
+            picker.innerHTML = '';
+            const today = new Date();
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                const cell = document.createElement('div');
+                cell.className = 'meal-day-cell';
+                cell.innerHTML = `<span class="day-num">${d.getDate()}</span><span class="day-name">${dayNames[d.getDay()]}</span>`;
+                cell.dataset.date = dateStr;
+                cell.onclick = () => selectAddToMealDay(dateStr, cell);
+                picker.appendChild(cell);
+            }
+
+            document.getElementById('addToMealModal').classList.add('active');
+        }
+
+        // Override confirmAddToMeal to handle recipe case
+        const _originalConfirmAddToMeal = confirmAddToMeal;
+        window.confirmAddToMeal = async function() {
+            if (addToMealItemId === '__recipe__') {
+                if (!addToMealSelectedDate) { alert('Please pick a day.'); return; }
+                const mealName = document.getElementById('addToMealName').value.trim();
+                if (!mealName) { alert('Please enter a meal name.'); return; }
+
+                const ings = window._recipeTempIngredients || [];
+                const queryUid = isGuest ? ownerUid : currentUser.uid;
+                const existing = mealPlans.find(m => m.date === addToMealSelectedDate && m.mealName.toLowerCase() === mealName.toLowerCase());
+
+                try {
+                    if (existing) {
+                        const updated = [...(existing.ingredients || []), ...ings];
+                        await updateDoc(doc(db, 'mealPlans', existing.id), { ingredients: updated });
+                    } else {
+                        await addDoc(collection(db, 'mealPlans'), {
+                            userId: queryUid,
+                            date: addToMealSelectedDate,
+                            mealName: mealName,
+                            ingredients: ings,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                    closeModal('addToMealModal');
+                    showToast('Added to ' + mealName + '!', '');
+                } catch (e) {
+                    alert('Failed to add to meal plan.');
+                }
+            } else {
+                await _originalConfirmAddToMeal();
+            }
+        };
+
+        window.showRecipeBrowser = showRecipeBrowser;
+        window.backFromRecipes = backFromRecipes;
+        window.backFromRecipeDetail = backFromRecipeDetail;
+        window.loadRecipesForCategory = loadRecipesForCategory;
+        window.searchRecipes = searchRecipes;
+        window.filterByIngredients = filterByIngredients;
+        window.showRecipeDetail = showRecipeDetail;
+        window.addRecipeToShoppingList = addRecipeToShoppingList;
+        window.addRecipeToMealPlan = addRecipeToMealPlan;
+
+        // ── END RECIPES ───────────────────────────────────────────────
+
         // ── MEAL PLANNER ──────────────────────────────────────────────
 
         let mealPlans = [];
@@ -3497,6 +4202,8 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('shoppingView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.add('hidden');
             document.getElementById('mealPlannerView').classList.remove('hidden');
             loadMealPlans();
         }
