@@ -3780,6 +3780,43 @@
         // ── END SETTINGS ──────────────────────────────────────────────
 
 
+        // Category matching
+        const CATEGORY_MAP = {
+            'dairies': 'Dairy', 'dairy': 'Dairy', 'milk': 'Dairy', 'cheese': 'Dairy',
+            'yogurt': 'Dairy', 'produce': 'Produce', 'fruits': 'Produce',
+            'vegetables': 'Produce', 'fresh': 'Produce', 'meat': 'Meat & Seafood',
+            'seafood': 'Meat & Seafood', 'fish': 'Meat & Seafood', 'poultry': 'Meat & Seafood',
+            'frozen': 'Frozen', 'ice cream': 'Frozen', 'bread': 'Bakery', 'bakery': 'Bakery',
+            'pastry': 'Bakery', 'snack': 'Snacks & Candy', 'candy': 'Snacks & Candy',
+            'chips': 'Snacks & Candy', 'chocolate': 'Snacks & Candy', 'beverage': 'Beverages',
+            'drink': 'Beverages', 'juice': 'Beverages', 'soda': 'Beverages',
+            'coffee': 'Beverages', 'tea': 'Beverages',
+            'canned': 'Canned & Dry Goods', 'pasta': 'Canned & Dry Goods',
+            'rice': 'Canned & Dry Goods', 'cereal': 'Breakfast', 'breakfast': 'Breakfast',
+            'oat': 'Breakfast', 'condiment': 'Condiments & Sauces', 'sauce': 'Condiments & Sauces',
+            'dressing': 'Condiments & Sauces', 'oil': 'Condiments & Sauces',
+            'vinegar': 'Condiments & Sauces', 'personal': 'Personal Care',
+            'shampoo': 'Personal Care', 'soap': 'Personal Care', 'toothpaste': 'Personal Care',
+            'household': 'Household', 'cleaning': 'Household', 'paper': 'Household',
+            'baby': 'Baby', 'diaper': 'Baby', 'pet': 'Pet', 'dog': 'Pet', 'cat': 'Pet',
+            'deli': 'Deli', 'alcohol': 'Alcohol', 'beer': 'Alcohol', 'wine': 'Alcohol',
+            'spirits': 'Alcohol'
+        };
+
+        function matchCategory(rawCategories) {
+            if (!rawCategories) return '';
+            const raw = Array.isArray(rawCategories) ? rawCategories.join(', ') : String(rawCategories);
+            const cleaned = raw.toLowerCase()
+                .replace(/[a-z]{2}:/g, '')
+                .replace(/-/g, ' ')
+                .replace(/_/g, ' ');
+            for (const [keyword, category] of Object.entries(CATEGORY_MAP)) {
+                const regex = new RegExp('\b' + keyword.replace(' ', '\s+') + '\b');
+                if (regex.test(cleaned)) return category;
+            }
+            return '';
+        }
+
         // ── RECIPES ───────────────────────────────────────────────────
 
         const SPOONACULAR_KEY = '7f63bb14706747698400d5450e7b8928';
@@ -4027,14 +4064,14 @@
         }
 
         function addRecipeToShoppingList() {
-            if (!currentRecipeDetail) return;
+            if (!currentRecipeDetail) {
+                showToast('Recipe not loaded yet — try again', 'warning');
+                return;
+            }
             const ings = (currentRecipeDetail.extendedIngredients || []).map(i => ({
                 name: i.name,
                 qty: i.amount ? String(i.amount) + ' ' + (i.unit || '') : '1'
             }));
-            // Reuse existing select list modal
-            const mealId = '__recipe__';
-            // Store ingredients temporarily
             window._recipeTempIngredients = ings;
             window._recipeTempName = currentRecipeDetail.title;
             window._recipeTempRecipeId = currentRecipeDetail.id;
@@ -4073,7 +4110,8 @@
         async function addRecipeIngredientsToList(listId) {
             const ings = window._recipeTempIngredients || [];
             const list = shoppingLists.find(l => l.id === listId);
-            if (!list) return;
+            if (!list) { showToast('List not found', 'danger'); return; }
+            if (ings.length === 0) { showToast('No ingredients stored', 'danger'); return; }
 
             const newItems = ings
                 .filter(ing => ing.name && ing.name.trim())
@@ -4087,7 +4125,7 @@
                 }));
 
             if (newItems.length === 0) {
-                showToast('No ingredients found', 'warning');
+                showToast('No valid ingredients found', 'warning');
                 return;
             }
 
@@ -4097,7 +4135,7 @@
                 viewList(listId);
                 showToast(newItems.length + ' ingredients added!', '');
             } catch (e) {
-                showToast('Failed to add ingredients', 'danger');
+                showToast('Firestore error: ' + e.message, 'danger');
             }
         }
 
