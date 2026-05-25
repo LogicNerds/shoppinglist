@@ -2697,7 +2697,7 @@
                 currentUser = null;
                 isGuest = false;
                 ownerUid = null;
-                showLoginScreen();
+                if (!isGuestMode) showLoginScreen();
             }
         });
 
