@@ -4035,12 +4035,33 @@
             }
 
             try {
-                zxingReader = new ZXing.BrowserMultiFormatReader();
+                // Get our own camera stream so we can apply autofocus
+                scannerStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+
+                // Apply continuous autofocus
+                const track = scannerStream.getVideoTracks()[0];
+                if (track && track.getCapabilities) {
+                    const caps = track.getCapabilities();
+                    if (caps.focusMode && caps.focusMode.includes('continuous')) {
+                        await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+                    }
+                }
+
                 const videoEl = document.getElementById('scannerVideo');
+                videoEl.srcObject = scannerStream;
                 document.getElementById('scannerOverlay').classList.add('active');
                 scannerActive = true;
 
-                await zxingReader.decodeFromVideoDevice(undefined, videoEl, async (result, err) => {
+                zxingReader = new ZXing.BrowserMultiFormatReader();
+
+                // Use decodeFromStream to read from our controlled stream
+                zxingReader.decodeFromStream(scannerStream, videoEl, async (result, err) => {
                     if (result && scannerActive) {
                         scannerActive = false;
                         const code = result.getText();
@@ -4058,7 +4079,7 @@
                 }, 30000);
 
             } catch (err) {
-                alert('Scanner error: ' + err.message);
+                showToast('Camera error: ' + err.message, 'danger');
                 closeScanner();
             }
         }
@@ -4069,6 +4090,12 @@
                 zxingReader.reset();
                 zxingReader = null;
             }
+            if (scannerStream) {
+                scannerStream.getTracks().forEach(t => t.stop());
+                scannerStream = null;
+            }
+            const videoEl = document.getElementById('scannerVideo');
+            if (videoEl) videoEl.srcObject = null;
             document.getElementById('scannerOverlay').classList.remove('active');
         }
 
