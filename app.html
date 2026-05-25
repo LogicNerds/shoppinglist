@@ -2275,6 +2275,7 @@
 
     <!-- Firebase SDK -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -2393,6 +2394,7 @@
             loadShoppingLists();
             startFamilyListener();
             loadMealPlans();
+            trackLogin();
         }
 
         async function ensureFamilyCode() {
@@ -3324,6 +3326,20 @@
 
 
 
+        // Login tracking
+        async function trackLogin() {
+            try {
+                await addDoc(collection(db, 'loginEvents'), {
+                    userId: currentUser.uid,
+                    displayName: currentUser.displayName || '',
+                    email: currentUser.email || '',
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) {
+                // Silently fail — don't block app startup
+            }
+        }
+
         // ── SETTINGS & MILESTONES ─────────────────────────────────────
 
         function getMilestoneSettings() {
@@ -3782,67 +3798,30 @@
 
         // ── END MEAL PLANNER ───────────────────────────────────────────
 
-        // Barcode Scanner
+        // Barcode Scanner (ZXing)
         let scannerStream = null;
-        let scannerDetector = null;
+        let zxingReader = null;
         let scannerActive = false;
 
         const CATEGORY_MAP = {
-            'dairies': 'Dairy',
-            'dairy': 'Dairy',
-            'milk': 'Dairy',
-            'cheese': 'Dairy',
-            'yogurt': 'Dairy',
-            'produce': 'Produce',
-            'fruits': 'Produce',
-            'vegetables': 'Produce',
-            'fresh': 'Produce',
-            'meat': 'Meat & Seafood',
-            'seafood': 'Meat & Seafood',
-            'fish': 'Meat & Seafood',
-            'poultry': 'Meat & Seafood',
-            'frozen': 'Frozen',
-            'ice cream': 'Frozen',
-            'bread': 'Bakery',
-            'bakery': 'Bakery',
-            'pastry': 'Bakery',
-            'snack': 'Snacks & Candy',
-            'candy': 'Snacks & Candy',
-            'chips': 'Snacks & Candy',
-            'chocolate': 'Snacks & Candy',
-            'beverage': 'Beverages',
-            'drink': 'Beverages',
-            'juice': 'Beverages',
-            'soda': 'Beverages',
-            'coffee': 'Beverages',
-            'tea': 'Beverages',
-            'canned': 'Canned & Dry Goods',
-            'pasta': 'Canned & Dry Goods',
-            'rice': 'Canned & Dry Goods',
-            'cereal': 'Breakfast',
-            'breakfast': 'Breakfast',
-            'oat': 'Breakfast',
-            'condiment': 'Condiments & Sauces',
-            'sauce': 'Condiments & Sauces',
-            'dressing': 'Condiments & Sauces',
-            'oil': 'Condiments & Sauces',
-            'vinegar': 'Condiments & Sauces',
-            'personal': 'Personal Care',
-            'shampoo': 'Personal Care',
-            'soap': 'Personal Care',
-            'toothpaste': 'Personal Care',
-            'household': 'Household',
-            'cleaning': 'Household',
-            'paper': 'Household',
-            'baby': 'Baby',
-            'diaper': 'Baby',
-            'pet': 'Pet',
-            'dog': 'Pet',
-            'cat': 'Pet',
-            'deli': 'Deli',
-            'alcohol': 'Alcohol',
-            'beer': 'Alcohol',
-            'wine': 'Alcohol',
+            'dairies': 'Dairy', 'dairy': 'Dairy', 'milk': 'Dairy', 'cheese': 'Dairy',
+            'yogurt': 'Dairy', 'produce': 'Produce', 'fruits': 'Produce',
+            'vegetables': 'Produce', 'fresh': 'Produce', 'meat': 'Meat & Seafood',
+            'seafood': 'Meat & Seafood', 'fish': 'Meat & Seafood', 'poultry': 'Meat & Seafood',
+            'frozen': 'Frozen', 'ice cream': 'Frozen', 'bread': 'Bakery', 'bakery': 'Bakery',
+            'pastry': 'Bakery', 'snack': 'Snacks & Candy', 'candy': 'Snacks & Candy',
+            'chips': 'Snacks & Candy', 'chocolate': 'Snacks & Candy', 'beverage': 'Beverages',
+            'drink': 'Beverages', 'juice': 'Beverages', 'soda': 'Beverages',
+            'coffee': 'Beverages', 'tea': 'Beverages',
+            'canned': 'Canned & Dry Goods', 'pasta': 'Canned & Dry Goods',
+            'rice': 'Canned & Dry Goods', 'cereal': 'Breakfast', 'breakfast': 'Breakfast',
+            'oat': 'Breakfast', 'condiment': 'Condiments & Sauces', 'sauce': 'Condiments & Sauces',
+            'dressing': 'Condiments & Sauces', 'oil': 'Condiments & Sauces',
+            'vinegar': 'Condiments & Sauces', 'personal': 'Personal Care',
+            'shampoo': 'Personal Care', 'soap': 'Personal Care', 'toothpaste': 'Personal Care',
+            'household': 'Household', 'cleaning': 'Household', 'paper': 'Household',
+            'baby': 'Baby', 'diaper': 'Baby', 'pet': 'Pet', 'dog': 'Pet', 'cat': 'Pet',
+            'deli': 'Deli', 'alcohol': 'Alcohol', 'beer': 'Alcohol', 'wine': 'Alcohol',
             'spirits': 'Alcohol'
         };
 
@@ -3861,67 +3840,50 @@
         }
 
         async function startScanner() {
-            if (!('BarcodeDetector' in window)) {
-                showToast('Barcode scanning not supported on this browser', 'warning');
+            if (typeof ZXing === 'undefined') {
+                showToast('Scanner not available — try refreshing', 'warning');
                 return;
             }
 
             try {
-                scannerStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-                });
-
-                // Apply continuous autofocus via track constraints after stream starts
-                const track = scannerStream.getVideoTracks()[0];
-                if (track && track.getCapabilities) {
-                    const caps = track.getCapabilities();
-                    if (caps.focusMode && caps.focusMode.includes('continuous')) {
-                        await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
-                    }
-                }
-
-                const video = document.getElementById('scannerVideo');
-                video.srcObject = scannerStream;
+                zxingReader = new ZXing.BrowserMultiFormatReader();
+                const videoEl = document.getElementById('scannerVideo');
                 document.getElementById('scannerOverlay').classList.add('active');
                 scannerActive = true;
 
-                scannerDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
-                recentScans = [];
-                scanLoop();
+                // Get back camera
+                const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+                const backCamera = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[devices.length - 1];
+                const deviceId = backCamera ? backCamera.deviceId : undefined;
+
+                await zxingReader.decodeFromVideoDevice(deviceId, videoEl, async (result, err) => {
+                    if (result && scannerActive) {
+                        scannerActive = false;
+                        const code = result.getText();
+                        closeScanner();
+                        await lookupBarcode(code);
+                    }
+                });
+
+                // 30 second timeout
+                setTimeout(() => {
+                    if (scannerActive) {
+                        closeScanner();
+                        showToast("Couldn't read barcode — try better lighting", 'warning');
+                    }
+                }, 30000);
+
             } catch (err) {
                 showToast('Camera access denied', 'danger');
+                closeScanner();
             }
-        }
-
-        let recentScans = [];
-
-        async function scanLoop() {
-            if (!scannerActive) return;
-            const video = document.getElementById('scannerVideo');
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                try {
-                    const barcodes = await scannerDetector.detect(video);
-                    if (barcodes.length > 0) {
-                        const code = barcodes[0].rawValue;
-                        recentScans.push(code);
-                        if (recentScans.length > 5) recentScans.shift();
-                        const matches = recentScans.filter(c => c === code).length;
-                        if (matches >= 2) {
-                            closeScanner();
-                            await lookupBarcode(code);
-                            return;
-                        }
-                    }
-                } catch (e) {}
-            }
-            if (scannerActive) setTimeout(scanLoop, 500);
         }
 
         function closeScanner() {
             scannerActive = false;
-            if (scannerStream) {
-                scannerStream.getTracks().forEach(t => t.stop());
-                scannerStream = null;
+            if (zxingReader) {
+                zxingReader.reset();
+                zxingReader = null;
             }
             document.getElementById('scannerOverlay').classList.remove('active');
         }
@@ -3929,24 +3891,24 @@
         async function lookupBarcode(barcode) {
             showToast('Looking up product...', '');
             try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 10000);
                 const fields = 'product_name,product_name_en,categories,categories_tags,pnns_groups_1,pnns_groups_2';
-                const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}?fields=${fields}`);
+                const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}?fields=${fields}`, { signal: controller.signal });
+                clearTimeout(timeout);
                 const data = await res.json();
 
                 if (data.status === 1 && data.product) {
                     const product = data.product;
                     const name = product.product_name_en || product.product_name || '';
-
-                    // Try multiple category sources in order of reliability
                     const rawCats = [
                         product.pnns_groups_2,
                         product.pnns_groups_1,
                         ...(product.categories_tags || []),
                         product.categories
-                    ].filter(Boolean);
+                    ].filter(c => c && c !== 'unknown');
 
-                    // Fall back to matching against product name if API data is unhelpful
-                    const apiCategory = rawCats.filter(c => c && c !== 'unknown').length > 0 ? matchCategory(rawCats) : '';
+                    const apiCategory = rawCats.length > 0 ? matchCategory(rawCats) : '';
                     const category = apiCategory || matchCategory([name]);
 
                     if (name) {
@@ -3964,7 +3926,11 @@
                     showToast('Product not found — enter manually', 'warning');
                 }
             } catch (err) {
-                showToast('Lookup failed — enter manually', 'warning');
+                if (err.name === 'AbortError') {
+                    showToast('Lookup timed out — enter manually', 'warning');
+                } else {
+                    showToast('Lookup failed — enter manually', 'warning');
+                }
             }
         }
 
