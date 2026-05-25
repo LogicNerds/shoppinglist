@@ -752,7 +752,7 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         /* Footer */
@@ -1175,6 +1175,54 @@
             opacity: 0.7;
         }
 
+
+        /* Guest mode banner */
+        .guest-banner {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.85em;
+        }
+
+        .guest-banner-text {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .guest-banner-btn {
+            background: white;
+            color: var(--accent-primary);
+            border: none;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.85em;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .guest-done-btn {
+            width: 100%;
+            padding: 18px;
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .guest-done-btn:hover {
+            background: #e0e0e0;
+        }
 
         /* Toggle switch */
         .toggle-switch {
@@ -1792,6 +1840,7 @@
             </svg>
             Sign in with Google
         </button>
+        <a onclick="enterGuestMode()" style="display:block; margin-top:20px; color:rgba(255,255,255,0.6); font-size:0.9em; cursor:pointer; text-decoration:none;">Try as a guest</a>
     </div>
 
     <!-- Main App - Dashboard -->
@@ -1800,8 +1849,8 @@
             <div class="header-left" style="position: relative;">
                 <button class="theme-btn" onclick="toggleHamburgerMenu()" title="Menu" id="hamburgerBtn">☰</button>
                 <div class="hamburger-menu hidden" id="hamburgerMenu">
-                    <button class="hamburger-item" onclick="showMealPlanner(); toggleHamburgerMenu()">📅 Meal Planner</button>
-                    <button class="hamburger-item" onclick="showMyShoppers(); toggleHamburgerMenu()">👨‍👩‍👧‍👦 My Shoppers</button>
+                    <button class="hamburger-item" id="menuMealPlanner" onclick="showMealPlanner(); toggleHamburgerMenu()">📅 Meal Planner</button>
+                    <button class="hamburger-item" id="menuMyShoppers" onclick="showMyShoppers(); toggleHamburgerMenu()">👨‍👩‍👧‍👦 My Shoppers</button>
                     <button class="hamburger-item" onclick="showThemeModal(); toggleHamburgerMenu()">🎨 Change Theme</button>
                     <button class="hamburger-item" onclick="showSettings(); toggleHamburgerMenu()">⚙️ Settings</button>
                     <button class="hamburger-item" onclick="startTutorial(); toggleHamburgerMenu()">❓ Start Tutorial</button>
@@ -1814,6 +1863,11 @@
             </div>
         </div>
 
+        <!-- Guest banner -->
+        <div class="guest-banner hidden" id="guestBannerDash">
+            <span class="guest-banner-text">You're in guest mode — sign in to save your lists and access all features.</span>
+            <button class="guest-banner-btn" onclick="signInWithGoogle()">Sign In</button>
+        </div>
         <div class="main-content">
             <!-- Health Bar -->
             <div class="health-bar-section" id="healthBarSection">
@@ -1865,6 +1919,11 @@
             </div>
         </div>
 
+        <!-- Guest banner -->
+        <div class="guest-banner hidden" id="guestBannerShopping">
+            <span class="guest-banner-text">Sign in to save your trips and track spending over time.</span>
+            <button class="guest-banner-btn" onclick="signInWithGoogle()">Sign In</button>
+        </div>
         <div class="shopping-view">
             <div class="shopping-header">
                 <div class="form-group">
@@ -1913,6 +1972,9 @@
                 </button>
                 <button class="done-shopping-btn" onclick="showDoneConfirmModal()" id="doneBtn">
                     ✓ Done Shopping!
+                </button>
+                <button class="guest-done-btn" id="guestDoneBtn" style="display:none;" onclick="signInWithGoogle()">
+                    Sign in to begin saving trips
                 </button>
             </div>
         </div>
@@ -2306,6 +2368,7 @@
         let unsubscribeLists = null;
         let milestonesHit = { fifty: false, seventyfive: false, over: false };
         let isGuest = false;
+        let isGuestMode = false; // true when using app without signing in
         let ownerUid = null;
         let familyCode = null;
         let familyMembers = [];
@@ -2390,6 +2453,11 @@
                 }, 800);
             }
 
+            // Migrate guest data if they just signed in
+            if (isGuestMode) {
+                isGuestMode = false;
+                await migrateGuestData();
+            }
             showMainApp();
             loadShoppingLists();
             startFamilyListener();
@@ -2485,6 +2553,21 @@
                 document.getElementById('userAvatar').src = currentUser.photoURL;
             }
 
+            // Hide guest banners for logged-in users
+            document.getElementById('guestBannerDash').classList.add('hidden');
+            document.getElementById('guestBannerShopping').classList.add('hidden');
+
+            // Hide account-only hamburger items for guest mode
+            const menuMealPlanner = document.getElementById('menuMealPlanner');
+            const menuMyShoppers = document.getElementById('menuMyShoppers');
+            if (isGuestMode) {
+                if (menuMealPlanner) menuMealPlanner.style.display = 'none';
+                if (menuMyShoppers) menuMyShoppers.style.display = 'none';
+            } else {
+                if (menuMealPlanner) menuMealPlanner.style.display = '';
+                if (menuMyShoppers) menuMyShoppers.style.display = '';
+            }
+
             // Add guest badge if applicable
             if (isGuest) {
                 const headerTitle = document.querySelector('#mainApp .header-left span');
@@ -2502,12 +2585,22 @@
             document.getElementById('shoppingView').classList.remove('hidden');
             document.getElementById('mealPlannerView').classList.add('hidden');
             
-            // Hide Done Shopping for guests
             const doneBtn = document.getElementById('doneBtn');
-            if (isGuest) {
-                doneBtn.style.display = 'none';
+            const guestDoneBtn = document.getElementById('guestDoneBtn');
+
+            if (isGuestMode) {
+                // Show guest banner and replace Done Shopping with sign-in prompt
+                document.getElementById('guestBannerShopping').classList.remove('hidden');
+                if (doneBtn) doneBtn.style.display = 'none';
+                if (guestDoneBtn) guestDoneBtn.style.display = '';
             } else {
-                doneBtn.style.display = '';
+                document.getElementById('guestBannerShopping').classList.add('hidden');
+                if (isGuest) {
+                    if (doneBtn) doneBtn.style.display = 'none';
+                } else {
+                    if (doneBtn) doneBtn.style.display = '';
+                }
+                if (guestDoneBtn) guestDoneBtn.style.display = 'none';
             }
         }
 
@@ -2713,11 +2806,12 @@
 
         // Create new shopping list
         async function createNewList() {
-            // Check if user has 10+ active lists
-            const activeLists = shoppingLists.filter(list => !list.completed);
-            if (activeLists.length >= 10) {
-                alert('You have reached the maximum of 10 active lists. Please complete or delete some lists before creating new ones.');
-                return;
+            if (!isGuestMode) {
+                const activeLists = shoppingLists.filter(list => !list.completed);
+                if (activeLists.length >= 10) {
+                    alert('You have reached the maximum of 10 active lists. Please complete or delete some lists before creating new ones.');
+                    return;
+                }
             }
 
             currentListId = null;
@@ -2822,6 +2916,7 @@
 
             renderItems();
             updateTotal();
+            if (isGuestMode) saveGuestData();
             closeModal('itemModal');
             document.getElementById('categoryDropdown').classList.add('hidden');
         }
@@ -2994,6 +3089,13 @@
 
         // Keep list for later
         async function keepList() {
+            // Guest mode — save to localStorage only
+            if (isGuestMode) {
+                saveGuestData();
+                showToast('List saved locally — sign in to save permanently', '');
+                showGuestDashboard();
+                return;
+            }
             const storeName = document.getElementById('storeName').value.trim();
             const budgetInput = document.getElementById('budgetAmount').value;
             const budget = parseFloat(budgetInput.replace(/[^\d.]/g, '')) || 0;
@@ -3339,6 +3441,93 @@
                 // Silently fail — don't block app startup
             }
         }
+
+
+        // ── GUEST MODE ────────────────────────────────────────────────
+
+        async function enterGuestMode() {
+            isGuestMode = true;
+            currentUser = null;
+            showGuestDashboard();
+            checkFirstLogin();
+            // Track trial
+            try {
+                await addDoc(collection(db, 'trialEvents'), {
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                });
+            } catch (e) {}
+        }
+
+        function showGuestDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('shoppingView').classList.add('hidden');
+            document.getElementById('mealPlannerView').classList.add('hidden');
+
+            // Show guest banner
+            document.getElementById('guestBannerDash').classList.remove('hidden');
+
+            // Hide health bar — replace with sign-in prompt
+            const healthBar = document.getElementById('healthBarSection');
+            if (healthBar) {
+                healthBar.innerHTML = '<div style="text-align:center; padding:16px; color:#999; font-size:0.9em; font-style:italic;">Sign in to see your spending history and averages.</div>';
+            }
+
+            // Hide history, show empty state
+            document.getElementById('shoppingLists').innerHTML = '<div class="no-lists">Sign in to see your past shopping trips.</div>';
+
+            // Load any saved guest list from localStorage
+            loadGuestData();
+        }
+
+        function loadGuestData() {
+            const saved = localStorage.getItem('idkGuestList');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    currentItems = data.items || [];
+                    document.getElementById('storeName') && (document.getElementById('storeName').value = data.storeName || '');
+                    document.getElementById('budgetAmount') && (document.getElementById('budgetAmount').value = data.budget || '');
+                } catch (e) {}
+            }
+        }
+
+        function saveGuestData() {
+            if (!isGuestMode) return;
+            const data = {
+                items: currentItems,
+                storeName: document.getElementById('storeName') ? document.getElementById('storeName').value : '',
+                budget: document.getElementById('budgetAmount') ? document.getElementById('budgetAmount').value : ''
+            };
+            localStorage.setItem('idkGuestList', JSON.stringify(data));
+        }
+
+        async function migrateGuestData() {
+            const saved = localStorage.getItem('idkGuestList');
+            if (!saved || !currentUser) return;
+            try {
+                const data = JSON.parse(saved);
+                if (data.items && data.items.length > 0) {
+                    await addDoc(collection(db, 'groceryLists'), {
+                        userId: currentUser.uid,
+                        storeName: data.storeName || 'Guest List',
+                        budget: parseFloat(data.budget) || 0,
+                        items: data.items,
+                        completed: false,
+                        createdAt: serverTimestamp()
+                    });
+                    localStorage.removeItem('idkGuestList');
+                    showToast('Your guest list has been saved!', '');
+                }
+            } catch (e) {
+                console.error('Migration failed:', e);
+            }
+        }
+
+        window.enterGuestMode = enterGuestMode;
+
+        // ── END GUEST MODE ────────────────────────────────────────────
 
         // ── SETTINGS & MILESTONES ─────────────────────────────────────
 
@@ -3799,7 +3988,6 @@
         // ── END MEAL PLANNER ───────────────────────────────────────────
 
         // Barcode Scanner (ZXing)
-        let scannerStream = null;
         let zxingReader = null;
         let scannerActive = false;
 
