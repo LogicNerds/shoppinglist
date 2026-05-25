@@ -4070,45 +4070,71 @@
             document.getElementById('selectListModal').classList.add('active');
         }
 
-        function addRecipeIngredientsToList(listId) {
+        async function addRecipeIngredientsToList(listId) {
             const ings = window._recipeTempIngredients || [];
-            viewList(listId);
-            // viewList resets currentItems from Firestore data, so add after
-            ings.forEach(ing => {
-                if (!ing.name) return;
-                currentItems.push({
+            const list = shoppingLists.find(l => l.id === listId);
+            if (!list) return;
+
+            const newItems = ings
+                .filter(ing => ing.name && ing.name.trim())
+                .map(ing => ({
                     id: 'item_' + Date.now() + '_' + Math.random(),
-                    name: ing.name,
+                    name: ing.name.trim(),
                     qty: parseFloat(ing.qty) || 1,
                     price: 0,
                     checked: false,
                     category: matchCategory([ing.name])
-                });
-            });
-            renderItems();
-            updateTotal();
-            showToast('Ingredients added!', '');
+                }));
+
+            if (newItems.length === 0) {
+                showToast('No ingredients found', 'warning');
+                return;
+            }
+
+            const mergedItems = [...(list.items || []), ...newItems];
+            try {
+                await updateDoc(doc(db, 'groceryLists', listId), { items: mergedItems });
+                viewList(listId);
+                showToast(newItems.length + ' ingredients added!', '');
+            } catch (e) {
+                showToast('Failed to add ingredients', 'danger');
+            }
         }
 
-        function addRecipeIngredientsToNewList() {
-            createNewList();
-            setTimeout(() => {
-                const ings = window._recipeTempIngredients || [];
-                ings.forEach(ing => {
-                    if (!ing.name) return;
-                    currentItems.push({
-                        id: 'item_' + Date.now() + '_' + Math.random(),
-                        name: ing.name,
-                        qty: parseFloat(ing.qty) || 1,
-                        price: 0,
-                        checked: false,
-                        category: matchCategory([ing.name])
-                    });
+        async function addRecipeIngredientsToNewList() {
+            const ings = window._recipeTempIngredients || [];
+            const newItems = ings
+                .filter(ing => ing.name && ing.name.trim())
+                .map(ing => ({
+                    id: 'item_' + Date.now() + '_' + Math.random(),
+                    name: ing.name.trim(),
+                    qty: parseFloat(ing.qty) || 1,
+                    price: 0,
+                    checked: false,
+                    category: matchCategory([ing.name])
+                }));
+
+            if (newItems.length === 0) {
+                showToast('No ingredients found', 'warning');
+                return;
+            }
+
+            try {
+                const queryUid = isGuest ? ownerUid : currentUser.uid;
+                const recipeName = window._recipeTempName || 'Recipe List';
+                const docRef = await addDoc(collection(db, 'groceryLists'), {
+                    userId: queryUid,
+                    storeName: recipeName,
+                    budget: 0,
+                    items: newItems,
+                    completed: false,
+                    createdAt: serverTimestamp()
                 });
-                renderItems();
-                updateTotal();
-                showToast('Ingredients added!', '');
-            }, 200);
+                viewList(docRef.id);
+                showToast(newItems.length + ' ingredients added!', '');
+            } catch (e) {
+                showToast('Failed to create list', 'danger');
+            }
         }
 
         function addRecipeToMealPlan() {
@@ -4422,58 +4448,94 @@
             document.getElementById('selectListModal').classList.add('active');
         }
 
-        function addMealToExistingList(mealId, listId) {
+        async function addMealToExistingList(mealId, listId) {
             closeModal('selectListModal');
             const meal = mealPlans.find(m => m.id === mealId);
             if (!meal) return;
             const list = shoppingLists.find(l => l.id === listId);
             if (!list) return;
 
-            // Navigate to shopping view with that list loaded
-            viewList(listId);
+            const newItems = (meal.ingredients || [])
+                .filter(ing => {
+                    // Handle both object {name, qty} and string formats
+                    const name = typeof ing === 'string' ? ing : ing.name;
+                    return name && name.trim();
+                })
+                .map(ing => {
+                    const name = typeof ing === 'string' ? ing : ing.name;
+                    const qty = typeof ing === 'string' ? 1 : (parseFloat(ing.qty) || 1);
+                    return {
+                        id: 'item_' + Date.now() + '_' + Math.random(),
+                        name: name.trim(),
+                        qty: qty,
+                        price: 0,
+                        checked: false,
+                        category: matchCategory([name])
+                    };
+                });
 
-            // Add ingredients as items
-            (meal.ingredients || []).forEach(ing => {
-                if (!ing.name) return;
-                const newItem = {
-                    id: 'item_' + Date.now() + '_' + Math.random(),
-                    name: ing.name,
-                    qty: parseFloat(ing.qty) || 1,
-                    price: 0,
-                    checked: false,
-                    category: matchCategory([ing.name])
-                };
-                currentItems.push(newItem);
-            });
+            if (newItems.length === 0) {
+                showToast('No ingredients found on this meal', 'warning');
+                return;
+            }
 
-            renderItems();
-            updateTotal();
-            showToast('Ingredients added!', '');
+            // Merge with existing list items and save to Firestore
+            const existingItems = list.items || [];
+            const mergedItems = [...existingItems, ...newItems];
+
+            try {
+                await updateDoc(doc(db, 'groceryLists', listId), {
+                    items: mergedItems
+                });
+                viewList(listId);
+                showToast(newItems.length + ' ingredients added!', '');
+            } catch (e) {
+                showToast('Failed to add ingredients', 'danger');
+            }
         }
 
-        function addMealToNewList(mealId) {
+        async function addMealToNewList(mealId) {
             const meal = mealPlans.find(m => m.id === mealId);
             if (!meal) return;
 
-            createNewList();
-
-            setTimeout(() => {
-                (meal.ingredients || []).forEach(ing => {
-                    if (!ing.name) return;
-                    const newItem = {
+            const newItems = (meal.ingredients || [])
+                .filter(ing => {
+                    const name = typeof ing === 'string' ? ing : ing.name;
+                    return name && name.trim();
+                })
+                .map(ing => {
+                    const name = typeof ing === 'string' ? ing : ing.name;
+                    const qty = typeof ing === 'string' ? 1 : (parseFloat(ing.qty) || 1);
+                    return {
                         id: 'item_' + Date.now() + '_' + Math.random(),
-                        name: ing.name,
-                        qty: parseFloat(ing.qty) || 1,
+                        name: name.trim(),
+                        qty: qty,
                         price: 0,
                         checked: false,
-                        category: matchCategory([ing.name])
+                        category: matchCategory([name])
                     };
-                    currentItems.push(newItem);
                 });
-                renderItems();
-                updateTotal();
-                showToast('Ingredients added!', '');
-            }, 200);
+
+            if (newItems.length === 0) {
+                showToast('No ingredients found on this meal', 'warning');
+                return;
+            }
+
+            try {
+                const queryUid = isGuest ? ownerUid : currentUser.uid;
+                const docRef = await addDoc(collection(db, 'groceryLists'), {
+                    userId: queryUid,
+                    storeName: meal.mealName || 'New List',
+                    budget: 0,
+                    items: newItems,
+                    completed: false,
+                    createdAt: serverTimestamp()
+                });
+                viewList(docRef.id);
+                showToast(newItems.length + ' ingredients added!', '');
+            } catch (e) {
+                showToast('Failed to create list', 'danger');
+            }
         }
 
         let recipeDetailOrigin = 'browser'; // 'browser' or 'mealplanner'
