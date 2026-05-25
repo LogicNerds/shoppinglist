@@ -2742,6 +2742,24 @@
             if (isGuestMode) {
                 isGuestMode = false;
                 await migrateGuestData();
+                // Restore health bar HTML that was replaced in guest mode
+                const healthBar = document.getElementById('healthBarSection');
+                if (healthBar) {
+                    healthBar.innerHTML = `
+                        <div class="health-bar-header">
+                            <span class="health-bar-label">Avg Budget</span>
+                            <span class="health-bar-budget" id="healthBarBudget"></span>
+                        </div>
+                        <div class="health-bar-track" id="healthBarTrack">
+                            <div class="health-bar-fill" id="healthBarFill"></div>
+                        </div>
+                        <div class="health-bar-sub" id="healthBarSub">
+                            <span class="health-bar-spend-label" id="healthBarSpendLabel"></span>
+                            <span class="health-bar-diff-label" id="healthBarDiffLabel"></span>
+                        </div>
+                        <div class="health-bar-empty hidden" id="healthBarEmpty">Complete a shopping trip to see your averages.</div>
+                    `;
+                }
             }
             showMainApp();
             loadShoppingLists();
