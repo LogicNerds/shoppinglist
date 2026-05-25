@@ -4039,8 +4039,8 @@
                 document.getElementById('scannerOverlay').classList.add('active');
                 scannerActive = true;
 
-                await zxingReader.decodeFromConstraints(
-                    { video: { facingMode: 'environment' } },
+                await zxingReader.decodeFromVideoDevice(
+                    undefined,
                     videoEl,
                     async (result, err) => {
                         if (result && scannerActive) {
