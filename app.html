@@ -3829,7 +3829,12 @@
 
         function backFromRecipeDetail() {
             document.getElementById('recipeDetailView').classList.add('hidden');
-            document.getElementById('recipeBrowserView').classList.remove('hidden');
+            if (recipeDetailOrigin === 'mealplanner') {
+                recipeDetailOrigin = 'browser';
+                document.getElementById('mealPlannerView').classList.remove('hidden');
+            } else {
+                document.getElementById('recipeBrowserView').classList.remove('hidden');
+            }
         }
 
         function buildCategoryTabs() {
@@ -3964,6 +3969,9 @@
         }
 
         async function showRecipeDetail(recipeId) {
+            if (document.getElementById('recipeBrowserView') && !document.getElementById('recipeBrowserView').classList.contains('hidden')) {
+                recipeDetailOrigin = 'browser';
+            }
             document.getElementById('recipeBrowserView').classList.add('hidden');
             document.getElementById('recipeDetailView').classList.remove('hidden');
 
@@ -4029,6 +4037,7 @@
             // Store ingredients temporarily
             window._recipeTempIngredients = ings;
             window._recipeTempName = currentRecipeDetail.title;
+            window._recipeTempRecipeId = currentRecipeDetail.id;
             showRecipeSelectListModal();
         }
 
@@ -4110,6 +4119,7 @@
             }));
             window._recipeTempIngredients = ings;
             window._recipeTempName = currentRecipeDetail.title;
+            window._recipeTempRecipeId = currentRecipeDetail.id;
 
             // Use addToMeal modal with recipe ingredients
             addToMealItemId = '__recipe__';
@@ -4271,6 +4281,7 @@
                             </div>
                         </div>
                         ${ingList ? `<div class="meal-ingredients-list">${ingList}</div>` : ''}
+                        ${meal.recipeId ? `<a onclick="viewRecipeFromMeal(${meal.recipeId})" style="display:block; margin-top:8px; font-size:0.82em; color:var(--accent-primary); cursor:pointer; text-decoration:none;">View Recipe</a>` : ''}
                         <button class="meal-add-to-list-btn" onclick="showSelectListModal('${meal.id}')">+ Add to Shopping List</button>
                     </div>
                 `;
@@ -4465,6 +4476,17 @@
             }, 200);
         }
 
+        let recipeDetailOrigin = 'browser'; // 'browser' or 'mealplanner'
+
+        function viewRecipeFromMeal(recipeId) {
+            recipeDetailOrigin = 'mealplanner';
+            document.getElementById('mealPlannerView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.remove('hidden');
+            showRecipeDetail(recipeId);
+        }
+        window.viewRecipeFromMeal = viewRecipeFromMeal;
+
         window.showMealPlanner = showMealPlanner;
         window.backFromMealPlanner = backFromMealPlanner;
         window.prevMonth = prevMonth;
@@ -4557,13 +4579,17 @@
                     const updated = [...(existing.ingredients || []), ...ingredients];
                     await updateDoc(doc(db, 'mealPlans', existing.id), { ingredients: updated });
                 } else {
-                    await addDoc(collection(db, 'mealPlans'), {
+                    const mealDoc = {
                         userId: queryUid,
                         date: addToMealSelectedDate,
                         mealName: mealName,
                         ingredients: ingredients,
                         createdAt: serverTimestamp()
-                    });
+                    };
+                    if (addToMealItemId === '__recipe__' && window._recipeTempRecipeId) {
+                        mealDoc.recipeId = window._recipeTempRecipeId;
+                    }
+                    await addDoc(collection(db, 'mealPlans'), mealDoc);
                 }
                 closeModal('addToMealModal');
                 showToast('Added to ' + mealName + '!', '');
