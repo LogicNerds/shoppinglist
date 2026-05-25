@@ -4063,7 +4063,7 @@
                 }, 30000);
 
             } catch (err) {
-                showToast('Camera access denied', 'danger');
+                showToast('Scanner error: ' + err.message, 'danger');
                 closeScanner();
             }
         }
