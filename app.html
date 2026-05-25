@@ -2639,6 +2639,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('guest') === 'true') {
+            setTimeout(() => enterGuestMode(), 100);
+        }
+
         // Global variables
         let currentUser = null;
         let shoppingLists = [];
