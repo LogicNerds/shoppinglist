@@ -3445,11 +3445,18 @@
 
         // ── GUEST MODE ────────────────────────────────────────────────
 
-        function enterGuestMode() {
+        async function enterGuestMode() {
             isGuestMode = true;
             currentUser = null;
             showGuestDashboard();
             checkFirstLogin();
+            // Track trial
+            try {
+                await addDoc(collection(db, 'trialEvents'), {
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                });
+            } catch (e) {}
         }
 
         function showGuestDashboard() {
