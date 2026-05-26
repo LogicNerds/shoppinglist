@@ -2743,13 +2743,6 @@
             }
 
             // Check URL for invite code
-            // GA4 event tracking helper
-        function trackEvent(eventName, params = {}) {
-            if (typeof gtag !== 'undefined') {
-                gtag('event', eventName, params);
-            }
-        }
-
         const urlParams = new URLSearchParams(window.location.search);
             const urlCode = urlParams.get('code');
             if (urlCode && !isGuest) {
