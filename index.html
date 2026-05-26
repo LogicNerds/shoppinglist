@@ -29,13 +29,12 @@
     --text-dimmer: rgba(255,255,255,0.25);
   }
 
-  html { scroll-behavior: smooth; }
+  html, body { scroll-behavior: smooth; overflow-x: hidden; }
 
   body {
     font-family: 'DM Sans', 'Segoe UI', sans-serif;
     background: var(--navy-dark);
     color: white;
-    overflow-x: hidden;
   }
 
 
@@ -123,7 +122,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 24px 80px;
+    padding: 40px 24px 120px;
     position: relative;
     background: linear-gradient(160deg, #0f2330 0%, #1a3a4a 50%, #0a1f2b 100%);
     text-align: center;
@@ -211,12 +210,25 @@
     bottom: 28px;
     left: 50%;
     transform: translateX(-50%);
-    color: var(--text-dimmer);
-    font-size: 0.75rem;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     animation: bounce 2s infinite;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1.5px;
+    height: 32px;
+    background: linear-gradient(180deg, rgba(13,148,136,0.8) 0%, transparent 100%);
+    margin-top: 4px;
   }
 
   @keyframes bounce {
