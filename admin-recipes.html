@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDK Recipe Admin</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── CHANGE PIN HERE ── */
+  /* PIN is set in the JavaScript below — search for ADMIN_PIN */
+
+  :root { --teal: #0d9488; --teal-dark: #0f766e; --navy: #1a3a4a; --navy-dark: #0f2330; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(160deg, #0f2330 0%, #1a3a4a 50%, #0a1f2b 100%);
+    min-height: 100vh;
+    color: white;
+  }
+
+  .pin-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 40px 24px;
+  }
+
+  .logo { font-size: 3em; margin-bottom: 16px; display: block; }
+  .pin-screen h1 { font-size: 1.5em; margin-bottom: 8px; }
+  .pin-screen p { color: rgba(255,255,255,0.5); font-size: 0.9em; margin-bottom: 32px; }
+
+  .pin-input {
+    width: 160px; padding: 16px; font-size: 2em; font-weight: 700;
+    text-align: center; letter-spacing: 0.2em;
+    background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 12px; color: white; margin-bottom: 16px; display: block;
+    margin-left: auto; margin-right: auto;
+  }
+  .pin-input:focus { outline: none; border-color: var(--teal); }
+  .pin-error { color: #ef4444; font-size: 0.85em; margin-top: 8px; min-height: 20px; }
+  .pin-btn {
+    padding: 14px 40px; background: var(--teal); color: white; border: none;
+    border-radius: 10px; font-size: 1em; font-weight: 600; cursor: pointer; margin-top: 8px;
+  }
+
+  /* Admin page */
+  .admin-page { display: none; background: #f4f6f9; min-height: 100vh; color: #333; }
+  .admin-page.visible { display: block; }
+
+  .admin-header {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0f2330 100%);
+    color: white; padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .admin-header h1 { font-size: 1.3em; font-weight: 700; }
+
+  .admin-body { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;
+  }
+  .stat-card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center;
+  }
+  .stat-label { font-size: 0.78em; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .stat-value { font-size: 2.2em; font-weight: 700; color: #1a3a4a; }
+
+  .section-title { font-size: 1em; font-weight: 700; color: #333; margin-bottom: 12px; }
+
+  .fetch-card {
+    background: white; border-radius: 12px; padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px;
+  }
+
+  .category-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;
+  }
+
+  .category-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px;
+    font-size: 0.9em;
+  }
+
+  .category-count { font-size: 0.78em; color: #999; }
+
+  .fetch-btn {
+    padding: 12px 24px; background: var(--teal); color: white; border: none;
+    border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer;
+    transition: background 0.2s; white-space: nowrap;
+  }
+  .fetch-btn:hover { background: var(--teal-dark); }
+  .fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .fetch-all-btn {
+    width: 100%; padding: 14px; background: #1a3a4a; color: white; border: none;
+    border-radius: 10px; font-size: 1em; font-weight: 600; cursor: pointer;
+    transition: background 0.2s; margin-top: 8px;
+  }
+  .fetch-all-btn:hover { background: #0f2330; }
+  .fetch-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .log-box {
+    background: #1a1a1a; color: #00ff88; font-family: monospace; font-size: 0.82em;
+    padding: 16px; border-radius: 8px; max-height: 300px; overflow-y: auto;
+    margin-top: 20px; line-height: 1.6;
+  }
+
+  .log-line { margin-bottom: 2px; }
+  .log-line.error { color: #ff6b6b; }
+  .log-line.success { color: #00ff88; }
+  .log-line.info { color: #88ccff; }
+
+  .points-warning {
+    background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;
+    padding: 12px 16px; font-size: 0.85em; color: #856404; margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Pin Screen -->
+<div class="pin-screen" id="pinScreen">
+  <span class="logo">💸</span>
+  <h1>Recipe Admin</h1>
+  <p>Enter your PIN to manage the recipe cache</p>
+  <input type="password" class="pin-input" id="pinInput" maxlength="6" placeholder="••••"
+    onkeydown="if(event.key==='Enter') checkPin()">
+  <div class="pin-error" id="pinError"></div>
+  <button class="pin-btn" onclick="checkPin()">Enter</button>
+</div>
+
+<!-- Admin Page -->
+<div class="admin-page" id="adminPage">
+  <div class="admin-header">
+    <h1>💸 Recipe Cache Manager</h1>
+    <span id="pointsUsed" style="font-size:0.85em; color:rgba(255,255,255,0.6);">Points used today: —</span>
+  </div>
+
+  <div class="admin-body">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Cached</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">With Full Detail</div>
+        <div class="stat-value" id="statDetail">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Categories</div>
+        <div class="stat-value" id="statCats">—</div>
+      </div>
+    </div>
+
+    <div class="points-warning">
+      ⚠️ Free tier: 50 points/day. Each fetch batch uses 1 point and returns 10 recipes. Fetch detail for a recipe costs 1 point. Plan accordingly.
+    </div>
+
+    <div class="fetch-card">
+      <div class="section-title">Fetch by Category</div>
+      <div class="category-grid" id="categoryGrid">
+        <!-- populated by JS -->
+      </div>
+      <button class="fetch-all-btn" id="fetchAllBtn" onclick="fetchAllCategories()">
+        Fetch 1 Batch from Each Category (uses ~10 points)
+      </button>
+    </div>
+
+    <div class="fetch-card">
+      <div class="section-title">Activity Log</div>
+      <div class="log-box" id="logBox">
+        <div class="log-line info">Ready. Open this page daily to build your recipe cache.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  import { getFirestore, collection, getDocs, addDoc, query, where, getCountFromServer } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+  // ── CHANGE PIN HERE ──────────────────────────────────────────
+  const ADMIN_PIN = '6977';
+  // ────────────────────────────────────────────────────────────
+
+  const SPOONACULAR_KEY = '7f63bb14706747698400d5450e7b8928';
+
+  const CATEGORIES = [
+    { label: 'General', query: null, maxReadyTime: null, diet: null },
+    { label: 'Under 30 Min', query: null, maxReadyTime: 30, diet: null },
+    { label: 'Slow Cook', query: 'slow cooker', maxReadyTime: null, diet: null },
+    { label: 'Healthy', query: 'healthy', maxReadyTime: null, diet: null },
+    { label: 'Kid-friendly', query: 'kid friendly', maxReadyTime: null, diet: null },
+    { label: 'Meal Prep', query: 'meal prep', maxReadyTime: null, diet: null },
+    { label: 'Budget', query: 'budget friendly', maxReadyTime: null, diet: null },
+    { label: 'Chicken', query: 'chicken', maxReadyTime: null, diet: null },
+    { label: 'Beef', query: 'beef', maxReadyTime: null, diet: null },
+    { label: 'Vegetarian', query: null, maxReadyTime: null, diet: 'vegetarian' },
+  ];
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDtBO48uBogqcdv69VO9IH7MIG8Kb1YG10",
+    authDomain: "idk-money-tracker.firebaseapp.com",
+    projectId: "idk-money-tracker",
+    storageBucket: "idk-money-tracker.firebasestorage.app",
+    messagingSenderId: "1033439716188",
+    appId: "1:1033439716188:web:ebf8c149f68d3d568f9799"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let categoryCounts = {};
+  let pointsUsedToday = 0;
+
+  window.checkPin = function() {
+    const val = document.getElementById('pinInput').value;
+    if (val === ADMIN_PIN) {
+      document.getElementById('pinScreen').style.display = 'none';
+      document.getElementById('adminPage').classList.add('visible');
+      loadStats();
+    } else {
+      document.getElementById('pinError').textContent = 'Incorrect PIN.';
+      document.getElementById('pinInput').value = '';
+    }
+  };
+
+  async function loadStats() {
+    log('Loading stats...', 'info');
+    try {
+      const snap = await getDocs(collection(db, 'recipesCache'));
+      const total = snap.size;
+      let withDetail = 0;
+      const catSet = new Set();
+
+      categoryCounts = {};
+      snap.forEach(d => {
+        const data = d.data();
+        if (data.hasDetail) withDetail++;
+        if (data.category) {
+          catSet.add(data.category);
+          categoryCounts[data.category] = (categoryCounts[data.category] || 0) + 1;
+        }
+      });
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statDetail').textContent = withDetail;
+      document.getElementById('statCats').textContent = catSet.size;
+
+      buildCategoryGrid();
+      log(`Loaded: ${total} recipes, ${withDetail} with full detail`, 'success');
+    } catch (e) {
+      log('Failed to load stats: ' + e.message, 'error');
+    }
+  }
+
+  function buildCategoryGrid() {
+    const grid = document.getElementById('categoryGrid');
+    grid.innerHTML = CATEGORIES.map((cat, idx) => `
+      <div class="category-row">
+        <span>${cat.label} <span class="category-count">(${categoryCounts[cat.label] || 0})</span></span>
+        <button class="fetch-btn" onclick="fetchCategory(${idx})">Fetch 10</button>
+      </div>
+    `).join('');
+  }
+
+  window.fetchCategory = async function(idx) {
+    const cat = CATEGORIES[idx];
+    log(`Fetching 10 ${cat.label} recipes...`, 'info');
+
+    // Get existing IDs to avoid duplicates
+    const existing = await getDocs(query(collection(db, 'recipesCache'), where('category', '==', cat.label)));
+    const existingIds = new Set(existing.docs.map(d => d.data().spoonacularId));
+    const offset = existingIds.size;
+
+    try {
+      let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=10&addRecipeInformation=false&offset=${offset}`;
+      if (cat.query) url += `&query=${encodeURIComponent(cat.query)}`;
+      if (cat.maxReadyTime) url += `&maxReadyTime=${cat.maxReadyTime}`;
+      if (cat.diet) url += `&diet=${cat.diet}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.code === 402) {
+        log('Daily limit hit (402). Try again tomorrow.', 'error');
+        return;
+      }
+
+      const recipes = data.results || [];
+      const newRecipes = recipes.filter(r => !existingIds.has(r.id));
+
+      let added = 0;
+      for (const r of newRecipes) {
+        await addDoc(collection(db, 'recipesCache'), {
+          spoonacularId: r.id,
+          title: r.title,
+          image: r.image || '',
+          category: cat.label,
+          hasDetail: false,
+          addedAt: new Date().toISOString()
+        });
+        added++;
+      }
+
+      pointsUsedToday++;
+      document.getElementById('pointsUsed').textContent = `Points used today: ~${pointsUsedToday}`;
+      log(`✓ Added ${added} new ${cat.label} recipes (${recipes.length - newRecipes.length} dupes skipped)`, 'success');
+      await loadStats();
+    } catch (e) {
+      log('Fetch failed: ' + e.message, 'error');
+    }
+  };
+
+  window.fetchAllCategories = async function() {
+    const btn = document.getElementById('fetchAllBtn');
+    btn.disabled = true;
+    btn.textContent = 'Fetching...';
+    log('Starting fetch for all categories...', 'info');
+
+    for (let i = 0; i < CATEGORIES.length; i++) {
+      await window.fetchCategory(i);
+      await new Promise(r => setTimeout(r, 500)); // small delay between calls
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Fetch 1 Batch from Each Category (uses ~10 points)';
+    log('All done!', 'success');
+  };
+
+  function log(msg, type = '') {
+    const box = document.getElementById('logBox');
+    const line = document.createElement('div');
+    line.className = 'log-line ' + type;
+    line.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
+    box.appendChild(line);
+    box.scrollTop = box.scrollHeight;
+  }
+</script>
+</body>
+</html>
