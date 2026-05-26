@@ -2621,7 +2621,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp, getDoc, setDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -4104,89 +4104,68 @@
             `).join('');
         }
 
+        // Page size for Firestore browse
+        const RECIPE_PAGE_SIZE = 20;
+        let lastRecipeDoc = null;
+
         async function loadRecipesForCategory(idx) {
             currentRecipeCategory = idx;
             currentRecipeOffset = 0;
             currentRecipeResults = [];
+            lastRecipeDoc = null;
 
-            // Update active tab
             document.querySelectorAll('.recipe-tab').forEach((t, i) => {
                 t.classList.toggle('active', i === idx);
             });
 
-            // Clear filters
             document.getElementById('recipeSearchInput').value = '';
             document.getElementById('recipeIngredientFilter').value = '';
             document.getElementById('recipeFeaturedLabel').textContent = idx === 0 ? "This Week's Picks" : RECIPE_CATEGORIES[idx].label;
             document.getElementById('recipeLoadMoreBtn').classList.add('hidden');
 
             const cat = RECIPE_CATEGORIES[idx];
-            const isFeatured = idx === 0;
+            showRecipeLoading();
 
-            if (isFeatured) {
-                // Featured: 5 rotating weekly, cached
-                const cacheKey = getCacheKey('cat', idx);
-                const cached = localStorage.getItem(cacheKey);
-                if (cached) {
-                    currentRecipeResults = JSON.parse(cached);
-                    renderRecipeCards(currentRecipeResults);
-                    return;
-                }
-                showRecipeLoading();
-                try {
-                    const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=5&addRecipeInformation=false&offset=${(getWeekNumber() * 5) % 50}`;
-                    const res = await fetch(url);
-                    const data = await res.json();
-                    currentRecipeResults = data.results || [];
-                    localStorage.setItem(cacheKey, JSON.stringify(currentRecipeResults));
-                    renderRecipeCards(currentRecipeResults);
-                } catch (e) {
-                    document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Failed to load recipes.</div>';
-                }
-            } else {
-                // Category: 20 results with load more
-                showRecipeLoading();
-                try {
-                    let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=0`;
-                    if (cat.query) url += `&query=${encodeURIComponent(cat.query)}`;
-                    if (cat.maxReadyTime) url += `&maxReadyTime=${cat.maxReadyTime}`;
-                    if (cat.diet) url += `&diet=${cat.diet}`;
-                    if (cat.type) url += `&type=${cat.type}`;
-                    const res = await fetch(url);
-                    const data = await res.json();
-                    currentRecipeResults = data.results || [];
-                    currentRecipeOffset = currentRecipeResults.length;
-                    renderRecipeCards(currentRecipeResults);
-                    if (data.totalResults > currentRecipeResults.length) {
+            try {
+                let q;
+                if (idx === 0) {
+                    // Featured: all recipes, pick 5 based on week rotation
+                    const snap = await getDocs(collection(db, 'recipesCache'));
+                    const all = snap.docs.map(d => ({ id: d.data().spoonacularId, ...d.data() }));
+                    const weekSeed = getWeekNumber() * 5;
+                    currentRecipeResults = all.slice(weekSeed % Math.max(all.length - 5, 1), (weekSeed % Math.max(all.length - 5, 1)) + 5);
+                    if (currentRecipeResults.length === 0) currentRecipeResults = all.slice(0, 5);
+                } else {
+                    q = query(collection(db, 'recipesCache'), where('category', '==', cat.label));
+                    const snap = await getDocs(q);
+                    currentRecipeResults = snap.docs.map(d => ({ id: d.data().spoonacularId, ...d.data() }));
+                    if (currentRecipeResults.length > RECIPE_PAGE_SIZE) {
+                        lastRecipeDoc = snap.docs[RECIPE_PAGE_SIZE - 1];
                         document.getElementById('recipeLoadMoreBtn').classList.remove('hidden');
+                        currentRecipeResults = currentRecipeResults.slice(0, RECIPE_PAGE_SIZE);
                     }
-                } catch (e) {
-                    document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Failed to load recipes.</div>';
                 }
+                renderRecipeCards(currentRecipeResults);
+            } catch (e) {
+                document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Failed to load recipes.</div>';
             }
         }
 
         async function loadMoreRecipes() {
+            if (currentRecipeCategory === 0) return;
             const cat = RECIPE_CATEGORIES[currentRecipeCategory];
-            if (!cat || currentRecipeCategory === 0) return;
-
             document.getElementById('recipeLoadMoreBtn').textContent = 'Loading...';
 
             try {
-                let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&number=20&addRecipeInformation=false&offset=${currentRecipeOffset}`;
-                if (cat.query) url += `&query=${encodeURIComponent(cat.query)}`;
-                if (cat.maxReadyTime) url += `&maxReadyTime=${cat.maxReadyTime}`;
-                if (cat.diet) url += `&diet=${cat.diet}`;
-                if (cat.type) url += `&type=${cat.type}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                const more = data.results || [];
-                currentRecipeResults = [...currentRecipeResults, ...more];
-                currentRecipeOffset += more.length;
+                const q = query(collection(db, 'recipesCache'), where('category', '==', cat.label));
+                const snap = await getDocs(q);
+                const all = snap.docs.map(d => ({ id: d.data().spoonacularId, ...d.data() }));
+                const nextBatch = all.slice(currentRecipeResults.length, currentRecipeResults.length + RECIPE_PAGE_SIZE);
+                currentRecipeResults = [...currentRecipeResults, ...nextBatch];
                 renderRecipeCards(currentRecipeResults);
 
                 const btn = document.getElementById('recipeLoadMoreBtn');
-                if (data.totalResults > currentRecipeOffset) {
+                if (currentRecipeResults.length < all.length) {
                     btn.textContent = 'Load More';
                     btn.classList.remove('hidden');
                 } else {
@@ -4199,30 +4178,21 @@
         }
 
         async function searchRecipes() {
-            const query = document.getElementById('recipeSearchInput').value.trim();
-            if (!query) {
+            const searchVal = document.getElementById('recipeSearchInput').value.trim().toLowerCase();
+            if (!searchVal) {
                 loadRecipesForCategory(currentRecipeCategory);
                 return;
             }
 
-            document.getElementById('recipeFeaturedLabel').textContent = 'Results for "' + query + '"';
+            document.getElementById('recipeFeaturedLabel').textContent = 'Results for "' + searchVal + '"';
             document.getElementById('recipeLoadMoreBtn').classList.add('hidden');
             showRecipeLoading();
 
-            const cacheKey = getCacheKey('search', query.toLowerCase());
-            const cached = localStorage.getItem(cacheKey);
-            if (cached) {
-                renderRecipeCards(JSON.parse(cached));
-                return;
-            }
-
             try {
-                const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&query=${encodeURIComponent(query)}&number=10&addRecipeInformation=false`;
-                const res = await fetch(url);
-                const data = await res.json();
-                const recipes = data.results || [];
-                localStorage.setItem(cacheKey, JSON.stringify(recipes));
-                renderRecipeCards(recipes);
+                const snap = await getDocs(collection(db, 'recipesCache'));
+                const all = snap.docs.map(d => ({ id: d.data().spoonacularId, ...d.data() }));
+                const results = all.filter(r => r.title && r.title.toLowerCase().includes(searchVal));
+                renderRecipeCards(results);
             } catch (e) {
                 document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Search failed. Try again.</div>';
             }
@@ -4238,24 +4208,26 @@
                     return;
                 }
 
-                const ingredients = val.split(',').map(s => s.trim()).filter(Boolean).join(',');
-                document.getElementById('recipeFeaturedLabel').textContent = 'Filtered by: ' + ingredients;
+                const ingredients = val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                document.getElementById('recipeFeaturedLabel').textContent = 'Filtered by: ' + ingredients.join(', ');
+                document.getElementById('recipeLoadMoreBtn').classList.add('hidden');
                 showRecipeLoading();
 
-                const cacheKey = getCacheKey('ing', ingredients.toLowerCase());
-                const cached = localStorage.getItem(cacheKey);
-                if (cached) {
-                    renderRecipeCards(JSON.parse(cached));
-                    return;
-                }
-
+                // Filter needs full detail — fetch from Firestore detail cache or Spoonacular
+                // For now, search cached titles and show what matches, note limitation
                 try {
-                    const url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOONACULAR_KEY}&includeIngredients=${encodeURIComponent(ingredients)}&number=10&addRecipeInformation=false&ranking=2`;
-                    const res = await fetch(url);
-                    const data = await res.json();
-                    const recipes = data.results || [];
-                    localStorage.setItem(cacheKey, JSON.stringify(recipes));
-                    renderRecipeCards(recipes);
+                    const snap = await getDocs(collection(db, 'recipesCache'));
+                    const all = snap.docs.map(d => ({ id: d.data().spoonacularId, ...d.data() }));
+                    // Filter recipes that have detail cached with matching ingredients
+                    const withDetail = all.filter(r => {
+                        if (!r.ingredients) return false;
+                        return ingredients.every(ing => r.ingredients.some(i => i.toLowerCase().includes(ing)));
+                    });
+                    if (withDetail.length > 0) {
+                        renderRecipeCards(withDetail);
+                    } else {
+                        document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">No cached recipes match those ingredients yet. Browse more recipes to build up the database.</div>';
+                    }
                 } catch (e) {
                     document.getElementById('recipeGrid').innerHTML = '<div class="recipe-loading">Filter failed. Try again.</div>';
                 }
@@ -4297,21 +4269,48 @@
             document.getElementById('recipeDetailInstructions').innerHTML = '';
             document.getElementById('recipeDetailImg').src = '';
 
-            const cacheKey = 'recipe_detail_' + recipeId;
-            const cached = localStorage.getItem(cacheKey);
             let recipe;
 
-            if (cached) {
-                recipe = JSON.parse(cached);
+            // Check localStorage first
+            const cacheKey = 'recipe_detail_' + recipeId;
+            const localCached = localStorage.getItem(cacheKey);
+            if (localCached) {
+                recipe = JSON.parse(localCached);
             } else {
+                // Check Firestore cache
                 try {
-                    const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${SPOONACULAR_KEY}`;
-                    const res = await fetch(url);
-                    recipe = await res.json();
-                    localStorage.setItem(cacheKey, JSON.stringify(recipe));
-                } catch (e) {
-                    document.getElementById('recipeDetailTitle').textContent = 'Failed to load recipe.';
-                    return;
+                    const firestoreSnap = await getDocs(query(collection(db, 'recipesCache'), where('spoonacularId', '==', recipeId)));
+                    const firestoreDoc = firestoreSnap.docs.find(d => d.data().hasDetail);
+                    if (firestoreDoc) {
+                        recipe = firestoreDoc.data().detail;
+                        localStorage.setItem(cacheKey, JSON.stringify(recipe));
+                    }
+                } catch (e) {}
+
+                // Fall back to Spoonacular
+                if (!recipe) {
+                    try {
+                        const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${SPOONACULAR_KEY}`;
+                        const res = await fetch(url);
+                        recipe = await res.json();
+                        localStorage.setItem(cacheKey, JSON.stringify(recipe));
+
+                        // Save full detail to Firestore permanently
+                        try {
+                            const snap = await getDocs(query(collection(db, 'recipesCache'), where('spoonacularId', '==', recipeId)));
+                            if (!snap.empty) {
+                                const ingredientNames = (recipe.extendedIngredients || []).map(i => i.name);
+                                await updateDoc(doc(db, 'recipesCache', snap.docs[0].id), {
+                                    hasDetail: true,
+                                    detail: recipe,
+                                    ingredients: ingredientNames
+                                });
+                            }
+                        } catch (e) {}
+                    } catch (e) {
+                        document.getElementById('recipeDetailTitle').textContent = 'Failed to load recipe.';
+                        return;
+                    }
                 }
             }
 
