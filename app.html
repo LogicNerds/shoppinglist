@@ -2646,6 +2646,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // GA4 event tracking helper
+        function trackEvent(eventName, params = {}) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, params);
+            }
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('guest') === 'true') {
             setTimeout(() => enterGuestMode(), 100);
@@ -2736,7 +2743,14 @@
             }
 
             // Check URL for invite code
-            const urlParams = new URLSearchParams(window.location.search);
+            // GA4 event tracking helper
+        function trackEvent(eventName, params = {}) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, params);
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
             const urlCode = urlParams.get('code');
             if (urlCode && !isGuest) {
                 setTimeout(() => {
@@ -2767,6 +2781,10 @@
                         <div class="health-bar-empty hidden" id="healthBarEmpty">Complete a shopping trip to see your averages.</div>
                     `;
                 }
+            }
+            // Track sign_up on first ever login
+            if (!localStorage.getItem('idkTutorialSeen')) {
+                trackEvent('sign_up', { method: 'google' });
             }
             showMainApp();
             loadShoppingLists();
@@ -3452,6 +3470,7 @@
                 } else {
                     // Create new list - set createdAt only on creation
                     await addDoc(collection(db, 'groceryLists'), { ...listData, createdAt: serverTimestamp() });
+                    trackEvent('list_created');
                     alert('List saved! 📝');
                 }
 
@@ -3513,6 +3532,7 @@
                     await addDoc(collection(db, 'groceryLists'), listData);
                 }
 
+                trackEvent('trip_completed', { total_spent: totalSpent, budget: budget });
                 alert('Shopping trip completed! 🎉');
                 showMainApp();
             } catch (error) {
@@ -3794,6 +3814,7 @@
         async function enterGuestMode() {
             isGuestMode = true;
             currentUser = null;
+            trackEvent('guest_start');
             showGuestDashboard();
             checkFirstLogin();
             // Track trial
@@ -4035,6 +4056,7 @@
                 try {
                     await updateDoc(doc(db, 'groceryLists', checklistTargetListId), { items: mergedItems });
                     viewList(checklistTargetListId);
+                    trackEvent('ingredients_added', { count: newItems.length, source: 'existing_list' });
                     showToast(newItems.length + ' ingredients added!', '');
                 } catch (e) {
                     showToast('Failed to add ingredients', 'danger');
@@ -4322,6 +4344,7 @@
             }
 
             currentRecipeDetail = recipe;
+            trackEvent('recipe_viewed', { recipe_id: recipeId, recipe_name: recipe.title || '' });
 
             document.getElementById('recipeDetailImg').src = recipe.image || '';
             document.getElementById('recipeDetailTitle').textContent = recipe.title || '';
@@ -4671,6 +4694,7 @@
                     await updateDoc(doc(db, 'mealPlans', editingMealId), mealData);
                 } else {
                     await addDoc(collection(db, 'mealPlans'), mealData);
+                trackEvent('meal_planned');
                 }
                 closeModal('mealModal');
             } catch (e) {
