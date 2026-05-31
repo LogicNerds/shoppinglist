@@ -3488,7 +3488,7 @@
             const storeName = document.getElementById('storeName').value.trim();
             const hasItems = currentItems.length > 0;
             
-            document.getElementById('keepListBtn').disabled = !storeName || !hasItems;
+            document.getElementById('keepListBtn').disabled = !storeName;
             document.getElementById('doneBtn').disabled = !storeName || !hasItems;
 
             // Budget milestone modals
