@@ -1212,6 +1212,38 @@
             padding: 4px 0 0 34px;
         }
 
+        /* Floating Add Item button */
+        .floating-add-btn {
+            position: fixed;
+            bottom: 52px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 28px;
+            padding: 14px 32px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(13,148,136,0.4);
+            z-index: 998;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .floating-add-btn:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13,148,136,0.5);
+        }
+
+        .floating-add-btn.visible {
+            display: flex;
+        }
+
         /* Add to Meal button */
         .add-to-meal-btn {
             background: none;
@@ -2198,7 +2230,7 @@
                 <!-- Items will be added here -->
             </div>
 
-            <button class="add-item-btn" onclick="showAddItemModal()">+ Add Item</button>
+            <!-- Add Item button moved to floating button -->
 
 
             <!-- Ad Unit -->
@@ -2628,6 +2660,11 @@
         </div>
     </div>
 
+    <!-- Floating Add Item Button -->
+    <button class="floating-add-btn" id="floatingAddBtn" onclick="showAddItemModal()">
+        + Add Item
+    </button>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
@@ -2892,6 +2929,7 @@
             }
 
             // Hide guest banners for logged-in users
+            document.getElementById('floatingAddBtn').classList.remove('visible');
             document.getElementById('guestBannerDash').classList.add('hidden');
             document.getElementById('guestBannerShopping').classList.add('hidden');
 
@@ -2927,6 +2965,7 @@
             document.getElementById('mealPlannerView').classList.add('hidden');
             document.getElementById('recipeBrowserView').classList.add('hidden');
             document.getElementById('recipeDetailView').classList.add('hidden');
+            document.getElementById('floatingAddBtn').classList.add('visible');
             
             const doneBtn = document.getElementById('doneBtn');
             const guestDoneBtn = document.getElementById('guestDoneBtn');
@@ -4111,6 +4150,7 @@
             document.getElementById('shoppingView').classList.add('hidden');
             document.getElementById('mealPlannerView').classList.add('hidden');
             document.getElementById('recipeDetailView').classList.add('hidden');
+            document.getElementById('floatingAddBtn').classList.remove('visible');
             document.getElementById('recipeBrowserView').classList.remove('hidden');
 
             buildCategoryTabs();
@@ -4126,7 +4166,8 @@
             document.getElementById('recipeDetailView').classList.add('hidden');
             if (recipeDetailOrigin === 'mealplanner') {
                 recipeDetailOrigin = 'browser';
-                document.getElementById('mealPlannerView').classList.remove('hidden');
+                document.getElementById('floatingAddBtn').classList.remove('visible');
+            document.getElementById('mealPlannerView').classList.remove('hidden');
             } else {
                 document.getElementById('recipeBrowserView').classList.remove('hidden');
             }
