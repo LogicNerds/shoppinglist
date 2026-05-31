@@ -583,14 +583,14 @@
         /* Keep List & Done Shopping Buttons */
         .action-buttons-shopping {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 10px;
             margin-top: 0;
+            padding: 10px 0 10px 0;
         }
 
         .keep-list-btn {
-            width: 100%;
-            padding: 15px;
+            padding: 14px 24px;
             background: white;
             border: 2px solid var(--accent-primary);
             color: var(--accent-primary);
@@ -612,13 +612,12 @@
 
         /* Done Shopping Button */
         .done-shopping-btn {
-            width: 100%;
-            padding: 18px;
+            padding: 14px 24px;
             background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -1215,14 +1214,15 @@
         /* Floating Add Item button */
         .floating-add-btn {
             position: fixed;
-            bottom: 52px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 62px;
+            right: 20px;
+            left: auto;
+            transform: none;
             background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             color: white;
             border: none;
             border-radius: 28px;
-            padding: 14px 32px;
+            padding: 14px 24px;
             font-size: 1em;
             font-weight: 700;
             cursor: pointer;
@@ -1236,7 +1236,7 @@
         }
 
         .floating-add-btn:hover {
-            transform: translateX(-50%) translateY(-2px);
+            transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(13,148,136,0.5);
         }
 
@@ -2247,10 +2247,10 @@
             </div>
             <div class="action-buttons-shopping">
                 <button class="keep-list-btn" onclick="keepList()" id="keepListBtn">
-                    💾 Keep List for Later
+                    Save
                 </button>
                 <button class="done-shopping-btn" onclick="showDoneConfirmModal()" id="doneBtn">
-                    ✓ Done Shopping!
+                    Finish
                 </button>
                 <button class="guest-done-btn" id="guestDoneBtn" style="display:none;" onclick="signInWithGoogle()">
                     Sign in to begin saving trips
