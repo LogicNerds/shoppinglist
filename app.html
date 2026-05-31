@@ -3447,8 +3447,14 @@
             const itemsEl = document.getElementById('catItems-' + key);
             const toggleEl = document.getElementById('toggle-' + key);
             if (!itemsEl) return;
+            const isCollapsed = itemsEl.classList.contains('collapsed');
             itemsEl.classList.toggle('collapsed');
             if (toggleEl) toggleEl.classList.toggle('collapsed');
+            if (isCollapsed) {
+                itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
+            } else {
+                itemsEl.style.maxHeight = '0px';
+            }
         }
 
         function toggleItemCheck(itemId) {
