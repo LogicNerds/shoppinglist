@@ -3320,82 +3320,126 @@
             if (currentItems.length === 0) {
                 const emptyMsg = document.createElement('div');
                 emptyMsg.className = 'no-lists';
-                emptyMsg.textContent = 'No items yet. Add your first item!';
+                emptyMsg.textContent = 'No items yet. Tap + Add Item to start!';
                 container.appendChild(emptyMsg);
                 return;
             }
 
-            // Group items by category
-            const groups = {};
-            currentItems.forEach(item => {
-                const cat = item.category || 'Uncategorized';
-                if (!groups[cat]) groups[cat] = [];
-                groups[cat].push(item);
-            });
+            const unchecked = currentItems.filter(i => !i.checked);
+            const checked = currentItems.filter(i => i.checked);
 
-            // Sort: named categories first, Uncategorized last
-            const sortedCats = Object.keys(groups).sort((a, b) => {
-                if (a === 'Uncategorized') return 1;
-                if (b === 'Uncategorized') return -1;
-                return a.localeCompare(b);
-            });
+            if (unchecked.length === 0 && checked.length > 0) {
+                const doneMsg = document.createElement('div');
+                doneMsg.className = 'no-lists';
+                doneMsg.style.cssText = 'color: var(--accent-primary); font-style: normal; font-weight: 600;';
+                doneMsg.textContent = '✓ All items checked!';
+                container.appendChild(doneMsg);
+            }
 
-            sortedCats.forEach(cat => {
-                const groupEl = document.createElement('div');
-                groupEl.className = 'category-group';
-                groupEl.dataset.category = cat;
+            // Group unchecked items by category
+            if (unchecked.length > 0) {
+                const groups = {};
+                unchecked.forEach(item => {
+                    const cat = item.category || 'Uncategorized';
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(item);
+                });
 
-                const headerEl = document.createElement('div');
-                headerEl.className = 'category-header';
-                headerEl.onclick = () => toggleCategory(cat);
-                headerEl.innerHTML = `
-                    <div class="category-header-left">
-                        <span>${cat}</span>
-                        <span style="color: #999; font-weight: 400; text-transform: none; letter-spacing: 0;">(${groups[cat].length})</span>
-                    </div>
-                    <span class="category-toggle" id="toggle-${cat.replace(/\s/g,'-')}">▼</span>
-                `;
-                groupEl.appendChild(headerEl);
+                const sortedCats = Object.keys(groups).sort((a, b) => {
+                    if (a === 'Uncategorized') return 1;
+                    if (b === 'Uncategorized') return -1;
+                    return a.localeCompare(b);
+                });
 
-                const itemsEl = document.createElement('div');
-                itemsEl.className = 'category-items';
-                itemsEl.id = 'catItems-' + cat.replace(/\s/g, '-');
-                itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
+                sortedCats.forEach(cat => {
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'category-group';
+                    groupEl.dataset.category = cat;
 
-                groups[cat].forEach(item => {
-                    const itemEl = document.createElement('div');
-                    itemEl.className = 'shopping-item' + (item.checked ? ' checked' : '');
-                    itemEl.dataset.itemId = item.id;
-                    itemEl.onclick = () => editItem(item.id);
-
-                    const total = item.qty * item.price;
-
-                    itemEl.innerHTML = `
-                        <div class="item-row-main">
-                            <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
-                            <div class="item-details">
-                                <div class="item-name-text">${item.name}</div>
-                                <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
-                            </div>
-                            <div class="item-total">$${total.toFixed(2)}</div>
-                            <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
+                    const headerEl = document.createElement('div');
+                    headerEl.className = 'category-header';
+                    headerEl.onclick = () => toggleCategory(cat);
+                    headerEl.innerHTML = `
+                        <div class="category-header-left">
+                            <span>${cat}</span>
+                            <span style="color: #999; font-weight: 400; text-transform: none; letter-spacing: 0;">(${groups[cat].length})</span>
                         </div>
-                        <div class="item-row-sub">
-                            <a onclick="event.stopPropagation(); showAddToMealModal('${item.id}')" style="color:var(--accent-primary); cursor:pointer; text-decoration:none; font-size:0.78em;">add to meal plan</a>
-                        </div>
+                        <span class="category-toggle" id="toggle-${cat.replace(/\s/g,'-')}">▼</span>
                     `;
+                    groupEl.appendChild(headerEl);
 
-                    itemsEl.appendChild(itemEl);
+                    const itemsEl = document.createElement('div');
+                    itemsEl.className = 'category-items';
+                    itemsEl.id = 'catItems-' + cat.replace(/\s/g, '-');
+
+                    groups[cat].forEach(item => {
+                        itemsEl.appendChild(buildItemEl(item));
+                    });
+
+                    groupEl.appendChild(itemsEl);
+                    container.appendChild(groupEl);
+
+                    requestAnimationFrame(() => {
+                        itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
+                    });
+                });
+            }
+
+            // Completed section — collapsed by default
+            if (checked.length > 0) {
+                const completedGroup = document.createElement('div');
+                completedGroup.className = 'category-group';
+
+                const completedHeader = document.createElement('div');
+                completedHeader.className = 'category-header';
+                completedHeader.onclick = () => toggleCategory('__completed__');
+                completedHeader.innerHTML = `
+                    <div class="category-header-left">
+                        <span style="color:#999;">Completed</span>
+                        <span style="color: #999; font-weight: 400; text-transform: none; letter-spacing: 0;">(${checked.length})</span>
+                    </div>
+                    <span class="category-toggle collapsed" id="toggle-__completed__">▼</span>
+                `;
+                completedGroup.appendChild(completedHeader);
+
+                const completedItemsEl = document.createElement('div');
+                completedItemsEl.className = 'category-items collapsed';
+                completedItemsEl.id = 'catItems-__completed__';
+                completedItemsEl.style.maxHeight = '0px';
+
+                checked.forEach(item => {
+                    completedItemsEl.appendChild(buildItemEl(item));
                 });
 
-                groupEl.appendChild(itemsEl);
-                container.appendChild(groupEl);
+                completedGroup.appendChild(completedItemsEl);
+                container.appendChild(completedGroup);
+            }
+        }
 
-                // Set height after render
-                requestAnimationFrame(() => {
-                    itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
-                });
-            });
+        function buildItemEl(item) {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'shopping-item' + (item.checked ? ' checked' : '');
+            itemEl.dataset.itemId = item.id;
+            itemEl.onclick = () => editItem(item.id);
+
+            const total = item.qty * item.price;
+
+            itemEl.innerHTML = `
+                <div class="item-row-main">
+                    <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
+                    <div class="item-details">
+                        <div class="item-name-text">${item.name}</div>
+                        <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                    </div>
+                    <div class="item-total">$${total.toFixed(2)}</div>
+                    <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
+                </div>
+                <div class="item-row-sub">
+                    <a onclick="event.stopPropagation(); showAddToMealModal('${item.id}')" style="color:var(--accent-primary); cursor:pointer; text-decoration:none; font-size:0.78em;">add to meal plan</a>
+                </div>
+            `;
+
+            return itemEl;
         }
 
         function toggleCategory(cat) {
