@@ -3537,11 +3537,6 @@
                 return;
             }
 
-            if (currentItems.length === 0) {
-                alert('Please add at least one item!');
-                return;
-            }
-
             try {
                 const listData = {
                     userId: isGuest ? ownerUid : currentUser.uid,
@@ -3584,11 +3579,6 @@
             
             if (!storeName) {
                 alert('Please enter a store name!');
-                return;
-            }
-
-            if (currentItems.length === 0) {
-                alert('Please add at least one item!');
                 return;
             }
 
