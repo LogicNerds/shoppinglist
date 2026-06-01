@@ -1211,6 +1211,58 @@
             padding: 4px 0 0 34px;
         }
 
+
+        /* Incognito List */
+        .incognito-toggle {
+            background: none;
+            border: none;
+            font-size: 1.4em;
+            cursor: pointer;
+            padding: 4px 8px;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .incognito-toggle.active {
+            opacity: 1;
+        }
+
+        .shopping-view.incognito {
+            background: #2a2a2a;
+        }
+
+        .shopping-view.incognito .budget-display {
+            background: #3a3a3a;
+        }
+
+        .shopping-view.incognito .shopping-item {
+            background: #333;
+            border-color: #444;
+        }
+
+        .shopping-view.incognito .item-name-text {
+            color: #ddd;
+        }
+
+        .shopping-view.incognito .item-info {
+            color: #999;
+        }
+
+        .shopping-view.incognito .category-header {
+            background: #3a3a3a;
+        }
+
+        .shopping-view.incognito .form-group input {
+            background: #333;
+            border-color: #444;
+            color: #ddd;
+        }
+
+        .incognito-badge {
+            font-size: 0.85em;
+            margin-left: 4px;
+        }
+
         /* Floating Add Item button */
         .floating-add-btn {
             position: fixed;
@@ -2194,6 +2246,7 @@
                 <span style="font-size: 1.2em; font-weight: 600;">Shopping</span>
             </div>
             <div class="header-right">
+                <button class="incognito-toggle" id="incognitoToggle" onclick="toggleIncognito()" title="Incognito List">👻</button>
                 <button class="theme-btn" onclick="showThemeModal()" title="Change Theme">🎨</button>
             </div>
         </div>
@@ -2716,6 +2769,7 @@
         let editingItemId = null;
         let unsubscribeLists = null;
         let milestonesHit = { fifty: false, seventyfive: false, over: false };
+        let isIncognito = false;
         let isGuest = false;
         let isGuestMode = false; // true when using app without signing in
         let ownerUid = null;
@@ -2966,6 +3020,11 @@
             document.getElementById('recipeBrowserView').classList.add('hidden');
             document.getElementById('recipeDetailView').classList.add('hidden');
             document.getElementById('floatingAddBtn').classList.add('visible');
+            // Apply incognito state
+            const incogBtn = document.getElementById('incognitoToggle');
+            const shoppingViewEl = document.querySelector('.shopping-view');
+            if (incogBtn) incogBtn.classList.toggle('active', isIncognito);
+            if (shoppingViewEl) shoppingViewEl.classList.toggle('incognito', isIncognito);
             
             const doneBtn = document.getElementById('doneBtn');
             const guestDoneBtn = document.getElementById('guestDoneBtn');
@@ -3003,6 +3062,9 @@
                     const data = doc.data();
                     const listDate = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now());
                     
+                    // Hide incognito lists from guests
+                    if (isGuest && data.incognito) return;
+
                     // Include completed lists from last 90 days or active lists
                     if (!data.completed || listDate >= ninetyDaysAgo) {
                         shoppingLists.push({ id: doc.id, ...data });
@@ -3026,6 +3088,7 @@
             shoppingLists.forEach(list => {
                 if (!list.completed) return;
                 if (!list.date) return;
+                if (list.incognito) return;
                 totalSpend += list.totalSpent || 0;
                 totalBudget += list.budget || 0;
                 completedCount++;
@@ -3110,7 +3173,7 @@
                     card.innerHTML = `
                         <div class="list-header">
                             <div class="list-info">
-                                <h4>📝 ${list.storeName || 'Shopping List'}</h4>
+                                <h4>${list.incognito ? '👻' : '📝'} ${list.storeName || 'Shopping List'}</h4>
                                 <div class="list-date">${dateStr}</div>
                             </div>
                             <button class="delete-list-btn" onclick="deleteList('${list.id}', event)">🗑️</button>
@@ -3161,7 +3224,7 @@
                 card.innerHTML = `
                     <div class="list-header">
                         <div class="list-info">
-                            <h4>💸 ${list.storeName || 'Shopping Trip'}</h4>
+                            <h4>${list.incognito ? '👻' : '💸'} ${list.storeName || 'Shopping Trip'}</h4>
                             <div class="list-date">${dateStr}</div>
                         </div>
                         <button class="delete-list-btn" onclick="deleteList('${list.id}', event)">🗑️</button>
@@ -3198,6 +3261,7 @@
 
             currentListId = null;
             currentItems = [];
+            isIncognito = false;
             milestonesHit = { fifty: false, seventyfive: false, over: false };
             document.getElementById('storeName').value = '';
             document.getElementById('budgetAmount').value = '';
@@ -3213,6 +3277,7 @@
 
             currentListId = listId;
             currentItems = list.items || [];
+            isIncognito = list.incognito || false;
             milestonesHit = { fifty: false, seventyfive: false, over: false };
             document.getElementById('storeName').value = list.storeName || '';
             document.getElementById('budgetAmount').value = list.budget || '';
@@ -3256,6 +3321,18 @@
             document.getElementById('itemModal').classList.add('active');
         }
 
+        // Incognito toggle
+        function toggleIncognito() {
+            isIncognito = !isIncognito;
+            const btn = document.getElementById('incognitoToggle');
+            const view = document.querySelector('.shopping-view');
+            btn.classList.toggle('active', isIncognito);
+            view.classList.toggle('incognito', isIncognito);
+            if (currentListId) autoSaveList();
+        }
+
+        window.toggleIncognito = toggleIncognito;
+
         // Auto-save helper
         async function autoSaveList() {
             if (isGuestMode) { saveGuestData(); return; }
@@ -3278,7 +3355,8 @@
                     checked: item.checked,
                     category: item.category || ''
                 })),
-                completed: false
+                completed: false,
+                incognito: isIncognito
             };
 
             try {
