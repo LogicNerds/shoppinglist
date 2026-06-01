@@ -3997,7 +3997,7 @@
             {
                 targetId: 'shoppingLists',
                 title: 'Your Shopping Lists',
-                text: 'Your active and completed lists from the last 90 days appear here. Tap any list to open it. Once you tap Done Shopping and confirm, the list is locked and cannot be edited.',
+                text: 'Your active and completed lists from the last 90 days appear here. Tap any list to open it. Once you tap Finish and confirm, the list is locked and cannot be edited.',
                 view: 'dashboard'
             },
             {
@@ -4005,6 +4005,26 @@
                 title: 'My Shoppers',
                 text: 'Tap the menu icon to access My Shoppers. Share your invite code or QR with family or roommates so they can add items and check things off your list together.',
                 view: 'dashboard'
+            },
+            {
+                targetId: 'hamburgerBtn',
+                title: 'My Staples',
+                text: 'Tap the menu and select My Staples to manage your go-to items. Staples save your most common items and their prices so you can add them to any list in seconds.',
+                view: 'dashboard'
+            },
+            {
+                targetId: 'staplesList',
+                title: 'Your Staples List',
+                text: 'Your staples live here, sorted alphabetically. Add items you buy every week — eggs, milk, whatever your regulars are. When you shop, tap "Add from My Staples" in the item modal to drop them in.',
+                view: 'staples',
+                onEnter: () => { showStaples(); }
+            },
+            {
+                targetId: 'hamburgerBtn',
+                title: 'Incognito Lists',
+                text: 'Back in the shopping view, tap the 👻 button to make a list incognito — it stays off the spending history and is invisible to your shoppers. Great for gifts or personal purchases.',
+                view: 'dashboard',
+                onEnter: () => { backFromStaples(); }
             },
             {
                 targetId: 'hamburgerBtn',
@@ -4017,9 +4037,7 @@
                 title: 'Search & Filter',
                 text: 'Search by recipe name, or type ingredients separated by commas to find recipes that use what you have.',
                 view: 'recipes',
-                onEnter: () => {
-                    showRecipeBrowser();
-                }
+                onEnter: () => { showRecipeBrowser(); }
             },
             {
                 targetId: 'recipeGrid',
@@ -4034,7 +4052,6 @@
                 view: 'mealPlanner',
                 onEnter: () => {
                     showMealPlanner();
-                    // Select today so the calendar renders properly
                     const today = new Date();
                     const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
                     setTimeout(() => selectCalendarDay(dateStr), 300);
@@ -4126,16 +4143,18 @@
         function endTutorial() {
             localStorage.setItem('idkTutorialSeen', 'true');
             document.getElementById('tutorialOverlay').classList.remove('active');
-            // Return to dashboard if we're in meal planner or recipe browser
             const mealView = document.getElementById('mealPlannerView');
             const recipeView = document.getElementById('recipeBrowserView');
             const recipeDetailView = document.getElementById('recipeDetailView');
+            const staplesView = document.getElementById('staplesView');
             if (!mealView.classList.contains('hidden')) {
                 backFromMealPlanner();
             } else if (!recipeView.classList.contains('hidden')) {
                 backFromRecipes();
             } else if (!recipeDetailView.classList.contains('hidden')) {
                 backFromRecipeDetail();
+            } else if (!staplesView.classList.contains('hidden')) {
+                backFromStaples();
             }
         }
 
