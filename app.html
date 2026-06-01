@@ -2207,7 +2207,7 @@
             <div class="shopping-header">
                 <div class="form-group">
                     <label>Store Name</label>
-                    <input type="text" id="storeName" placeholder="e.g., Walmart, Kroger, Target" oninput="updateTotal()">
+                    <input type="text" id="storeName" placeholder="e.g., Walmart, Kroger, Target" oninput="updateTotal(); if(currentListId) autoSaveList();">
                 </div>
                 <div class="form-group">
                     <label>Budget</label>
@@ -3223,11 +3223,6 @@
         }
 
         function backToDashboard() {
-            if (currentItems.length > 0 && !currentListId) {
-                if (!confirm('You have unsaved items. Are you sure you want to go back?')) {
-                    return;
-                }
-            }
             currentListId = null;
             currentItems = [];
             showMainApp();
@@ -3261,7 +3256,48 @@
             document.getElementById('itemModal').classList.add('active');
         }
 
-        function saveItem() {
+        // Auto-save helper
+        async function autoSaveList() {
+            if (isGuestMode) { saveGuestData(); return; }
+            if (!currentUser) return;
+
+            const storeName = document.getElementById('storeName').value.trim() ||
+                'new-list-' + new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+            const budget = parseFloat(document.getElementById('budgetAmount').value.replace(/[^\d.]/g, '')) || 0;
+            const userId = isGuest ? ownerUid : currentUser.uid;
+
+            const listData = {
+                userId,
+                storeName,
+                budget,
+                items: currentItems.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    qty: item.qty,
+                    price: item.price,
+                    checked: item.checked,
+                    category: item.category || ''
+                })),
+                completed: false
+            };
+
+            try {
+                if (currentListId) {
+                    await updateDoc(doc(db, 'groceryLists', currentListId), listData);
+                } else {
+                    const docRef = await addDoc(collection(db, 'groceryLists'), {
+                        ...listData,
+                        createdAt: serverTimestamp()
+                    });
+                    currentListId = docRef.id;
+                    trackEvent('list_created');
+                }
+            } catch (e) {
+                console.error('Auto-save failed:', e);
+            }
+        }
+
+        async function saveItem() {
             const name = document.getElementById('itemName').value.trim();
             const qty = parseFloat(document.getElementById('itemQty').value) || 1;
             const priceInput = document.getElementById('itemPrice').value;
@@ -3298,18 +3334,19 @@
 
             renderItems();
             updateTotal();
-            if (isGuestMode) saveGuestData();
+            await autoSaveList();
             closeModal('itemModal');
             document.getElementById('categoryDropdown').classList.add('hidden');
         }
 
-        function deleteItem(itemId, event) {
+        async function deleteItem(itemId, event) {
             event.stopPropagation();
             
             if (confirm('Delete this item?')) {
                 currentItems = currentItems.filter(i => i.id !== itemId);
                 renderItems();
                 updateTotal();
+                await autoSaveList();
             }
         }
 
@@ -3457,11 +3494,12 @@
             }
         }
 
-        function toggleItemCheck(itemId) {
+        async function toggleItemCheck(itemId) {
             const item = currentItems.find(i => i.id === itemId);
             if (item) {
                 item.checked = !item.checked;
                 renderItems();
+                await autoSaveList();
             }
         }
 
@@ -3519,56 +3557,17 @@
             }, 3000);
         }
 
-        // Keep list for later
+        // Keep list for later — list is auto-saved, just navigate back
         async function keepList() {
-            // Guest mode — save to localStorage only
             if (isGuestMode) {
                 saveGuestData();
                 showToast('List saved locally — sign in to save permanently', '');
                 showGuestDashboard();
                 return;
             }
-            const storeName = document.getElementById('storeName').value.trim();
-            const budgetInput = document.getElementById('budgetAmount').value;
-            const budget = parseFloat(budgetInput.replace(/[^\d.]/g, '')) || 0;
-            
-            if (!storeName) {
-                alert('Please enter a store name!');
-                return;
-            }
-
-            try {
-                const listData = {
-                    userId: isGuest ? ownerUid : currentUser.uid,
-                    storeName: storeName,
-                    budget: budget,
-                    items: currentItems.map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        qty: item.qty,
-                        price: item.price,
-                        checked: item.checked,
-                        category: item.category || ''
-                    })),
-                    completed: false
-                };
-
-                if (currentListId) {
-                    // Update existing list - don't overwrite createdAt
-                    await updateDoc(doc(db, 'groceryLists', currentListId), listData);
-                    alert('List updated! 📝');
-                } else {
-                    // Create new list - set createdAt only on creation
-                    await addDoc(collection(db, 'groceryLists'), { ...listData, createdAt: serverTimestamp() });
-                    trackEvent('list_created');
-                    alert('List saved! 📝');
-                }
-
-                showMainApp();
-            } catch (error) {
-                console.error('Error saving list:', error);
-                alert('Failed to save list. Please try again.');
-            }
+            // Final save with latest store name and budget
+            await autoSaveList();
+            showMainApp();
         }
 
         // Complete shopping
