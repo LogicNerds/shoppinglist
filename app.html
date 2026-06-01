@@ -1212,6 +1212,114 @@
         }
 
 
+
+        /* Staples */
+        .staples-view {
+            padding: 20px 20px 80px 20px;
+        }
+
+        .staple-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .staple-item-info {
+            flex: 1;
+        }
+
+        .staple-item-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .staple-item-price {
+            font-size: 0.82em;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .staple-remove-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 4px 8px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .staple-remove-btn:hover { opacity: 1; }
+
+        .staple-checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .staple-checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .staple-checkbox-row input[type="checkbox"]:disabled {
+            cursor: not-allowed;
+        }
+
+        .staple-checkbox-label {
+            font-size: 0.85em;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .staple-checkbox-label.greyed {
+            color: #bbb;
+            cursor: not-allowed;
+        }
+
+        .add-staples-link {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.82em;
+            color: var(--accent-primary);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .staples-checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .staples-checklist-item:last-child { border-bottom: none; }
+
+        .staples-checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .staples-checklist-info { flex: 1; }
+        .staples-checklist-name { font-weight: 600; color: #333; font-size: 0.9em; }
+        .staples-checklist-price { font-size: 0.78em; color: #999; }
+
         /* Incognito List */
         .incognito-toggle {
             background: none;
@@ -2182,6 +2290,7 @@
                     <button class="hamburger-item" id="menuMealPlanner" onclick="showMealPlanner(); toggleHamburgerMenu()">📅 Meal Planner</button>
                     <button class="hamburger-item" id="menuRecipes" onclick="showRecipeBrowser(); toggleHamburgerMenu()">🍽️ Recipes <span style="font-size:0.75em; color:#999; font-weight:400;">(beta)</span></button>
                     <button class="hamburger-item" id="menuMyShoppers" onclick="showMyShoppers(); toggleHamburgerMenu()">👨‍👩‍👧‍👦 My Shoppers</button>
+                    <button class="hamburger-item" id="menuStaples" onclick="showStaples(); toggleHamburgerMenu()">⭐ My Staples</button>
                     <button class="hamburger-item" onclick="showThemeModal(); toggleHamburgerMenu()">🎨 Change Theme</button>
                     <button class="hamburger-item" onclick="showSettings(); toggleHamburgerMenu()">⚙️ Settings</button>
                     <button class="hamburger-item" onclick="startTutorial(); toggleHamburgerMenu()">❓ Start Tutorial</button>
@@ -2420,6 +2529,11 @@
                     <div class="typeahead-dropdown hidden" id="categoryDropdown"></div>
                 </div>
             </div>
+            <div class="staple-checkbox-row">
+                <input type="checkbox" id="itemIsStaple">
+                <label class="staple-checkbox-label" id="itemIsStapleLabel" for="itemIsStaple">Mark as staple</label>
+            </div>
+            <a class="add-staples-link" onclick="showAddStaplesToList()">+ Add from My Staples</a>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal('itemModal')">Cancel</button>
                 <button class="modal-btn primary" onclick="saveItem()" id="saveItemBtn">Add</button>
@@ -2439,6 +2553,54 @@
             <p>Users are solely responsible for the accuracy of data entered and any financial decisions made. This app does not connect to bank accounts or store any sensitive financial information.</p>
             <p>Logic Nerds and its affiliates assume no liability for any losses, damages, or consequences arising from the use or misuse of this application. This software is provided "as is" without warranty of any kind, express or implied.</p>
             <p>By using this application, you acknowledge and accept full responsibility for your budgeting decisions and data accuracy.</p>
+        </div>
+    </div>
+
+    <!-- My Staples View -->
+    <div id="staplesView" class="container hidden">
+        <div class="header">
+            <div class="header-left">
+                <button class="back-btn" onclick="backFromStaples()">←</button>
+                <span style="font-size: 1.2em; font-weight: 600;">My Staples</span>
+            </div>
+        </div>
+        <div class="staples-view">
+            <button class="create-list-btn" onclick="showAddStapleModal()" style="margin-bottom:20px;">+ Add Staple</button>
+            <div id="staplesList"></div>
+        </div>
+    </div>
+
+    <!-- Add Staple Modal -->
+    <div id="addStapleModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Staple</h2>
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="stapleNameInput" placeholder="e.g., Eggs, Milk, Bread">
+            </div>
+            <div class="form-group">
+                <label>Usual Price <span style="color:#999; font-weight:400;">(optional)</span></label>
+                <div class="price-input-container">
+                    <input type="text" id="staplePriceInput" placeholder="0.00" oninput="formatCurrency(this)">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('addStapleModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="saveNewStaple()" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white;">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Staples to List Modal -->
+    <div id="addStaplesToListModal" class="modal" style="z-index: 1100;">
+        <div class="modal-content">
+            <h2>Add Staples</h2>
+            <p style="color:#666; font-size:0.85em; margin-bottom:12px;">Check the ones you need.</p>
+            <div style="max-height:320px; overflow-y:auto; margin-bottom:16px;" id="staplesChecklistContainer"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModal('addStaplesToListModal')">Cancel</button>
+                <button class="modal-btn primary" onclick="confirmAddStaples()" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%); color: white;">Add Selected</button>
+            </div>
         </div>
     </div>
 
@@ -2887,6 +3049,7 @@
             loadShoppingLists();
             startFamilyListener();
             loadMealPlans();
+            loadStaples();
             trackLogin();
         }
 
@@ -2968,6 +3131,7 @@
             document.getElementById('mealPlannerView').classList.add('hidden');
             document.getElementById('recipeBrowserView').classList.add('hidden');
             document.getElementById('recipeDetailView').classList.add('hidden');
+            document.getElementById('staplesView').classList.add('hidden');
         }
 
         function showMainApp() {
@@ -2984,6 +3148,7 @@
 
             // Hide guest banners for logged-in users
             document.getElementById('floatingAddBtn').classList.remove('visible');
+            document.getElementById('staplesView').classList.add('hidden');
             document.getElementById('guestBannerDash').classList.add('hidden');
             document.getElementById('guestBannerShopping').classList.add('hidden');
 
@@ -2991,14 +3156,17 @@
             const menuMealPlanner = document.getElementById('menuMealPlanner');
             const menuMyShoppers = document.getElementById('menuMyShoppers');
             const menuRecipes = document.getElementById('menuRecipes');
+            const menuStaples = document.getElementById('menuStaples');
             if (isGuestMode) {
                 if (menuMealPlanner) menuMealPlanner.style.display = 'none';
                 if (menuRecipes) menuRecipes.style.display = 'none';
                 if (menuMyShoppers) menuMyShoppers.style.display = 'none';
+                if (menuStaples) menuStaples.style.display = 'none';
             } else {
                 if (menuMealPlanner) menuMealPlanner.style.display = '';
                 if (menuRecipes) menuRecipes.style.display = '';
                 if (menuMyShoppers) menuMyShoppers.style.display = '';
+                if (menuStaples) menuStaples.style.display = '';
             }
 
             // Add guest badge if applicable
@@ -3303,6 +3471,12 @@
             document.getElementById('itemCategory').value = '';
             document.getElementById('categoryDropdown').classList.add('hidden');
             document.getElementById('saveItemBtn').textContent = 'Add';
+            // Reset staple checkbox
+            const stapleCheck = document.getElementById('itemIsStaple');
+            const stapleLabel = document.getElementById('itemIsStapleLabel');
+            stapleCheck.checked = false;
+            stapleCheck.disabled = false;
+            stapleLabel.classList.remove('greyed');
             document.getElementById('itemModal').classList.add('active');
         }
 
@@ -3318,6 +3492,14 @@
             document.getElementById('itemCategory').value = item.category || '';
             document.getElementById('categoryDropdown').classList.add('hidden');
             document.getElementById('saveItemBtn').textContent = 'Save';
+            // Set staple checkbox state
+            const stapleCheck = document.getElementById('itemIsStaple');
+            const stapleLabel = document.getElementById('itemIsStapleLabel');
+            const isAlreadyStaple = item.staple || staples.find(s => s.name.toLowerCase() === item.name.toLowerCase());
+            stapleCheck.checked = !!isAlreadyStaple;
+            stapleCheck.disabled = !!isAlreadyStaple;
+            stapleLabel.classList.toggle('greyed', !!isAlreadyStaple);
+            stapleLabel.textContent = isAlreadyStaple ? 'Already a staple' : 'Mark as staple';
             document.getElementById('itemModal').classList.add('active');
         }
 
@@ -3387,6 +3569,8 @@
                 return;
             }
 
+            const isStaple = document.getElementById('itemIsStaple').checked;
+
             if (editingItemId) {
                 const itemIndex = currentItems.findIndex(i => i.id === editingItemId);
                 if (itemIndex !== -1) {
@@ -3395,7 +3579,8 @@
                         name: name,
                         qty: qty,
                         price: price,
-                        category: category
+                        category: category,
+                        staple: isStaple || currentItems[itemIndex].staple || false
                     };
                 }
             } else {
@@ -3405,9 +3590,23 @@
                     qty: qty,
                     price: price,
                     checked: false,
-                    category: category
+                    category: category,
+                    staple: isStaple
                 };
                 currentItems.push(newItem);
+            }
+
+            // Add to staples collection if checked and not already a staple
+            if (isStaple && !staples.find(s => s.name.toLowerCase() === name.toLowerCase())) {
+                const uid = isGuest ? ownerUid : currentUser.uid;
+                try {
+                    await addDoc(collection(db, 'staples'), {
+                        userId: uid,
+                        name,
+                        price,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (e) {}
             }
 
             renderItems();
@@ -3694,6 +3893,7 @@
                     await addDoc(collection(db, 'groceryLists'), listData);
                 }
 
+                await updateStaplePrices();
                 trackEvent('trip_completed', { total_spent: totalSpent, budget: budget });
                 alert('Shopping trip completed! 🎉');
                 showMainApp();
@@ -3970,6 +4170,180 @@
             }
         }
 
+
+
+        // ── STAPLES ───────────────────────────────────────────────────
+
+        let staples = [];
+        let unsubscribeStaples = null;
+
+        function loadStaples() {
+            if (unsubscribeStaples) unsubscribeStaples();
+            const uid = isGuest ? ownerUid : currentUser.uid;
+            if (!uid) return;
+            const q = query(collection(db, 'staples'), where('userId', '==', uid));
+            unsubscribeStaples = onSnapshot(q, (snap) => {
+                staples = [];
+                snap.forEach(d => staples.push({ id: d.id, ...d.data() }));
+                staples.sort((a, b) => a.name.localeCompare(b.name));
+                if (!document.getElementById('staplesView').classList.contains('hidden')) {
+                    renderStaplesList();
+                }
+            });
+        }
+
+        function showStaples() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('shoppingView').classList.add('hidden');
+            document.getElementById('mealPlannerView').classList.add('hidden');
+            document.getElementById('recipeBrowserView').classList.add('hidden');
+            document.getElementById('recipeDetailView').classList.add('hidden');
+            document.getElementById('staplesView').classList.remove('hidden');
+            document.getElementById('floatingAddBtn').classList.remove('visible');
+            renderStaplesList();
+        }
+
+        function backFromStaples() {
+            document.getElementById('staplesView').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        function renderStaplesList() {
+            const container = document.getElementById('staplesList');
+            if (staples.length === 0) {
+                container.innerHTML = '<div class="no-lists">No staples yet. Add items you buy regularly.</div>';
+                return;
+            }
+            container.innerHTML = staples.map(s => `
+                <div class="staple-item">
+                    <div class="staple-item-info">
+                        <div class="staple-item-name">${s.name}</div>
+                        <div class="staple-item-price">${s.price ? '$' + parseFloat(s.price).toFixed(2) : 'No price saved'}</div>
+                    </div>
+                    <button class="staple-remove-btn" onclick="removeStaple('${s.id}', '${s.name.replace(/'/g, "\'")}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        function showAddStapleModal() {
+            document.getElementById('stapleNameInput').value = '';
+            document.getElementById('staplePriceInput').value = '';
+            document.getElementById('addStapleModal').classList.add('active');
+        }
+
+        async function saveNewStaple() {
+            const name = document.getElementById('stapleNameInput').value.trim();
+            if (!name) { alert('Please enter an item name.'); return; }
+            const price = parseFloat(document.getElementById('staplePriceInput').value) || 0;
+            const uid = isGuest ? ownerUid : currentUser.uid;
+
+            // Check if already exists
+            if (staples.find(s => s.name.toLowerCase() === name.toLowerCase())) {
+                alert('That item is already in your staples.');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'staples'), {
+                    userId: uid,
+                    name,
+                    price,
+                    createdAt: serverTimestamp()
+                });
+                closeModal('addStapleModal');
+            } catch (e) {
+                alert('Failed to add staple.');
+            }
+        }
+
+        async function removeStaple(stapleId, name) {
+            if (!confirm(`Remove "${name}" from your staples?`)) return;
+            try {
+                await deleteDoc(doc(db, 'staples', stapleId));
+            } catch (e) {
+                alert('Failed to remove staple.');
+            }
+        }
+
+        // Show Add Staples checklist from item modal
+        function showAddStaplesToList() {
+            if (staples.length === 0) {
+                showToast('No staples yet — add some in My Staples', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('staplesChecklistContainer');
+            container.innerHTML = staples.map((s, idx) => `
+                <label class="staples-checklist-item">
+                    <input type="checkbox" id="stapleCheck_${idx}">
+                    <div class="staples-checklist-info">
+                        <div class="staples-checklist-name">${s.name}</div>
+                        <div class="staples-checklist-price">${s.price ? '$' + parseFloat(s.price).toFixed(2) : 'No price saved'}</div>
+                    </div>
+                </label>
+            `).join('');
+
+            document.getElementById('addStaplesToListModal').classList.add('active');
+        }
+
+        async function confirmAddStaples() {
+            const selected = staples.filter((s, idx) => {
+                const cb = document.getElementById('stapleCheck_' + idx);
+                return cb && cb.checked;
+            });
+
+            if (selected.length === 0) {
+                showToast('No staples selected', 'warning');
+                return;
+            }
+
+            closeModal('addStaplesToListModal');
+            closeModal('itemModal');
+
+            selected.forEach(s => {
+                // Don't add if already in list
+                if (currentItems.find(i => i.name.toLowerCase() === s.name.toLowerCase())) return;
+                currentItems.push({
+                    id: 'item_' + Date.now() + '_' + Math.random(),
+                    name: s.name,
+                    qty: 1,
+                    price: s.price || 0,
+                    checked: false,
+                    category: matchCategory([s.name]),
+                    staple: true
+                });
+            });
+
+            renderItems();
+            updateTotal();
+            await autoSaveList();
+            showToast(selected.length + ' staple(s) added!', '');
+        }
+
+        // Update staple prices on Done Shopping
+        async function updateStaplePrices() {
+            const uid = isGuest ? ownerUid : currentUser.uid;
+            for (const item of currentItems) {
+                if (!item.staple || !item.price) continue;
+                const match = staples.find(s => s.name.toLowerCase() === item.name.toLowerCase());
+                if (match) {
+                    try {
+                        await updateDoc(doc(db, 'staples', match.id), { price: item.price });
+                    } catch (e) {}
+                }
+            }
+        }
+
+        window.showStaples = showStaples;
+        window.backFromStaples = backFromStaples;
+        window.showAddStapleModal = showAddStapleModal;
+        window.saveNewStaple = saveNewStaple;
+        window.removeStaple = removeStaple;
+        window.showAddStaplesToList = showAddStaplesToList;
+        window.confirmAddStaples = confirmAddStaples;
+
+        // ── END STAPLES ────────────────────────────────────────────────
 
         // ── GUEST MODE ────────────────────────────────────────────────
 
