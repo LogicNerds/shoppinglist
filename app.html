@@ -2857,10 +2857,10 @@
             <li>Stop guessing. Start shopping smarter.</li>
         </ul>
         <div class="welcome-modal-buttons">
-            <button class="welcome-tour-btn" onclick="closeModal('welcomeModal'); startTutorial()">See How It Works</button>
-            <button class="welcome-skip-btn" onclick="localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal'); createNewList()">Create My First List</button>
+            <button class="welcome-tour-btn" onclick="trackEvent('welcome_cta', {choice:'tutorial'}); closeModal('welcomeModal'); startTutorial()">See How It Works</button>
+            <button class="welcome-skip-btn" onclick="trackEvent('welcome_cta', {choice:'create_list'}); localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal'); createNewList()">Create My First List</button>
         </div>
-        <button onclick="localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal')" style="background:none; border:none; color:#bbb; font-size:1.4em; cursor:pointer; position:absolute; top:14px; right:18px; line-height:1;">×</button>
+        <button onclick="trackEvent('welcome_cta', {choice:'dismissed'}); localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal')" style="background:none; border:none; color:#bbb; font-size:1.4em; cursor:pointer; position:absolute; top:14px; right:18px; line-height:1;">×</button>
     </div>
 </div>
 
