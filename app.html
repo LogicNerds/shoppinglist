@@ -2847,17 +2847,22 @@
     </div>
 
     <!-- Welcome / First Login Modal -->
-    <div id="welcomeModal" class="modal">
-        <div class="modal-content welcome-modal-content">
-            <span class="welcome-emoji">💸</span>
-            <h2>Welcome to IDK My Shopping List!</h2>
-            <p>Know your total before you get to the register. Want a quick tour of how it works?</p>
-            <div class="welcome-modal-buttons">
-                <button class="welcome-tour-btn" onclick="closeModal('welcomeModal'); startTutorial()">Show Me Around</button>
-                <button class="welcome-skip-btn" onclick="localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal')">Skip for Now</button>
-            </div>
+<div id="welcomeModal" class="modal">
+    <div class="modal-content welcome-modal-content">
+        <span class="welcome-emoji">💸</span>
+        <h2>IDK My Groceries</h2>
+        <ul style="text-align:left; color:#666; font-size:0.95em; line-height:1.8; margin:0 0 28px 0; padding-left:1.25em;">
+            <li>Know your total before you hit checkout</li>
+            <li>Fight grocery cart creep</li>
+            <li>Stop guessing. Start shopping smarter.</li>
+        </ul>
+        <div class="welcome-modal-buttons">
+            <button class="welcome-tour-btn" onclick="closeModal('welcomeModal'); startTutorial()">See How It Works</button>
+            <button class="welcome-skip-btn" onclick="localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal'); createNewList()">Create My First List</button>
         </div>
+        <button onclick="localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal')" style="background:none; border:none; color:#bbb; font-size:1.4em; cursor:pointer; position:absolute; top:14px; right:18px; line-height:1;">×</button>
     </div>
+</div>
 
     <!-- Done Shopping Confirmation Modal -->
     <div id="doneConfirmModal" class="modal">
