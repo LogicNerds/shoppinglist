@@ -2857,10 +2857,10 @@
             <li>Stop guessing. Start shopping smarter.</li>
         </ul>
         <div class="welcome-modal-buttons">
-            <button class="welcome-tour-btn" onclick="trackEvent('welcome_cta', {choice:'tutorial'}); closeModal('welcomeModal'); startTutorial()">See How It Works</button>
-            <button class="welcome-skip-btn" onclick="trackEvent('welcome_cta', {choice:'create_list'}); localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal'); createNewList()">Create My First List</button>
+            <button class="welcome-tour-btn" onclick="logWelcomeCta('tutorial'); closeModal('welcomeModal'); startTutorial()">See How It Works</button>
+            <button class="welcome-skip-btn" onclick="logWelcomeCta('create_list'); localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal'); createNewList()">Create My First List</button>
         </div>
-        <button onclick="trackEvent('welcome_cta', {choice:'dismissed'}); localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal')" style="background:none; border:none; color:#bbb; font-size:1.4em; cursor:pointer; position:absolute; top:14px; right:18px; line-height:1;">×</button>
+        <button onclick="logWelcomeCta('dismissed'); localStorage.setItem('idkTutorialSeen', 'true'); closeModal('welcomeModal')" style="background:none; border:none; color:#bbb; font-size:1.4em; cursor:pointer; position:absolute; top:14px; right:18px; line-height:1;">×</button>
     </div>
 </div>
 
@@ -2916,12 +2916,24 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // GA4 event tracking helper
+       // GA4 event tracking helper
         function trackEvent(eventName, params = {}) {
             if (typeof gtag !== 'undefined') {
                 gtag('event', eventName, params);
             }
         }
+
+        async function logWelcomeCta(choice) {
+            trackEvent('welcome_cta', { choice });
+            try {
+                await addDoc(collection(db, 'welcomeCtaEvents'), {
+                    choice,
+                    timestamp: serverTimestamp(),
+                    isGuest: isGuestMode
+                });
+            } catch(e) {}
+        }
+        window.logWelcomeCta = logWelcomeCta;
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('guest') === 'true') {
