@@ -818,13 +818,32 @@
 <div id="flashOverlay" id="flashOverlay"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-//  BACKGROUND MUSIC PLACEHOLDER
-//  Set --bg-music CSS variable at top, then wire up here:
-//  const bgMusic = new Audio('your-music-file.mp3');
-//  bgMusic.loop = true; bgMusic.volume = 0.35;
-//  Call bgMusic.play() inside startRound()
-// ═══════════════════════════════════════════════════════
+// ── MUSIC ──
+const bgMusic = new Audio('idkassets/GroceryRouletteTheme.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.6;
+
+const winMusic = new Audio('idkassets/GRWinner.mp3');
+winMusic.loop = false;
+winMusic.volume = 0.6;
+
+function startBgMusic() {
+  winMusic.pause();
+  winMusic.currentTime = 0;
+  bgMusic.currentTime = 0;
+  bgMusic.play().catch(() => {}); // silently handle autoplay block
+}
+
+function stopAllMusic() {
+  bgMusic.pause();
+  winMusic.pause();
+}
+
+function playWinMusic() {
+  bgMusic.pause();
+  winMusic.currentTime = 0;
+  winMusic.play().catch(() => {});
+}
 
 // ── AUDIO ENGINE ──
 let audioCtx = null;
@@ -998,6 +1017,7 @@ document.getElementById('btnStartGame').addEventListener('click', () => {
   state.totalItemsTossed = 0;
   state.totalMissed = 0;
   state.rolloverBudget = 0;
+  startBgMusic();
   beginNextRound();
 });
 
@@ -1332,6 +1352,7 @@ function triggerCheckout() {
   if (state.round >= MAX_ROUNDS) {
     flash('teal');
     launchConfetti();
+    playWinMusic();
     setTimeout(() => {
       showEndScreen(
         'win',
@@ -1424,6 +1445,7 @@ function playAgain() {
   state.totalItemsTossed = 0;
   state.totalMissed = 0;
   state.rolloverBudget = 0;
+  startBgMusic();
   beginNextRound();
 }
 
