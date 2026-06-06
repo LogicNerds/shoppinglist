@@ -161,6 +161,7 @@
     max-width: 500px;
     height: 100vh;
     padding: 0;
+    justify-content: center;
   }
   #gameWrapper.active { display: flex; }
 
@@ -700,7 +701,8 @@
       <span style="color:var(--text-main);">🛒 Coupon Clipper</span> — 1 round<br>
       <span style="color:var(--text-main);">🧾 Savvy Shopper</span> — 3 rounds<br>
       <span style="color:var(--text-main);">💰 Budget Boss</span> — 5 rounds<br>
-      <span style="color:var(--text-main);">🏆 Cart Commander</span> — 8+ rounds
+      <span style="color:var(--text-main);">⭐ Cart Commander</span> — 8 rounds<br>
+      <span style="color:var(--text-main);">👑 Grocery Legend</span> — survive all 12 rounds
     </div>
     <button onclick="document.getElementById('rulesModal').style.display='none'" style="padding:12px;font-family:var(--font-display);font-size:0.85rem;letter-spacing:3px;color:var(--dark-bg);background:var(--neon-teal);border:none;cursor:pointer;box-shadow:var(--glow-teal);min-height:44px;">GOT IT</button>
   </div>
@@ -999,11 +1001,16 @@ document.getElementById('btnStartGame').addEventListener('click', () => {
   beginNextRound();
 });
 
+// ── FIXED ROUND BUDGETS ──
+const ROUND_BUDGETS = [0, 30, 40, 50, 45, 55, 35, 60, 25, 50, 20, 40, 15];
+const MAX_ROUNDS = 12;
+
 function beginNextRound() {
   clearGameLoop();
   state.round++;
-  // Budget: $25-$60 base + rollover
-  const base = Math.round((25 + Math.random() * 35) * 100) / 100;
+
+  // Fixed budget + rollover
+  const base = ROUND_BUDGETS[Math.min(state.round, MAX_ROUNDS)];
   state.budget = Math.round((base + state.rolloverBudget) * 100) / 100;
   state.cartTotal = 0;
   state.cartItems = [];
@@ -1321,6 +1328,23 @@ function triggerCheckout() {
   const timeBonus = state.timeLeft * 15;
   state.score += accuracyBonus + timeBonus;
 
+  // Round 12 completion = game won
+  if (state.round >= MAX_ROUNDS) {
+    flash('teal');
+    launchConfetti();
+    setTimeout(() => {
+      showEndScreen(
+        'win',
+        '👑 GROCERY LEGEND!',
+        "You're basically a human receipt. You survived all 12 rounds of Cart Creep without breaking the bank once. Try the real thing.",
+        'Beat Cart Creep IRL',
+        '👑 GROCERY LEGEND',
+        MAX_ROUNDS
+      );
+    }, 1200);
+    return;
+  }
+
   showToast(`✅ CHECKED OUT! +${accuracyBonus} accuracy pts +${timeBonus} time pts`, 'var(--neon-teal)');
   flash('teal');
   launchConfetti();
@@ -1386,9 +1410,10 @@ function showEndScreen(type, title, pitch, cta, badge, rounds) {
 }
 
 function getBadge(rounds) {
-  if (rounds >= 8) return '🏆 CART COMMANDER';
-  if (rounds >= 5) return '💰 BUDGET BOSS';
-  if (rounds >= 3) return '🧾 SAVVY SHOPPER';
+  if (rounds >= 12) return '👑 GROCERY LEGEND';
+  if (rounds >= 8)  return '⭐ CART COMMANDER';
+  if (rounds >= 5)  return '💰 BUDGET BOSS';
+  if (rounds >= 3)  return '🧾 SAVVY SHOPPER';
   return '🛒 COUPON CLIPPER';
 }
 
