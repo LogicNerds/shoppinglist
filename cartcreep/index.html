@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Grocery Roulette: Cart Creep</title>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-KEZSNJZ4JW');
+</script>
 <style>
   /* ── BACKGROUND IMAGE ── drop your 16-bit grocery store image here */
   :root {
@@ -20,7 +28,7 @@
     --belt-bg:      #1a1a2e;
     --belt-stripe:  #222244;
     --text-main:    #e8e8ff;
-    --text-dim:     #ffffff;
+    --text-dim:     #7777aa;
     --glow-teal:    0 0 12px #00f5d4, 0 0 30px rgba(0,245,212,0.4);
     --glow-orange:  0 0 12px #ff6b35, 0 0 30px rgba(255,107,53,0.4);
     --glow-red:     0 0 12px #ff2d55, 0 0 30px rgba(255,45,85,0.4);
@@ -675,7 +683,7 @@
       <div style="color:var(--neon-teal);text-shadow:var(--glow-teal);font-size:1.1rem;letter-spacing:3px;">THE RULES</div>
       <button onclick="document.getElementById('rulesModal').style.display='none'" style="background:none;border:1px solid var(--text-dim);color:var(--text-dim);font-family:var(--font-display);font-size:0.8rem;padding:4px 10px;cursor:pointer;border-radius:2px;">✕ CLOSE</button>
     </div>
-    <div style="color:var(--text-dim);font-size:0.72rem;line-height:1.9;letter-spacing:1px;">
+    <div style="color:#ffffff;font-size:0.72rem;line-height:1.9;letter-spacing:1px;">
       <div style="color:var(--neon-orange);margin-bottom:4px;">🎯 THE GOAL</div>
       Stay under your target budget and cash out for as many rounds as you can survive.
       <br><br>
@@ -806,7 +814,7 @@
   <div id="endBadge">🛒 COUPON CLIPPER</div>
   <div id="endPitch">Oof! You went over budget. In the arcade, it's game over. In real life, it means awkwardly telling the cashier to take things back. Stop guessing at the store.</div>
   <div id="endActions">
-    <a id="btnCTA" href="https://www.myidk.app" target="_blank">Beat Cart Creep IRL</a>
+    <a id="btnCTA" href="https://www.myidk.app" target="_blank" onclick="trackEvent('cta_click', { round: parseInt(document.getElementById('statEndRounds').textContent) })">Beat Cart Creep IRL</a>
     <button id="btnShare" onclick="shareResult()">📲 SHARE MY SCORE</button>
     <button id="btnPlayAgain" onclick="playAgain()">▶ Play Again</button>
   </div>
@@ -818,7 +826,13 @@
 <div id="flashOverlay" id="flashOverlay"></div>
 
 <script>
-// ── MUSIC ──
+// ── ANALYTICS ──
+function trackEvent(name, params = {}) {
+  if (typeof gtag === 'function') {
+    gtag('event', name, params);
+  }
+}
+
 const bgMusic = new Audio('../idkassets/GroceryRouletteTheme.mp3');
 bgMusic.loop = true;
 bgMusic.volume = 0.6;
@@ -1018,6 +1032,7 @@ document.getElementById('btnStartGame').addEventListener('click', () => {
   state.totalMissed = 0;
   state.rolloverBudget = 0;
   startBgMusic();
+  trackEvent('game_start');
   beginNextRound();
 });
 
@@ -1353,6 +1368,7 @@ function triggerCheckout() {
     flash('teal');
     launchConfetti();
     playWinMusic();
+    trackEvent('game_won', { score: state.score, items_collected: state.totalItemsTossed });
     setTimeout(() => {
       showEndScreen(
         'win',
@@ -1366,6 +1382,13 @@ function triggerCheckout() {
     return;
   }
 
+  trackEvent('round_complete', {
+    round: state.round,
+    cart_total: state.cartTotal,
+    budget: state.budget,
+    rollover: leftover,
+    score: state.score
+  });
   showToast(`✅ CHECKED OUT! +${accuracyBonus} accuracy pts +${timeBonus} time pts`, 'var(--neon-teal)');
   flash('teal');
   launchConfetti();
@@ -1380,6 +1403,7 @@ function triggerBust() {
   clearGameLoop();
   soundBust();
   flash('red');
+  trackEvent('game_bust', { round: state.round, score: state.score });
 
   const badge = getBadge(state.round - 1);
   showEndScreen(
@@ -1396,6 +1420,7 @@ function triggerTimeout() {
   state.running = false;
   clearGameLoop();
   soundTimeout();
+  trackEvent('game_timeout', { round: state.round, score: state.score });
 
   const badge = getBadge(state.round - 1);
   showEndScreen(
@@ -1451,6 +1476,7 @@ function playAgain() {
 
 // ── SHARE ──
 function shareResult() {
+  trackEvent('share_click', { round: parseInt(document.getElementById('statEndRounds').textContent), score: state.score });
   const rounds = parseInt(document.getElementById('statEndRounds').textContent);
   const badge  = document.getElementById('endBadge').textContent;
   const score  = document.getElementById('statEndScore').textContent;
