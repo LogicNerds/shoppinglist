@@ -1059,9 +1059,10 @@ let state = {
 };
 
 // Round config
-const ROUND_BASE_SPEED   = 120;  // px/sec round 1 starting speed
-const ROUND_SPEED_INC    = 25;   // additional px/sec per round at start
-const WITHIN_ROUND_RAMP  = 45;   // total additional px/sec gained over 30 sec
+const ROUND_SPEEDS = [0, 190, 195, 205, 215, 230, 245, 265, 290, 315, 340, 365, 395];
+const ROUND_BASE_SPEED   = 190; // fallback, not used directly
+const ROUND_SPEED_INC    = 25;  // not used, kept for reference
+const WITHIN_ROUND_RAMP  = 45;  // total additional px/sec gained over 30 sec
 const SPAWN_BASE         = 1800; // ms between spawns round 1
 const SPAWN_MIN          = 650;  // floor
 const SPAWN_DEC_PER_RND  = 200;  // ms less per round
@@ -1179,7 +1180,7 @@ function startRound() {
   cartEmoji.classList.remove('shake');
 
   // Belt speed for this round
-  state.beltSpeed = ROUND_BASE_SPEED + (state.round - 1) * ROUND_SPEED_INC;
+  state.beltSpeed = ROUND_SPEEDS[Math.min(state.round, MAX_ROUNDS)];
 
   // Spawn interval for this round
   state.spawnInterval = Math.max(SPAWN_MIN, SPAWN_BASE - (state.round - 1) * SPAWN_DEC_PER_RND);
@@ -1571,8 +1572,9 @@ function updateCart() {
 }
 
 function updateSpeedUI(speed) {
-  const maxSpeed = ROUND_BASE_SPEED + 8 * ROUND_SPEED_INC + WITHIN_ROUND_RAMP;
-  const ratio = Math.min(1, (speed - ROUND_BASE_SPEED) / (maxSpeed - ROUND_BASE_SPEED));
+  const maxSpeed = 395 + WITHIN_ROUND_RAMP;
+  const minSpeed = 190;
+  const ratio = Math.min(1, (speed - minSpeed) / (maxSpeed - minSpeed));
   const pips = Math.round(ratio * 8);
   for (let i = 0; i < 8; i++) {
     document.getElementById('pip' + i).className = 'speed-pip' + (i < pips ? ' on' : '');
