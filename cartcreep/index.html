@@ -74,11 +74,12 @@
     position: fixed; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.85);
+    background: rgba(0,0,10,0.82);
     z-index: 500;
-    gap: 10px;
+    gap: 20px;
     padding: 24px;
     text-align: center;
+    backdrop-filter: blur(2px);
   }
   #titleBranding {
     position: absolute;
@@ -111,7 +112,7 @@
     margin-top: 8px;
   }
   .btn-start {
-    margin-top: 5px;
+    margin-top: 16px;
     padding: 16px 48px;
     font-family: var(--font-display);
     font-size: 1.2rem;
@@ -134,9 +135,10 @@
     display: none;
     flex-direction: column;
     align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.92);
+    background: rgba(0,0,10,0.82);
     z-index: 490;
     gap: 12px;
+    backdrop-filter: blur(2px);
   }
   #roundSplash.active { display: flex; }
   #splashRound {
@@ -163,7 +165,7 @@
 
   /* ── GAME WRAPPER ── */
   #gameWrapper {
-    display: none;
+    display: flex;
     flex-direction: column;
     width: 100%;
     max-width: 500px;
@@ -171,7 +173,6 @@
     padding: 0;
     justify-content: center;
   }
-  #gameWrapper.active { display: flex; }
 
   /* ── HUD ── */
   #hud {
@@ -490,6 +491,31 @@
   }
   #scoreStrip span { color: var(--neon-teal); }
 
+  /* ── PERSISTENT CTA BANNER ── */
+  #persistentCTA {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    background: linear-gradient(90deg, rgba(255,107,53,0.15), rgba(255,107,53,0.08));
+    border-top: 1px solid rgba(255,107,53,0.4);
+    color: var(--neon-orange);
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0 0 8px rgba(255,107,53,0.5);
+    transition: background 0.2s;
+    flex-shrink: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #persistentCTA:active {
+    background: rgba(255,107,53,0.25);
+  }
+
   /* ── TOAST ── */
   #toast {
     position: fixed;
@@ -670,7 +696,7 @@
 <!-- ── TITLE SCREEN ── -->
 <div id="titleScreen">
   <img src="../idkassets/cartcreeptitle.png" alt="Grocery Roulette: Cart Creep" style="max-width:320px;width:90%;height:auto;">
-  <button class="btn-start" id="btnStartGame">PLAY NOW!</button>
+  <button class="btn-start" id="btnStartGame">START</button>
   <button id="btnRules" onclick="document.getElementById('rulesModal').style.display='flex'" style="background:none;border:none;color:var(--text-dim);font-family:var(--font-display);font-size:0.75rem;letter-spacing:3px;cursor:pointer;text-decoration:underline;padding:8px;min-height:44px;">READ THE RULES</button>
   <div id="titleBranding">IDK PRESENTS</div>
 </div>
@@ -799,6 +825,11 @@
     <div>ROUNDS: <span id="statRounds">0</span></div>
   </div>
 
+  <!-- Persistent CTA Banner -->
+  <a id="persistentCTA" href="https://www.myidk.app" target="_blank" onclick="trackEvent('cta_click', { round: state.round })">
+    Beat Cart Creep IRL → Try IDK My Groceries Free
+  </a>
+
 </div>
 
 <!-- ── END SCREEN ── -->
@@ -811,9 +842,7 @@
     <div class="stat-row"><span class="stat-label">Items Collected</span><span class="stat-val" id="statEndItems">0</span></div>
   </div>
   <div id="endBadge">🛒 COUPON CLIPPER</div>
-  <div id="endPitch">Oof! You went over budget. In the arcade, it's game over. In real life, it means awkwardly telling the cashier to take things back. Stop guessing at the store.</div>
   <div id="endActions">
-    <a id="btnCTA" href="https://www.myidk.app" target="_blank" onclick="trackEvent('cta_click', { round: parseInt(document.getElementById('statEndRounds').textContent) })">Beat Cart Creep IRL</a>
     <button id="btnShare" onclick="shareResult()">📲 SHARE MY SCORE</button>
     <button id="btnPlayAgain" onclick="playAgain()">▶ Play Again</button>
   </div>
@@ -1086,7 +1115,7 @@ function beginNextRound() {
 
 function startRound() {
   // Show game
-  gameWrapper.classList.add('active');
+  // game wrapper always visible
   endScreen.classList.remove('active');
 
   // Clear conveyor
@@ -1369,14 +1398,7 @@ function triggerCheckout() {
     playWinMusic();
     trackEvent('game_won', { score: state.score, items_collected: state.totalItemsTossed });
     setTimeout(() => {
-      showEndScreen(
-        'win',
-        '👑 GROCERY LEGEND!',
-        "You're basically a human receipt. You survived all 12 rounds of Cart Creep without breaking the bank once. Try the real thing.",
-        'Beat Cart Creep IRL',
-        '👑 GROCERY LEGEND',
-        MAX_ROUNDS
-      );
+      showEndScreen('win', '👑 GROCERY LEGEND!', '👑 GROCERY LEGEND', MAX_ROUNDS);
     }, 1200);
     return;
   }
@@ -1405,14 +1427,7 @@ function triggerBust() {
   trackEvent('game_bust', { round: state.round, score: state.score });
 
   const badge = getBadge(state.round - 1);
-  showEndScreen(
-    'lose',
-    '💥 CART CREEP STRIKES AGAIN!',
-    "Oof! You went over budget. In the arcade, it's game over. In real life, it means awkwardly telling the cashier to take things back. Stop guessing at the store.",
-    'Beat Cart Creep IRL',
-    badge,
-    state.round - 1
-  );
+  showEndScreen('lose', '💥 CART CREEP STRIKES AGAIN!', badge, state.round - 1);
 }
 
 function triggerTimeout() {
@@ -1422,18 +1437,11 @@ function triggerTimeout() {
   trackEvent('game_timeout', { round: state.round, score: state.score });
 
   const badge = getBadge(state.round - 1);
-  showEndScreen(
-    'timeout',
-    '⏰ TIME OUT! Frozen food melted!',
-    "Hesitation costs money. Get organized before you shop so you can zip through the store without breaking the bank.",
-    'Beat Cart Creep IRL',
-    badge,
-    state.round - 1
-  );
+  showEndScreen('timeout', '⏰ TIME OUT! Frozen food melted!', badge, state.round - 1);
 }
 
-function showEndScreen(type, title, pitch, cta, badge, rounds) {
-  gameWrapper.classList.remove('active');
+function showEndScreen(type, title, badge, rounds) {
+  // game wrapper always visible
   endScreen.classList.add('active');
   state.rolloverBudget = 0; // reset on game over
 
@@ -1441,10 +1449,6 @@ function showEndScreen(type, title, pitch, cta, badge, rounds) {
   const endTitle = document.getElementById('endTitle');
   endTitle.textContent = title;
   endTitle.className = type === 'lose' ? 'lose' : type === 'timeout' ? 'timeout' : 'win';
-
-  document.getElementById('endPitch').textContent = pitch;
-  document.getElementById('btnCTA').textContent = cta;
-  document.getElementById('btnCTA').href = 'https://www.myidk.app';
 
   document.getElementById('statEndRounds').textContent = rounds;
   document.getElementById('statEndScore').textContent = state.score.toLocaleString();
