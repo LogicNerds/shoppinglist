@@ -2521,6 +2521,10 @@
                 <div class="price-input-container">
                     <input type="text" id="itemPrice" placeholder="0.00" oninput="formatCurrency(this)">
                 </div>
+                <div id="priceHistoryHint" style="display:none; margin-top:6px; font-size:0.82em; color:var(--accent-primary); align-items:center; gap:6px;">
+                    <span id="priceHistoryText"></span>
+                    <button id="priceHistoryBtn" onclick="useSuggestedPrice()" style="background:none; border:none; color:var(--accent-primary); font-size:0.82em; font-weight:700; cursor:pointer; padding:0; text-decoration:underline;">Use it</button>
+                </div>
             </div>
             <div class="form-group">
                 <label>Category <span style="color:#999; font-weight:400;">(optional)</span></label>
@@ -3494,6 +3498,17 @@
             stapleCheck.checked = false;
             stapleCheck.disabled = false;
             stapleLabel.classList.remove('greyed');
+            stapleLabel.textContent = 'Mark as staple';
+            clearPriceHint();
+
+            // Wire debounced price history lookup
+            const nameInput = document.getElementById('itemName');
+            nameInput.oninput = function() {
+                autoCategoryFromName(this.value);
+                clearTimeout(_priceHintDebounce);
+                _priceHintDebounce = setTimeout(() => lookupPriceHistory(this.value), 600);
+            };
+
             document.getElementById('itemModal').classList.add('active');
         }
 
@@ -3632,6 +3647,72 @@
             closeModal('itemModal');
             document.getElementById('categoryDropdown').classList.add('hidden');
         }
+
+        // ── PRICE HISTORY HINT ────────────────────────────────────────
+
+        let _priceHintDebounce = null;
+        let _suggestedPrice = null;
+
+        function lookupPriceHistory(name) {
+            const hint = document.getElementById('priceHistoryHint');
+            const hintText = document.getElementById('priceHistoryText');
+            if (!hint || !hintText) return;
+
+            if (isGuestMode || !currentUser || !name.trim()) {
+                hint.style.display = 'none';
+                _suggestedPrice = null;
+                return;
+            }
+
+            const nameLower = name.trim().toLowerCase();
+            const prices = [];
+
+            const completed = shoppingLists
+                .filter(l => l.completed)
+                .sort((a, b) => {
+                    const aDate = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0);
+                    const bDate = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0);
+                    return bDate - aDate;
+                });
+
+            for (const list of completed) {
+                if (prices.length >= 5) break;
+                const match = (list.items || []).find(i =>
+                    i.name.trim().toLowerCase() === nameLower && i.price > 0
+                );
+                if (match) prices.push(match.price);
+            }
+
+            if (prices.length === 0) {
+                hint.style.display = 'none';
+                _suggestedPrice = null;
+                return;
+            }
+
+            const avg = prices.reduce((s, p) => s + p, 0) / prices.length;
+            _suggestedPrice = parseFloat(avg.toFixed(2));
+
+            const tripWord = prices.length === 1 ? 'trip' : 'trips';
+            hintText.textContent = `📊 Avg from last ${prices.length} ${tripWord}: $${_suggestedPrice.toFixed(2)} ·`;
+            hint.style.display = 'flex';
+        }
+
+        function useSuggestedPrice() {
+            if (_suggestedPrice === null) return;
+            document.getElementById('itemPrice').value = _suggestedPrice.toFixed(2);
+            document.getElementById('priceHistoryHint').style.display = 'none';
+            _suggestedPrice = null;
+        }
+
+        function clearPriceHint() {
+            const hint = document.getElementById('priceHistoryHint');
+            if (hint) hint.style.display = 'none';
+            _suggestedPrice = null;
+        }
+
+        window.useSuggestedPrice = useSuggestedPrice;
+
+        // ── END PRICE HISTORY HINT ────────────────────────────────────
 
         async function deleteItem(itemId, event) {
             event.stopPropagation();
@@ -3954,6 +4035,10 @@
         // Utility functions
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'itemModal') {
+                clearTimeout(_priceHintDebounce);
+                clearPriceHint();
+            }
         }
 
         function openDisclaimer() {
