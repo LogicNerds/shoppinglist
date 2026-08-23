@@ -1,0 +1,219 @@
+!DOCTYPE html
+html lang=en
+head
+meta charset=UTF-8
+meta name=viewport content=width=device-width, initial-scale=1.0
+titleZero-Based Budgeting Workshop — IDK My Groceriestitle
+meta name=description content=Join our free Zero-Based Budgeting workshop. Give every dollar a job so it can work for you.
+script async src=httpswww.googletagmanager.comgtagjsid=G-KEZSNJZ4JWscript
+script
+    window.dataLayer = window.dataLayer  [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KEZSNJZ4JW');
+script
+link rel=preconnect href=httpsfonts.googleapis.com
+link rel=preconnect href=httpsfonts.gstatic.com crossorigin
+link href=httpsfonts.googleapis.comcss2family=Bebas+Neue&family=DM+Sansital,wght@0,400;0,500;0,700;1,400&display=swap rel=stylesheet
+style
+  , before, after { margin 0; padding 0; box-sizing border-box; }
+
+  root {
+    --teal #0d9488;
+    --teal-dark #0f766e;
+    --teal-light rgba(13,148,136,0.15);
+    --navy #1a3a4a;
+    --navy-dark #0a1f2b;
+    --text-dim rgba(255,255,255,0.5);
+    --text-dimmer rgba(255,255,255,0.25);
+  }
+
+  html, body { scroll-behavior smooth; overflow-x hidden; }
+
+  body {
+    font-family 'DM Sans', 'Segoe UI', sans-serif;
+    background var(--navy-dark);
+    color white;
+  }
+
+   ── HERO ── 
+  .hero {
+    display flex;
+    flex-direction column;
+    align-items center;
+    justify-content center;
+    padding 60px 24px 40px;
+    position relative;
+    background linear-gradient(160deg, #0f2330 0%, #1a3a4a 50%, #0a1f2b 100%);
+    text-align center;
+  }
+
+  .bg-grid {
+    position absolute;
+    inset 0;
+    background-image
+      linear-gradient(rgba(13,148,136,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,148,136,0.06) 1px, transparent 1px);
+    background-size 48px 48px;
+    pointer-events none;
+  }
+
+  .bg-glow {
+    position absolute;
+    width 700px;
+    height 700px;
+    border-radius 50%;
+    background radial-gradient(circle, rgba(13,148,136,0.1) 0%, transparent 70%);
+    top 50%;
+    left 50%;
+    transform translate(-50%, -50%);
+    pointer-events none;
+  }
+
+  .hero-content {
+    position relative;
+    z-index 1;
+    max-width 560px;
+    width 100%;
+  }
+
+  .logo {
+    font-size 3.5rem;
+    line-height 1;
+    margin-bottom 28px;
+    display block;
+    animation drop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .headline {
+    font-family 'Bebas Neue', 'Impact', sans-serif;
+    font-size clamp(3.2rem, 11vw, 6rem);
+    line-height 0.95;
+    letter-spacing 0.02em;
+    color white;
+    margin-bottom 24px;
+    animation rise 0.7s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .headline span { display block; color var(--teal); }
+
+  .subhead {
+    font-size clamp(1rem, 3vw, 1.2rem);
+    color var(--text-dim);
+    font-weight 400;
+    margin-bottom 12px;
+    animation rise 0.7s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .badge {
+    display inline-block;
+    background var(--teal-light);
+    border 1.5px solid var(--teal);
+    color var(--teal);
+    font-size 0.8rem;
+    font-weight 700;
+    letter-spacing 0.08em;
+    text-transform uppercase;
+    padding 6px 16px;
+    border-radius 20px;
+    margin-bottom 24px;
+    animation rise 0.7s 0.05s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+   ── FORM SECTION ── 
+  .form-section {
+    background linear-gradient(180deg, #0a1f2b 0%, #0f2330 100%);
+    padding 20px 24px 64px;
+    border-top 1px solid rgba(13,148,136,0.15);
+  }
+
+  .form-card {
+    max-width 640px;
+    margin 0 auto;
+    background rgba(255,255,255,0.03);
+    border 1px solid rgba(13,148,136,0.25);
+    border-radius 16px;
+    padding 8px;
+    overflow hidden;
+  }
+
+  .form-card iframe {
+    width 100%;
+    min-height 640px;
+    border none;
+    display block;
+    border-radius 10px;
+    background white;
+  }
+
+  .form-note {
+    text-align center;
+    color var(--text-dimmer);
+    font-size 0.8rem;
+    margin-top 20px;
+    max-width 480px;
+    margin-left auto;
+    margin-right auto;
+  }
+
+   ── FOOTER ── 
+  .footer {
+    background #060f17;
+    padding 24px;
+    text-align center;
+    font-size 0.75rem;
+    color var(--text-dimmer);
+    letter-spacing 0.05em;
+  }
+
+  .footer a {
+    color rgba(255,255,255,0.3);
+    text-decoration none;
+  }
+
+  .footer ahover { color rgba(255,255,255,0.6); }
+
+   ── ANIMATIONS ── 
+  @keyframes drop {
+    from { opacity 0; transform translateY(-20px) scale(0.8); }
+    to { opacity 1; transform translateY(0) scale(1); }
+  }
+
+  @keyframes rise {
+    from { opacity 0; transform translateY(30px); }
+    to { opacity 1; transform translateY(0); }
+  }
+style
+head
+body
+
+!-- Hero --
+section class=hero
+  div class=bg-griddiv
+  div class=bg-glowdiv
+  div class=hero-content
+    span class=logo💰span
+    span class=badgeFree Workshopspan
+    h1 class=headline
+      Give every dollarspana job.span
+    h1
+    p class=subheadZero-Based Budgeting, taught live. Grab a spot in the next session below.p
+  div
+section
+
+!-- Embedded Google Form --
+section class=form-section
+  div class=form-card
+    iframe src=httpsdocs.google.comformsde1FAIpQLSfunAHVCCuAjFbHoMhHqPMZL0L4J8qsmu3dQxa-So4QPHDI8Qviewformembedded=true title=Zero-Based Budgeting Workshop SignupLoading…iframe
+  div
+  p class=form-noteYou'll get a calendar invite with the Google Meet link once you're confirmed for the next session.p
+section
+
+!-- Footer --
+footer class=footer
+  © 2026 Logic Nerds. All Rights Reserved. &nbsp;&nbsp;
+  a href=privacy.htmlPrivacy Policya
+footer
+
+body
+html
