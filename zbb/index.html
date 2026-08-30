@@ -152,19 +152,44 @@
     font-size:15px;
     color:var(--text);
   }
-  .category-head .group-tag{
-    font-size:10px;
+  .section{ margin-bottom:26px; }
+  .section-header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:13px;
     text-transform:uppercase;
-    letter-spacing:0.08em;
-    font-weight:700;
-    padding:3px 8px;
-    border-radius:100px;
-    margin-left:8px;
+    letter-spacing:0.14em;
+    font-weight:800;
+    padding-bottom:9px;
+    margin-bottom:14px;
+    border-bottom:2px solid;
   }
-  .tag-essentials{ background:rgba(23,169,140,0.18); color:var(--emerald); }
-  .tag-debt{ background:rgba(232,145,106,0.18); color:var(--coral); }
-  .tag-future{ background:rgba(227,196,130,0.18); color:var(--gold); }
-  .tag-life{ background:rgba(154,166,224,0.18); color:var(--life); }
+  .section-header .section-total{
+    margin-left:auto;
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0;
+    text-transform:none;
+    font-weight:700;
+    font-size:14px;
+    color:var(--text);
+  }
+  .sec-essentials{ color:var(--emerald); border-color:var(--emerald); }
+  .sec-debt{ color:var(--coral); border-color:var(--coral); }
+  .sec-future{ color:var(--gold); border-color:var(--gold); }
+  .sec-life{ color:var(--life); border-color:var(--life); }
+
+  .category-head .cat-dot{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    margin-right:9px;
+  }
+  .dot-essentials{ background:var(--emerald); }
+  .dot-debt{ background:var(--coral); }
+  .dot-future{ background:var(--gold); }
+  .dot-life{ background:var(--life); }
 
   .category-head .subtotal{
     font-family:'IBM Plex Mono',monospace;
@@ -518,7 +543,9 @@
   };
 
   var GROUP_LABELS = { essentials:'Essentials', debt:'Debt', future:'Future', life:'Life' };
-  var GROUP_TAG_CLASS = { essentials:'tag-essentials', debt:'tag-debt', future:'tag-future', life:'tag-life' };
+  var GROUP_ORDER = ['essentials','debt','future','life'];
+  var GROUP_DOT_CLASS = { essentials:'dot-essentials', debt:'dot-debt', future:'dot-future', life:'dot-life' };
+  var GROUP_SECTION_CLASS = { essentials:'sec-essentials', debt:'sec-debt', future:'sec-future', life:'sec-life' };
 
   var fmt = function(n){
     var sign = n < 0 ? '-' : '';
@@ -549,100 +576,122 @@
   function buildCategories(){
     var container = document.getElementById('categoriesContainer');
     container.innerHTML = '';
-    state.categories.forEach(function(cat, catIdx){
-      var card = document.createElement('div');
-      card.className = 'category';
 
-      var head = document.createElement('div');
-      head.className = 'category-head';
-      var nameWrap = document.createElement('div');
-      var nameSpan = document.createElement('span');
-      nameSpan.className = 'name';
-      nameSpan.textContent = cat.name;
-      var tag = document.createElement('span');
-      tag.className = 'group-tag ' + GROUP_TAG_CLASS[cat.group];
-      tag.textContent = GROUP_LABELS[cat.group];
-      nameWrap.appendChild(nameSpan);
-      nameWrap.appendChild(tag);
-      var subtotal = document.createElement('div');
-      subtotal.className = 'subtotal';
-      subtotal.id = 'subtotal-' + cat.id;
-      subtotal.textContent = fmt(categoryTotal(cat));
-      head.appendChild(nameWrap);
-      head.appendChild(subtotal);
-      card.appendChild(head);
+    GROUP_ORDER.forEach(function(groupKey){
+      var catsInGroup = state.categories.filter(function(c){ return c.group === groupKey; });
+      if(catsInGroup.length === 0) return;
 
-      var rowsWrap = document.createElement('div');
-      rowsWrap.className = 'rows';
+      var section = document.createElement('div');
+      section.className = 'section';
 
-      cat.rows.forEach(function(row, rowIdx){
-        var rowEl = document.createElement('div');
-        rowEl.className = 'row';
+      var sectionHeader = document.createElement('div');
+      sectionHeader.className = 'section-header ' + GROUP_SECTION_CLASS[groupKey];
+      var sectionName = document.createElement('span');
+      sectionName.textContent = GROUP_LABELS[groupKey];
+      var sectionTotal = document.createElement('span');
+      sectionTotal.className = 'section-total';
+      sectionTotal.id = 'section-total-' + groupKey;
+      sectionTotal.textContent = fmt(groupTotal(groupKey));
+      sectionHeader.appendChild(sectionName);
+      sectionHeader.appendChild(sectionTotal);
+      section.appendChild(sectionHeader);
 
-        var labelInput = document.createElement('input');
-        labelInput.className = 'label-input';
-        labelInput.type = 'text';
-        labelInput.placeholder = 'Item name';
-        labelInput.value = row.label;
-        labelInput.addEventListener('input', function(e){
-          row.label = e.target.value;
+      catsInGroup.forEach(function(cat){
+        var card = document.createElement('div');
+        card.className = 'category';
+
+        var head = document.createElement('div');
+        head.className = 'category-head';
+        var nameWrap = document.createElement('div');
+        var dot = document.createElement('span');
+        dot.className = 'cat-dot ' + GROUP_DOT_CLASS[cat.group];
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'name';
+        nameSpan.textContent = cat.name;
+        nameWrap.appendChild(dot);
+        nameWrap.appendChild(nameSpan);
+        var subtotal = document.createElement('div');
+        subtotal.className = 'subtotal';
+        subtotal.id = 'subtotal-' + cat.id;
+        subtotal.textContent = fmt(categoryTotal(cat));
+        head.appendChild(nameWrap);
+        head.appendChild(subtotal);
+        card.appendChild(head);
+
+        var rowsWrap = document.createElement('div');
+        rowsWrap.className = 'rows';
+
+        cat.rows.forEach(function(row, rowIdx){
+          var rowEl = document.createElement('div');
+          rowEl.className = 'row';
+
+          var labelInput = document.createElement('input');
+          labelInput.className = 'label-input';
+          labelInput.type = 'text';
+          labelInput.placeholder = 'Item name';
+          labelInput.value = row.label;
+          labelInput.addEventListener('input', function(e){
+            row.label = e.target.value;
+          });
+
+          var amtWrap = document.createElement('div');
+          amtWrap.className = 'row-amt';
+          var dollarSign = document.createElement('span');
+          dollarSign.textContent = '$';
+          var amtInput = document.createElement('input');
+          amtInput.className = 'amount-input';
+          amtInput.type = 'text';
+          amtInput.inputMode = 'decimal';
+          amtInput.autocomplete = 'off';
+          amtInput.placeholder = '0.00';
+          amtInput.value = row.amount;
+          amtInput.addEventListener('input', function(e){
+            // allow only digits and a single decimal point while typing
+            var cleaned = e.target.value.replace(/[^0-9.]/g, '');
+            var firstDot = cleaned.indexOf('.');
+            if(firstDot !== -1){
+              cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+            }
+            e.target.value = cleaned;
+            row.amount = cleaned === '' ? '' : cleaned;
+            updateNumbers();
+          });
+          amtWrap.appendChild(dollarSign);
+          amtWrap.appendChild(amtInput);
+
+          var delBtn = document.createElement('button');
+          delBtn.className = 'del-btn';
+          delBtn.type = 'button';
+          delBtn.title = 'Remove item';
+          delBtn.textContent = '\u00D7';
+          delBtn.addEventListener('click', function(){
+            cat.rows.splice(rowIdx, 1);
+            buildCategories();
+            updateNumbers();
+          });
+
+          rowEl.appendChild(labelInput);
+          rowEl.appendChild(amtWrap);
+          rowEl.appendChild(delBtn);
+          rowsWrap.appendChild(rowEl);
         });
 
-        var amtWrap = document.createElement('div');
-        amtWrap.className = 'row-amt';
-        var dollarSign = document.createElement('span');
-        dollarSign.textContent = '$';
-        var amtInput = document.createElement('input');
-        amtInput.className = 'amount-input';
-        amtInput.type = 'text';
-        amtInput.inputMode = 'decimal';
-        amtInput.autocomplete = 'off';
-        amtInput.placeholder = '0.00';
-        amtInput.value = row.amount;
-        amtInput.addEventListener('input', function(e){
-          // allow only digits and a single decimal point while typing
-          var cleaned = e.target.value.replace(/[^0-9.]/g, '');
-          var firstDot = cleaned.indexOf('.');
-          if(firstDot !== -1){
-            cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
-          }
-          e.target.value = cleaned;
-          row.amount = cleaned === '' ? '' : cleaned;
-          updateNumbers();
-        });
-        amtWrap.appendChild(dollarSign);
-        amtWrap.appendChild(amtInput);
-
-        var delBtn = document.createElement('button');
-        delBtn.className = 'del-btn';
-        delBtn.type = 'button';
-        delBtn.title = 'Remove item';
-        delBtn.textContent = '\u00D7';
-        delBtn.addEventListener('click', function(){
-          cat.rows.splice(rowIdx, 1);
+        var addRowBtn = document.createElement('button');
+        addRowBtn.className = 'add-row-btn';
+        addRowBtn.type = 'button';
+        addRowBtn.textContent = '+ Add item to ' + cat.name;
+        addRowBtn.addEventListener('click', function(){
+          cat.rows.push({label:'', amount:''});
           buildCategories();
           updateNumbers();
         });
+        rowsWrap.appendChild(addRowBtn);
 
-        rowEl.appendChild(labelInput);
-        rowEl.appendChild(amtWrap);
-        rowEl.appendChild(delBtn);
-        rowsWrap.appendChild(rowEl);
+        card.appendChild(rowsWrap);
+        section.appendChild(card);
       });
 
-      var addRowBtn = document.createElement('button');
-      addRowBtn.className = 'add-row-btn';
-      addRowBtn.type = 'button';
-      addRowBtn.textContent = '+ Add item to ' + cat.name;
-      addRowBtn.addEventListener('click', function(){
-        cat.rows.push({label:'', amount:''});
-        buildCategories();
-        updateNumbers();
-      });
-      rowsWrap.appendChild(addRowBtn);
-
-      card.appendChild(rowsWrap);
-      container.appendChild(card);
+      container.appendChild(section);
     });
   }
 
@@ -661,6 +710,11 @@
     var future = groupTotal('future');
     var life = groupTotal('life');
     var remaining = income - essentials - debt - future - life;
+
+    GROUP_ORDER.forEach(function(groupKey){
+      var el = document.getElementById('section-total-' + groupKey);
+      if(el) el.textContent = fmt(groupTotal(groupKey));
+    });
 
     document.getElementById('sumEssentials').innerHTML = fmt(essentials) + ' <span class="sl-pct">' + pct(essentials, income) + '</span>';
     document.getElementById('sumDebt').innerHTML = fmt(debt) + ' <span class="sl-pct">' + pct(debt, income) + '</span>';
