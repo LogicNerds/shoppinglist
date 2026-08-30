@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero-Based Budget Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-a:#15323F;
+    --bg-b:#0A1B24;
+    --panel:#102A35;
+    --panel-line:rgba(255,255,255,0.09);
+    --text:#F2F6F4;
+    --text-soft:#93A8A2;
+    --emerald:#17A98C;
+    --emerald-deep:#0F7C66;
+    --coral:#E8916A;
+    --gold:#E3C482;
+    --life:#9AA6E0;
+    --shadow: 0 1px 2px rgba(0,0,0,0.25), 0 8px 22px rgba(0,0,0,0.28);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(23,169,140,0.10), transparent 60%),
+      linear-gradient(165deg, var(--bg-a) 0%, var(--bg-b) 55%, #081319 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .app{
+    display:flex;
+    align-items:flex-start;
+    max-width:1180px;
+    margin:0 auto;
+    gap:28px;
+    padding:28px 20px 60px;
+  }
+  /* ---------- LEFT: scrollable ledger ---------- */
+  .ledger{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .app-title{
+    font-size:13px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--emerald);
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .app-sub{
+    font-size:26px;
+    font-weight:800;
+    margin:0 0 22px;
+    letter-spacing:-0.01em;
+    color:var(--text);
+  }
+  .income-card{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:18px 20px;
+    margin-bottom:22px;
+  }
+  .income-card h2{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--text-soft);
+    margin:0 0 14px;
+    font-weight:700;
+  }
+  .income-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    align-items:flex-end;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .field label{
+    font-size:12px;
+    color:var(--text-soft);
+    font-weight:600;
+  }
+  .field input{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15px;
+    border:1px solid var(--panel-line);
+    border-radius:8px;
+    padding:9px 10px;
+    width:140px;
+    background:rgba(255,255,255,0.04);
+    color:var(--text);
+  }
+  .field input:focus{ outline:2px solid var(--emerald); outline-offset:1px; }
+  .income-result{
+    margin-left:auto;
+    text-align:right;
+  }
+  .income-result .amt{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:24px;
+    font-weight:700;
+    color:var(--emerald);
+  }
+  .income-result .cap{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--text-soft);
+    font-weight:600;
+  }
+  .income-override{
+    font-size:12px;
+    color:var(--text-soft);
+    margin-top:10px;
+  }
+  .income-override a{
+    color:var(--emerald);
+    cursor:pointer;
+    text-decoration:underline;
+  }
+
+  .category{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+  .category-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 18px;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .category-head .name{
+    font-weight:700;
+    font-size:15px;
+    color:var(--text);
+  }
+  .category-head .group-tag{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    font-weight:700;
+    padding:3px 8px;
+    border-radius:100px;
+    margin-left:8px;
+  }
+  .tag-essentials{ background:rgba(23,169,140,0.18); color:var(--emerald); }
+  .tag-debt{ background:rgba(232,145,106,0.18); color:var(--coral); }
+  .tag-future{ background:rgba(227,196,130,0.18); color:var(--gold); }
+  .tag-life{ background:rgba(154,166,224,0.18); color:var(--life); }
+
+  .category-head .subtotal{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:15px;
+    color:var(--text);
+  }
+  .rows{ padding:6px 18px 10px; }
+  .row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px dashed var(--panel-line);
+  }
+  .row:last-child{ border-bottom:none; }
+  .row input.label-input{
+    flex:1 1 auto;
+    border:none;
+    background:transparent;
+    font-size:14px;
+    color:var(--text);
+    padding:4px 2px;
+    border-bottom:1px solid transparent;
+  }
+  .row input.label-input::placeholder{ color:var(--text-soft); }
+  .row input.label-input:focus{
+    outline:none;
+    border-bottom:1px solid var(--emerald);
+  }
+  .row .row-amt{
+    display:flex;
+    align-items:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+  }
+  .row .row-amt span{ color:var(--text-soft); margin-right:2px; }
+  .row input.amount-input{
+    width:96px;
+    text-align:right;
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:5px 7px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    background:rgba(255,255,255,0.04);
+    color:var(--text);
+  }
+  .row input.amount-input:focus{ outline:2px solid var(--emerald); outline-offset:1px; }
+  .row .del-btn{
+    border:none;
+    background:none;
+    color:var(--text-soft);
+    cursor:pointer;
+    font-size:16px;
+    line-height:1;
+    padding:4px 6px;
+    border-radius:6px;
+  }
+  .row .del-btn:hover{ background:rgba(232,145,106,0.15); color:var(--coral); }
+  .add-row-btn{
+    margin:8px 0 4px;
+    background:none;
+    border:1px dashed var(--panel-line);
+    border-radius:8px;
+    color:var(--text-soft);
+    font-size:13px;
+    font-weight:600;
+    padding:7px 12px;
+    cursor:pointer;
+    width:100%;
+    text-align:left;
+  }
+  .add-row-btn:hover{ border-color:var(--emerald); color:var(--emerald); background:rgba(23,169,140,0.08); }
+
+  /* ---------- RIGHT: fixed results pane ---------- */
+  .results-wrap{
+    flex:0 0 340px;
+    position:sticky;
+    top:28px;
+    align-self:flex-start;
+  }
+  .results{
+    background:#081820;
+    color:var(--text);
+    border-radius:16px;
+    padding:22px 22px 20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    border:1px solid rgba(255,255,255,0.06);
+    position:relative;
+  }
+  .results h2{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    color:var(--text-soft);
+    font-weight:700;
+    margin:0 0 18px;
+  }
+  .balance-hero{
+    text-align:center;
+    padding:16px 8px 20px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    margin-bottom:16px;
+  }
+  .balance-hero .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--text-soft);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .balance-hero .value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:40px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    transition:color .2s ease;
+  }
+  .balance-hero .status{
+    font-size:12px;
+    margin-top:8px;
+    font-weight:600;
+  }
+  .status-balanced{ color:#7FDCB5; }
+  .status-over{ color:#FF5C5C; }
+  .status-under{ color:#E8CE8F; }
+
+  .allocation-bar{
+    display:flex;
+    width:100%;
+    height:10px;
+    border-radius:100px;
+    overflow:hidden;
+    margin-bottom:18px;
+    background:rgba(255,255,255,0.08);
+  }
+  .allocation-bar span{ height:100%; }
+  .seg-essentials{ background:var(--emerald); }
+  .seg-debt{ background:var(--coral); }
+  .seg-future{ background:var(--gold); }
+  .seg-life{ background:var(--life); }
+
+  .summary-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:9px 0;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    font-size:13px;
+  }
+  .summary-line:last-of-type{ border-bottom:none; }
+  .summary-line .dot{
+    width:9px;height:9px;border-radius:50%;
+    display:inline-block;margin-right:8px;
+  }
+  .summary-line .sl-name{ display:flex; align-items:center; color:#D8DDD9; font-weight:600; }
+  .summary-line .sl-vals{
+    font-family:'IBM Plex Mono',monospace;
+    text-align:right;
+    color:#F3F1E9;
+  }
+  .summary-line .sl-pct{ color:var(--text-soft); font-size:11px; margin-left:6px; }
+
+  .income-line{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--text-soft);
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,0.12);
+  }
+  .income-line .val{ font-family:'IBM Plex Mono',monospace; color:#F3F1E9; font-weight:600; }
+
+  .reset-btn{
+    width:100%;
+    margin-top:18px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.18);
+    color:#D8DDD9;
+    border-radius:8px;
+    padding:9px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .reset-btn:hover{ background:rgba(255,255,255,0.12); }
+
+  /* ---------- Results cover / reveal ---------- */
+  .results-cover{
+    position:absolute;
+    inset:0;
+    background:#081820;
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:28px;
+    z-index:5;
+  }
+  .results-cover .cover-icon{
+    font-size:28px;
+    margin-bottom:14px;
+  }
+  .results-cover h3{
+    margin:0 0 8px;
+    font-size:17px;
+    font-weight:800;
+    color:var(--text);
+  }
+  .results-cover p{
+    margin:0 0 20px;
+    font-size:13px;
+    color:var(--text-soft);
+    line-height:1.5;
+    max-width:230px;
+  }
+  .show-results-btn{
+    background:var(--emerald);
+    color:#06231C;
+    border:none;
+    border-radius:9px;
+    padding:12px 22px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .show-results-btn:hover{ background:#1FC1A0; }
+
+  @media (max-width: 860px){
+    .app{ flex-direction:column; }
+    .results-wrap{ position:relative; top:0; width:100%; flex:none; order:-1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="ledger" id="ledger">
+    <p class="app-title">Zero&#8209;Based Budget</p>
+    <h1 class="app-sub">Give every dollar a job.</h1>
+
+    <div class="income-card">
+      <h2>Income</h2>
+      <div class="income-row">
+        <div class="field">
+          <label for="paydays"># of paydays this month</label>
+          <input type="text" inputmode="numeric" autocomplete="off" id="paydays" value="" placeholder="0">
+        </div>
+        <div class="field">
+          <label for="perCheck">Amount per check</label>
+          <input type="text" inputmode="decimal" autocomplete="off" id="perCheck" value="" placeholder="0.00">
+        </div>
+        <div class="income-result">
+          <div class="cap">This month's income</div>
+          <div class="amt" id="incomeDisplay">$0.00</div>
+        </div>
+      </div>
+      <div class="income-override">
+        Irregular income? <a id="overrideToggle">Enter a total directly</a>
+      </div>
+    </div>
+
+    <div id="categoriesContainer"></div>
+  </div>
+
+  <div class="results-wrap">
+    <div class="results">
+
+      <div class="results-cover" id="resultsCover">
+        <h3>Ready to see where it goes?</h3>
+        <p>Fill in your income and expenses, then reveal your zero&#8209;based breakdown.</p>
+        <button class="show-results-btn" id="showResultsBtn">Show Results</button>
+      </div>
+
+      <h2>Where it's going</h2>
+
+      <div class="balance-hero">
+        <div class="label">Remaining Cash</div>
+        <div class="value" id="remainingValue">$0.00</div>
+        <div class="status" id="remainingStatus">Assign your income below</div>
+      </div>
+
+      <div class="allocation-bar" id="allocationBar">
+        <span class="seg-essentials" style="width:0%"></span>
+        <span class="seg-debt" style="width:0%"></span>
+        <span class="seg-future" style="width:0%"></span>
+        <span class="seg-life" style="width:0%"></span>
+      </div>
+
+      <div class="summary-line">
+        <span class="sl-name"><span class="dot" style="background:var(--emerald)"></span>Cost of Living</span>
+        <span class="sl-vals" id="sumEssentials">$0.00 <span class="sl-pct" id="pctEssentials">0%</span></span>
+      </div>
+      <div class="summary-line">
+        <span class="sl-name"><span class="dot" style="background:var(--coral)"></span>Debt</span>
+        <span class="sl-vals" id="sumDebt">$0.00 <span class="sl-pct" id="pctDebt">0%</span></span>
+      </div>
+      <div class="summary-line">
+        <span class="sl-name"><span class="dot" style="background:var(--gold)"></span>Your Future</span>
+        <span class="sl-vals" id="sumFuture">$0.00 <span class="sl-pct" id="pctFuture">0%</span></span>
+      </div>
+      <div class="summary-line">
+        <span class="sl-name"><span class="dot" style="background:var(--life)"></span>Lifestyle</span>
+        <span class="sl-vals" id="sumLife">$0.00 <span class="sl-pct" id="pctLife">0%</span></span>
+      </div>
+
+      <div class="income-line">
+        <span>Remaining Cash</span>
+        <span class="val" id="remainingLineVal">$0.00</span>
+      </div>
+
+      <button class="reset-btn" id="resetBtn">Start a new budget</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // ---- Data model: mirrors the original sheet's 8 blocks, grouped into 4 summary buckets ----
+  var state = {
+    incomeMode: 'paycheck', // 'paycheck' | 'manual'
+    paydays: '',
+    perCheck: '',
+    manualIncome: '',
+    categories: [
+      { id:'living', name:'Living', group:'essentials',
+        rows:[ {label:'Rent/Mortgage', amount:''}, {label:'Groceries', amount:''}, {label:'Insurance', amount:''} ] },
+      { id:'utilities', name:'Utilities', group:'essentials',
+        rows:[ {label:'Electricity', amount:''}, {label:'Gas', amount:''}, {label:'Water', amount:''}, {label:'Internet', amount:''}, {label:'Phone', amount:''} ] },
+      { id:'transportation', name:'Transportation', group:'essentials',
+        rows:[ {label:'Gas/Fuel', amount:''}, {label:'Car Insurance', amount:''}, {label:'Routine Maint.', amount:''} ] },
+      { id:'misc', name:'Misc Needs', group:'essentials',
+        rows:[ {label:'', amount:''} ] },
+      { id:'debt', name:'Debt Payments', group:'debt',
+        rows:[ {label:'Car payment', amount:''}, {label:'Credit card mins.', amount:''} ] },
+      { id:'subscriptions', name:'Subscriptions', group:'life',
+        rows:[ {label:'netflix', amount:''}, {label:'disney+', amount:''}, {label:'prime', amount:''}, {label:'spotify', amount:''} ] },
+      { id:'future', name:'Your Future', group:'future',
+        rows:[ {label:'savings/invest', amount:''} ] },
+      { id:'extras', name:'Extras', group:'life',
+        rows:[ {label:'Discretionary', amount:''} ] }
+    ]
+  };
+
+  var GROUP_LABELS = { essentials:'Essentials', debt:'Debt', future:'Future', life:'Life' };
+  var GROUP_TAG_CLASS = { essentials:'tag-essentials', debt:'tag-debt', future:'tag-future', life:'tag-life' };
+
+  var fmt = function(n){
+    var sign = n < 0 ? '-' : '';
+    var abs = Math.abs(n);
+    return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  };
+
+  var pct = function(part, whole){
+    if(!whole || whole <= 0) return '0%';
+    return Math.round((part/whole)*100) + '%';
+  };
+
+  function getIncome(){
+    if(state.incomeMode === 'manual') return Number(state.manualIncome) || 0;
+    return (Number(state.paydays)||0) * (Number(state.perCheck)||0);
+  }
+
+  function categoryTotal(cat){
+    return cat.rows.reduce(function(sum, r){ return sum + (Number(r.amount)||0); }, 0);
+  }
+
+  function groupTotal(group){
+    return state.categories
+      .filter(function(c){ return c.group === group; })
+      .reduce(function(sum, c){ return sum + categoryTotal(c); }, 0);
+  }
+
+  function buildCategories(){
+    var container = document.getElementById('categoriesContainer');
+    container.innerHTML = '';
+    state.categories.forEach(function(cat, catIdx){
+      var card = document.createElement('div');
+      card.className = 'category';
+
+      var head = document.createElement('div');
+      head.className = 'category-head';
+      var nameWrap = document.createElement('div');
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = cat.name;
+      var tag = document.createElement('span');
+      tag.className = 'group-tag ' + GROUP_TAG_CLASS[cat.group];
+      tag.textContent = GROUP_LABELS[cat.group];
+      nameWrap.appendChild(nameSpan);
+      nameWrap.appendChild(tag);
+      var subtotal = document.createElement('div');
+      subtotal.className = 'subtotal';
+      subtotal.id = 'subtotal-' + cat.id;
+      subtotal.textContent = fmt(categoryTotal(cat));
+      head.appendChild(nameWrap);
+      head.appendChild(subtotal);
+      card.appendChild(head);
+
+      var rowsWrap = document.createElement('div');
+      rowsWrap.className = 'rows';
+
+      cat.rows.forEach(function(row, rowIdx){
+        var rowEl = document.createElement('div');
+        rowEl.className = 'row';
+
+        var labelInput = document.createElement('input');
+        labelInput.className = 'label-input';
+        labelInput.type = 'text';
+        labelInput.placeholder = 'Item name';
+        labelInput.value = row.label;
+        labelInput.addEventListener('input', function(e){
+          row.label = e.target.value;
+        });
+
+        var amtWrap = document.createElement('div');
+        amtWrap.className = 'row-amt';
+        var dollarSign = document.createElement('span');
+        dollarSign.textContent = '$';
+        var amtInput = document.createElement('input');
+        amtInput.className = 'amount-input';
+        amtInput.type = 'text';
+        amtInput.inputMode = 'decimal';
+        amtInput.autocomplete = 'off';
+        amtInput.placeholder = '0.00';
+        amtInput.value = row.amount;
+        amtInput.addEventListener('input', function(e){
+          // allow only digits and a single decimal point while typing
+          var cleaned = e.target.value.replace(/[^0-9.]/g, '');
+          var firstDot = cleaned.indexOf('.');
+          if(firstDot !== -1){
+            cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+          }
+          e.target.value = cleaned;
+          row.amount = cleaned === '' ? '' : cleaned;
+          updateNumbers();
+        });
+        amtWrap.appendChild(dollarSign);
+        amtWrap.appendChild(amtInput);
+
+        var delBtn = document.createElement('button');
+        delBtn.className = 'del-btn';
+        delBtn.type = 'button';
+        delBtn.title = 'Remove item';
+        delBtn.textContent = '\u00D7';
+        delBtn.addEventListener('click', function(){
+          cat.rows.splice(rowIdx, 1);
+          buildCategories();
+          updateNumbers();
+        });
+
+        rowEl.appendChild(labelInput);
+        rowEl.appendChild(amtWrap);
+        rowEl.appendChild(delBtn);
+        rowsWrap.appendChild(rowEl);
+      });
+
+      var addRowBtn = document.createElement('button');
+      addRowBtn.className = 'add-row-btn';
+      addRowBtn.type = 'button';
+      addRowBtn.textContent = '+ Add item to ' + cat.name;
+      addRowBtn.addEventListener('click', function(){
+        cat.rows.push({label:'', amount:''});
+        buildCategories();
+        updateNumbers();
+      });
+      rowsWrap.appendChild(addRowBtn);
+
+      card.appendChild(rowsWrap);
+      container.appendChild(card);
+    });
+  }
+
+  function updateNumbers(){
+    var income = getIncome();
+    document.getElementById('incomeDisplay').textContent = fmt(income);
+
+    state.categories.forEach(function(cat){
+      var el = document.getElementById('subtotal-' + cat.id);
+      if(el) el.textContent = fmt(categoryTotal(cat));
+    });
+
+    // ---- summary math ----
+    var essentials = groupTotal('essentials');
+    var debt = groupTotal('debt');
+    var future = groupTotal('future');
+    var life = groupTotal('life');
+    var remaining = income - essentials - debt - future - life;
+
+    document.getElementById('sumEssentials').innerHTML = fmt(essentials) + ' <span class="sl-pct">' + pct(essentials, income) + '</span>';
+    document.getElementById('sumDebt').innerHTML = fmt(debt) + ' <span class="sl-pct">' + pct(debt, income) + '</span>';
+    document.getElementById('sumFuture').innerHTML = fmt(future) + ' <span class="sl-pct">' + pct(future, income) + '</span>';
+    document.getElementById('sumLife').innerHTML = fmt(life) + ' <span class="sl-pct">' + pct(life, income) + '</span>';
+
+    var remainingEl = document.getElementById('remainingValue');
+    var statusEl = document.getElementById('remainingStatus');
+    var remainingLineEl = document.getElementById('remainingLineVal');
+    remainingEl.textContent = fmt(remaining);
+    remainingLineEl.textContent = fmt(remaining);
+
+    if(Math.abs(remaining) < 0.005){
+      remainingEl.style.color = '#7FDCB5';
+      remainingLineEl.style.color = '#7FDCB5';
+      statusEl.textContent = 'Balanced \u2014 every dollar has a job';
+      statusEl.className = 'status status-balanced';
+    } else if(remaining < 0){
+      remainingEl.style.color = '#FF5C5C';
+      remainingLineEl.style.color = '#FF5C5C';
+      statusEl.textContent = 'Over budget by ' + fmt(Math.abs(remaining));
+      statusEl.className = 'status status-over';
+    } else {
+      remainingEl.style.color = '#E8CE8F';
+      remainingLineEl.style.color = '#E8CE8F';
+      statusEl.textContent = fmt(remaining) + ' still needs a job';
+      statusEl.className = 'status status-under';
+    }
+
+    // allocation bar (relative to income, clamped)
+    var bar = document.getElementById('allocationBar');
+    var base = income > 0 ? income : (essentials+debt+future+life) || 1;
+    var segs = bar.children;
+    segs[0].style.width = Math.max(0, Math.min(100, (essentials/base)*100)) + '%';
+    segs[1].style.width = Math.max(0, Math.min(100, (debt/base)*100)) + '%';
+    segs[2].style.width = Math.max(0, Math.min(100, (future/base)*100)) + '%';
+    segs[3].style.width = Math.max(0, Math.min(100, (life/base)*100)) + '%';
+  }
+
+  function render(){
+    buildCategories();
+    updateNumbers();
+  }
+
+  // ---- income inputs ----
+  document.getElementById('paydays').addEventListener('input', function(e){
+    var cleaned = e.target.value.replace(/[^0-9]/g, '');
+    e.target.value = cleaned;
+    state.paydays = cleaned;
+    updateNumbers();
+  });
+  document.getElementById('perCheck').addEventListener('input', function(e){
+    var cleaned = e.target.value.replace(/[^0-9.]/g, '');
+    var firstDot = cleaned.indexOf('.');
+    if(firstDot !== -1){
+      cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+    }
+    e.target.value = cleaned;
+    state.perCheck = cleaned;
+    updateNumbers();
+  });
+
+  document.getElementById('overrideToggle').addEventListener('click', function(){
+    var incomeCard = document.querySelector('.income-row');
+    if(state.incomeMode === 'paycheck'){
+      state.incomeMode = 'manual';
+      var carryOver = getIncome();
+      state.manualIncome = carryOver > 0 ? carryOver : '';
+      incomeCard.innerHTML =
+        '<div class="field"><label for="manualIncome">Total income this month</label>' +
+        '<input type="text" inputmode="decimal" autocomplete="off" id="manualIncome" placeholder="0.00" value="'+state.manualIncome+'"></div>' +
+        '<div class="income-result"><div class="cap">This month\'s income</div><div class="amt" id="incomeDisplay">$0.00</div></div>';
+      document.getElementById('manualIncome').addEventListener('input', function(e){
+        var cleaned = e.target.value.replace(/[^0-9.]/g, '');
+        var firstDot = cleaned.indexOf('.');
+        if(firstDot !== -1){
+          cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+        }
+        e.target.value = cleaned;
+        state.manualIncome = cleaned;
+        updateNumbers();
+      });
+      document.getElementById('overrideToggle').textContent = 'Use paycheck calculator instead';
+      updateNumbers();
+    } else {
+      state.incomeMode = 'paycheck';
+      incomeCard.innerHTML =
+        '<div class="field"><label for="paydays"># of paydays this month</label>' +
+        '<input type="text" inputmode="numeric" autocomplete="off" id="paydays" value="'+state.paydays+'" placeholder="0"></div>' +
+        '<div class="field"><label for="perCheck">Amount per check</label>' +
+        '<input type="text" inputmode="decimal" autocomplete="off" id="perCheck" value="'+state.perCheck+'" placeholder="0.00"></div>' +
+        '<div class="income-result"><div class="cap">This month\'s income</div><div class="amt" id="incomeDisplay">$0.00</div></div>';
+      document.getElementById('paydays').addEventListener('input', function(e){
+        var cleaned = e.target.value.replace(/[^0-9]/g, '');
+        e.target.value = cleaned;
+        state.paydays = cleaned;
+        updateNumbers();
+      });
+      document.getElementById('perCheck').addEventListener('input', function(e){
+        var cleaned = e.target.value.replace(/[^0-9.]/g, '');
+        var firstDot = cleaned.indexOf('.');
+        if(firstDot !== -1){
+          cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+        }
+        e.target.value = cleaned;
+        state.perCheck = cleaned;
+        updateNumbers();
+      });
+      document.getElementById('overrideToggle').textContent = 'Enter a total directly';
+      updateNumbers();
+    }
+  });
+
+  // ---- reveal results ----
+  document.getElementById('showResultsBtn').addEventListener('click', function(){
+    document.getElementById('resultsCover').style.display = 'none';
+  });
+
+  // ---- reset ----
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if(!confirm('Clear everything and start a new budget?')) return;
+    location.reload();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
