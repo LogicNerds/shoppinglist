@@ -1,0 +1,115 @@
+/* Shared styles for the IDK site pages (not the app). */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --teal: #0d9488;
+  --teal-dark: #0f766e;
+  --navy: #1a3a4a;
+  --navy-dark: #0a1f2b;
+  --text: #ffffff;
+  --text-dim: rgba(255,255,255,0.62);
+  --text-dimmer: rgba(255,255,255,0.32);
+  --rule: rgba(255,255,255,0.1);
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  background: var(--navy-dark);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ── HEADER ── */
+.site-header { border-bottom: 1px solid var(--rule); }
+
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text);
+  font-family: 'Jost', 'Futura', sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.brand img { width: 34px; height: auto; display: block; }
+
+.site-nav { display: flex; gap: 24px; }
+
+.site-nav a {
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] { color: var(--text); border-color: var(--teal); }
+
+/* ── BUTTON ── */
+.btn {
+  display: inline-block;
+  background: var(--teal);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 16px 40px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn:hover { background: var(--teal-dark); transform: translateY(-2px); }
+.btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ── FOOTER ── */
+.site-footer {
+  margin-top: auto;
+  padding: 56px 0 32px;
+}
+
+.site-footer .wrap {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--text-dimmer);
+}
+
+.site-footer a { text-decoration: none; color: var(--text-dimmer); }
+.site-footer a:hover { color: var(--text-dim); }
+
+@media (max-width: 600px) {
+  .site-nav { gap: 16px; }
+  .site-nav a { font-size: 0.85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
