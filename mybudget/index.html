@@ -75,10 +75,16 @@
     font-size:clamp(2.8rem, 8vw, 4.4rem);
     line-height:0.9;
     letter-spacing:0.01em;
-    margin:0 0 28px;
+    margin:0 0 14px;
     color:var(--text);
   }
   .app-sub span{ color:var(--teal); }
+  .head-cta{
+    margin:0 0 28px;
+    font-size:0.95rem;
+    line-height:1.5;
+    color:var(--text-dim);
+  }
   .income-card{
     background:var(--panel);
     border:1px solid var(--panel-line);
@@ -457,6 +463,75 @@
   }
   .show-results-btn:hover{ background:#14b8a6; }
 
+  /* ---------- Per-check sections ---------- */
+  .check{
+    border:1px solid var(--panel-line);
+    border-radius:16px;
+    margin-bottom:16px;
+    background:rgba(255,255,255,0.015);
+  }
+  .check-head{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px 18px;
+    background:none;
+    border:none;
+    color:var(--text);
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+    border-radius:16px;
+  }
+  .check-head:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+  .check-chev{
+    width:10px; height:10px;
+    border-right:2px solid var(--text-soft);
+    border-bottom:2px solid var(--text-soft);
+    transform:rotate(-45deg);
+    transition:transform .15s;
+    flex:0 0 auto;
+  }
+  .check.open .check-chev{ transform:rotate(45deg); }
+  .check-title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.7rem;
+    line-height:1;
+    letter-spacing:0.02em;
+  }
+  .check-meta{
+    margin-left:auto;
+    text-align:right;
+    font-size:12px;
+    color:var(--text-soft);
+    line-height:1.35;
+  }
+  .check-meta .left{ font-weight:700; font-size:14px; }
+  .check-body{ display:none; padding:4px 14px 2px; }
+  .check.open .check-body{ display:block; }
+  .left.balanced{ color:#7FDCB5; }
+  .left.over{ color:#FF5C5C; }
+  .left.under{ color:#E8CE8F; }
+
+  .by-check{ margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.12); }
+  .by-check h3{
+    margin:0 0 6px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--text-soft);
+    font-weight:700;
+  }
+  .by-check .bc-line{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    font-size:13px;
+    color:#D8DDD9;
+  }
+  .by-check .bc-line span:last-child{ font-weight:600; font-variant-numeric:tabular-nums; }
+
   @media (max-width: 860px){
     .app{ flex-direction:column; align-items:stretch; }
     .page-head{ padding-top:36px; }
@@ -483,7 +558,8 @@
     <span class="idk">IDK</span>
     <span class="product">my budget</span>
   </div>
-  <h1 class="app-sub">Give every dollar <span>a job.</span></h1>
+  <h1 class="app-sub">Assign <span>every dollar.</span></h1>
+  <p class="head-cta">Trying to figure out how to make your budget work? <a class="cta-link" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Schedule a free Budget Assessment</a></p>
 </div>
 <div class="app wrap">
   <div class="ledger" id="ledger">
@@ -558,10 +634,15 @@
         <span class="val" id="remainingLineVal">$0.00</span>
       </div>
 
+      <div class="by-check" id="byCheck" hidden>
+        <h3>Left to assign, by check</h3>
+        <div id="byCheckLines"></div>
+      </div>
+
       <button class="reset-btn" id="resetBtn">Start a new budget</button>
     </div>
 
-    <p class="cta-text">Trying to figure out how to make your budget work? <a class="cta-link" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Schedule a free discovery call!</a></p>
+    <p class="cta-text">Trying to figure out how to make your budget work? <a class="cta-link" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Schedule a free Budget Assessment</a></p>
   </div>
 </div>
 </main>
@@ -576,13 +657,11 @@
 <script>
 (function(){
 
-  // ---- Data model: mirrors the original sheet's 8 blocks, grouped into 4 summary buckets ----
-  var state = {
-    incomeMode: 'paycheck', // 'paycheck' | 'manual'
-    paydays: '',
-    perCheck: '',
-    manualIncome: '',
-    categories: [
+  var MAX_PAYDAYS = 5;
+
+  // Default line items for one set of categories (one per check).
+  function makeCategories(){
+    return [
       { id:'living', name:'Living', group:'essentials',
         rows:[ {label:'Rent/Mortgage', amount:''}, {label:'Groceries', amount:''}, {label:'Insurance', amount:''} ] },
       { id:'utilities', name:'Utilities', group:'essentials',
@@ -599,7 +678,17 @@
         rows:[ {label:'savings/invest', amount:''} ] },
       { id:'extras', name:'Extras', group:'life',
         rows:[ {label:'Discretionary', amount:''} ] }
-    ]
+    ];
+  }
+
+  var state = {
+    incomeMode: 'paycheck', // 'paycheck' | 'manual'
+    paydays: '',
+    perCheck: '',
+    manualIncome: '',
+    // One category set per check. Check 1's set is also the single list used
+    // for "Enter a total directly" and for 0-1 paydays, so nothing is lost when switching.
+    checks: [ { categories: makeCategories(), open: true } ]
   };
 
   var GROUP_LABELS = { essentials:'Essentials', debt:'Debt', future:'Future', life:'Life' };
@@ -618,27 +707,77 @@
     return Math.round((part/whole)*100) + '%';
   };
 
+  function cleanDecimal(v){
+    var cleaned = v.replace(/[^0-9.]/g, '');
+    var firstDot = cleaned.indexOf('.');
+    if(firstDot !== -1){
+      cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+    }
+    return cleaned;
+  }
+
+  // Is the budget split into one section per check right now?
+  function isSplit(){
+    return state.incomeMode === 'paycheck' && (Number(state.paydays)||0) >= 2;
+  }
+
+  function checkCount(){
+    return isSplit() ? Number(state.paydays) : 1;
+  }
+
+  // Make sure a category set exists for every visible check.
+  function ensureChecks(){
+    while(state.checks.length < checkCount()){
+      state.checks.push({ categories: makeCategories(), open: false });
+    }
+  }
+
+  function activeChecks(){
+    return state.checks.slice(0, checkCount());
+  }
+
   function getIncome(){
     if(state.incomeMode === 'manual') return Number(state.manualIncome) || 0;
     return (Number(state.paydays)||0) * (Number(state.perCheck)||0);
+  }
+
+  function checkIncome(){
+    return Number(state.perCheck) || 0;
   }
 
   function categoryTotal(cat){
     return cat.rows.reduce(function(sum, r){ return sum + (Number(r.amount)||0); }, 0);
   }
 
-  function groupTotal(group){
-    return state.categories
+  function groupTotalIn(categories, group){
+    return categories
       .filter(function(c){ return c.group === group; })
       .reduce(function(sum, c){ return sum + categoryTotal(c); }, 0);
   }
 
-  function buildCategories(){
-    var container = document.getElementById('categoriesContainer');
-    container.innerHTML = '';
+  // Group total across every active check.
+  function groupTotal(group){
+    return activeChecks().reduce(function(sum, chk){ return sum + groupTotalIn(chk.categories, group); }, 0);
+  }
 
+  function checkSpent(chk){
+    return chk.categories.reduce(function(sum, c){ return sum + categoryTotal(c); }, 0);
+  }
+
+  function leftClass(left){
+    if(Math.abs(left) < 0.005) return 'balanced';
+    return left < 0 ? 'over' : 'under';
+  }
+
+  function leftText(left){
+    if(Math.abs(left) < 0.005) return 'Balanced';
+    return left < 0 ? fmt(Math.abs(left)) + ' over' : fmt(left) + ' left';
+  }
+
+  // Builds the category cards for one check. ci = check index, used to keep ids unique.
+  function buildCategorySet(container, categories, ci){
     GROUP_ORDER.forEach(function(groupKey){
-      var catsInGroup = state.categories.filter(function(c){ return c.group === groupKey; });
+      var catsInGroup = categories.filter(function(c){ return c.group === groupKey; });
       if(catsInGroup.length === 0) return;
 
       var section = document.createElement('div');
@@ -650,8 +789,8 @@
       sectionName.textContent = GROUP_LABELS[groupKey];
       var sectionTotal = document.createElement('span');
       sectionTotal.className = 'section-total';
-      sectionTotal.id = 'section-total-' + groupKey;
-      sectionTotal.textContent = fmt(groupTotal(groupKey));
+      sectionTotal.id = 'section-total-' + ci + '-' + groupKey;
+      sectionTotal.textContent = fmt(groupTotalIn(categories, groupKey));
       sectionHeader.appendChild(sectionName);
       sectionHeader.appendChild(sectionTotal);
       section.appendChild(sectionHeader);
@@ -672,7 +811,7 @@
         nameWrap.appendChild(nameSpan);
         var subtotal = document.createElement('div');
         subtotal.className = 'subtotal';
-        subtotal.id = 'subtotal-' + cat.id;
+        subtotal.id = 'subtotal-' + ci + '-' + cat.id;
         subtotal.textContent = fmt(categoryTotal(cat));
         head.appendChild(nameWrap);
         head.appendChild(subtotal);
@@ -706,14 +845,9 @@
           amtInput.placeholder = '0.00';
           amtInput.value = row.amount;
           amtInput.addEventListener('input', function(e){
-            // allow only digits and a single decimal point while typing
-            var cleaned = e.target.value.replace(/[^0-9.]/g, '');
-            var firstDot = cleaned.indexOf('.');
-            if(firstDot !== -1){
-              cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
-            }
+            var cleaned = cleanDecimal(e.target.value);
             e.target.value = cleaned;
-            row.amount = cleaned === '' ? '' : cleaned;
+            row.amount = cleaned;
             updateNumbers();
           });
           amtWrap.appendChild(dollarSign);
@@ -723,11 +857,10 @@
           delBtn.className = 'del-btn';
           delBtn.type = 'button';
           delBtn.title = 'Remove item';
-          delBtn.textContent = '\u00D7';
+          delBtn.textContent = '×';
           delBtn.addEventListener('click', function(){
             cat.rows.splice(rowIdx, 1);
-            buildCategories();
-            updateNumbers();
+            render();
           });
 
           rowEl.appendChild(labelInput);
@@ -742,8 +875,7 @@
         addRowBtn.textContent = '+ Add item to ' + cat.name;
         addRowBtn.addEventListener('click', function(){
           cat.rows.push({label:'', amount:''});
-          buildCategories();
-          updateNumbers();
+          render();
         });
         rowsWrap.appendChild(addRowBtn);
 
@@ -755,26 +887,99 @@
     });
   }
 
+  function buildCategories(){
+    var container = document.getElementById('categoriesContainer');
+    container.innerHTML = '';
+    ensureChecks();
+
+    if(!isSplit()){
+      buildCategorySet(container, state.checks[0].categories, 0);
+      return;
+    }
+
+    activeChecks().forEach(function(chk, ci){
+      var wrap = document.createElement('div');
+      wrap.className = 'check' + (chk.open ? ' open' : '');
+
+      var head = document.createElement('button');
+      head.type = 'button';
+      head.className = 'check-head';
+      head.setAttribute('aria-expanded', chk.open ? 'true' : 'false');
+      head.setAttribute('aria-controls', 'check-body-' + ci);
+
+      var chev = document.createElement('span');
+      chev.className = 'check-chev';
+      chev.setAttribute('aria-hidden', 'true');
+      var title = document.createElement('span');
+      title.className = 'check-title';
+      title.textContent = 'Check ' + (ci + 1);
+      var meta = document.createElement('span');
+      meta.className = 'check-meta';
+      meta.innerHTML = '<span id="check-in-' + ci + '"></span><br><span class="left" id="check-left-' + ci + '"></span>';
+
+      head.appendChild(chev);
+      head.appendChild(title);
+      head.appendChild(meta);
+      head.addEventListener('click', function(){
+        chk.open = !chk.open;
+        wrap.classList.toggle('open', chk.open);
+        head.setAttribute('aria-expanded', chk.open ? 'true' : 'false');
+      });
+
+      var body = document.createElement('div');
+      body.className = 'check-body';
+      body.id = 'check-body-' + ci;
+      buildCategorySet(body, chk.categories, ci);
+
+      wrap.appendChild(head);
+      wrap.appendChild(body);
+      container.appendChild(wrap);
+    });
+  }
+
   function updateNumbers(){
     var income = getIncome();
     document.getElementById('incomeDisplay').textContent = fmt(income);
 
-    state.categories.forEach(function(cat){
-      var el = document.getElementById('subtotal-' + cat.id);
-      if(el) el.textContent = fmt(categoryTotal(cat));
+    // per-check subtotals and section totals
+    activeChecks().forEach(function(chk, ci){
+      chk.categories.forEach(function(cat){
+        var el = document.getElementById('subtotal-' + ci + '-' + cat.id);
+        if(el) el.textContent = fmt(categoryTotal(cat));
+      });
+      GROUP_ORDER.forEach(function(groupKey){
+        var el = document.getElementById('section-total-' + ci + '-' + groupKey);
+        if(el) el.textContent = fmt(groupTotalIn(chk.categories, groupKey));
+      });
     });
 
-    // ---- summary math ----
+    // per-check headers and the "by check" list in the results panel
+    var byCheck = document.getElementById('byCheck');
+    var byLines = document.getElementById('byCheckLines');
+    if(isSplit()){
+      var lines = '';
+      activeChecks().forEach(function(chk, ci){
+        var left = checkIncome() - checkSpent(chk);
+        var cls = leftClass(left);
+        var inEl = document.getElementById('check-in-' + ci);
+        var leftEl = document.getElementById('check-left-' + ci);
+        if(inEl) inEl.textContent = fmt(checkIncome());
+        if(leftEl){ leftEl.textContent = leftText(left); leftEl.className = 'left ' + cls; }
+        lines += '<div class="bc-line"><span>Check ' + (ci + 1) + '</span><span class="left ' + cls + '">' + leftText(left) + '</span></div>';
+      });
+      byLines.innerHTML = lines;
+      byCheck.hidden = false;
+    } else {
+      byLines.innerHTML = '';
+      byCheck.hidden = true;
+    }
+
+    // ---- summary math (all active checks combined) ----
     var essentials = groupTotal('essentials');
     var debt = groupTotal('debt');
     var future = groupTotal('future');
     var life = groupTotal('life');
     var remaining = income - essentials - debt - future - life;
-
-    GROUP_ORDER.forEach(function(groupKey){
-      var el = document.getElementById('section-total-' + groupKey);
-      if(el) el.textContent = fmt(groupTotal(groupKey));
-    });
 
     document.getElementById('sumEssentials').innerHTML = fmt(essentials) + ' <span class="sl-pct">' + pct(essentials, income) + '</span>';
     document.getElementById('sumDebt').innerHTML = fmt(debt) + ' <span class="sl-pct">' + pct(debt, income) + '</span>';
@@ -790,7 +995,7 @@
     if(Math.abs(remaining) < 0.005){
       remainingEl.style.color = '#7FDCB5';
       remainingLineEl.style.color = '#7FDCB5';
-      statusEl.textContent = 'Balanced \u2014 every dollar has a job';
+      statusEl.textContent = 'Balanced — every dollar has a job';
       statusEl.className = 'status status-balanced';
     } else if(remaining < 0){
       remainingEl.style.color = '#FF5C5C';
@@ -820,72 +1025,61 @@
   }
 
   // ---- income inputs ----
-  document.getElementById('paydays').addEventListener('input', function(e){
-    var cleaned = e.target.value.replace(/[^0-9]/g, '');
-    e.target.value = cleaned;
-    state.paydays = cleaned;
-    updateNumbers();
-  });
-  document.getElementById('perCheck').addEventListener('input', function(e){
-    var cleaned = e.target.value.replace(/[^0-9.]/g, '');
-    var firstDot = cleaned.indexOf('.');
-    if(firstDot !== -1){
-      cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
-    }
-    e.target.value = cleaned;
-    state.perCheck = cleaned;
-    updateNumbers();
-  });
+  function bindPaycheckInputs(){
+    var paydaysEl = document.getElementById('paydays');
+    paydaysEl.addEventListener('input', function(e){
+      var cleaned = e.target.value.replace(/[^0-9]/g, '');
+      if(cleaned !== '' && Number(cleaned) > MAX_PAYDAYS) cleaned = String(MAX_PAYDAYS);
+      e.target.value = cleaned;
+      var wasSplit = isSplit(), oldCount = checkCount();
+      state.paydays = cleaned;
+      // Only rebuild the category cards when the number of check sections changes.
+      if(isSplit() !== wasSplit || checkCount() !== oldCount) render();
+      else updateNumbers();
+    });
+    document.getElementById('perCheck').addEventListener('input', function(e){
+      var cleaned = cleanDecimal(e.target.value);
+      e.target.value = cleaned;
+      state.perCheck = cleaned;
+      updateNumbers();
+    });
+  }
+
+  function paycheckFieldsHTML(){
+    return '<div class="field"><label for="paydays"># of paydays this month</label>' +
+      '<input type="text" inputmode="numeric" autocomplete="off" maxlength="1" id="paydays" value="'+state.paydays+'" placeholder="0"></div>' +
+      '<div class="field"><label for="perCheck">Amount per check</label>' +
+      '<input type="text" inputmode="decimal" autocomplete="off" id="perCheck" value="'+state.perCheck+'" placeholder="0.00"></div>' +
+      '<div class="income-result"><div class="cap">This month\'s income</div><div class="amt" id="incomeDisplay">$0.00</div></div>';
+  }
+
+  document.querySelector('.income-row').innerHTML = paycheckFieldsHTML();
+  bindPaycheckInputs();
 
   document.getElementById('overrideToggle').addEventListener('click', function(){
     var incomeCard = document.querySelector('.income-row');
     if(state.incomeMode === 'paycheck'){
+      var carryOver = getIncome(); // read paycheck income before switching modes
       state.incomeMode = 'manual';
-      var carryOver = getIncome();
       state.manualIncome = carryOver > 0 ? carryOver : '';
       incomeCard.innerHTML =
         '<div class="field"><label for="manualIncome">Total income this month</label>' +
         '<input type="text" inputmode="decimal" autocomplete="off" id="manualIncome" placeholder="0.00" value="'+state.manualIncome+'"></div>' +
         '<div class="income-result"><div class="cap">This month\'s income</div><div class="amt" id="incomeDisplay">$0.00</div></div>';
       document.getElementById('manualIncome').addEventListener('input', function(e){
-        var cleaned = e.target.value.replace(/[^0-9.]/g, '');
-        var firstDot = cleaned.indexOf('.');
-        if(firstDot !== -1){
-          cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
-        }
+        var cleaned = cleanDecimal(e.target.value);
         e.target.value = cleaned;
         state.manualIncome = cleaned;
         updateNumbers();
       });
       document.getElementById('overrideToggle').textContent = 'Use paycheck calculator instead';
-      updateNumbers();
     } else {
       state.incomeMode = 'paycheck';
-      incomeCard.innerHTML =
-        '<div class="field"><label for="paydays"># of paydays this month</label>' +
-        '<input type="text" inputmode="numeric" autocomplete="off" id="paydays" value="'+state.paydays+'" placeholder="0"></div>' +
-        '<div class="field"><label for="perCheck">Amount per check</label>' +
-        '<input type="text" inputmode="decimal" autocomplete="off" id="perCheck" value="'+state.perCheck+'" placeholder="0.00"></div>' +
-        '<div class="income-result"><div class="cap">This month\'s income</div><div class="amt" id="incomeDisplay">$0.00</div></div>';
-      document.getElementById('paydays').addEventListener('input', function(e){
-        var cleaned = e.target.value.replace(/[^0-9]/g, '');
-        e.target.value = cleaned;
-        state.paydays = cleaned;
-        updateNumbers();
-      });
-      document.getElementById('perCheck').addEventListener('input', function(e){
-        var cleaned = e.target.value.replace(/[^0-9.]/g, '');
-        var firstDot = cleaned.indexOf('.');
-        if(firstDot !== -1){
-          cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
-        }
-        e.target.value = cleaned;
-        state.perCheck = cleaned;
-        updateNumbers();
-      });
+      incomeCard.innerHTML = paycheckFieldsHTML();
+      bindPaycheckInputs();
       document.getElementById('overrideToggle').textContent = 'Enter a total directly';
-      updateNumbers();
     }
+    render();
   });
 
   // ---- reveal results ----
