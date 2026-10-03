@@ -37,7 +37,8 @@
   }
 
   main { padding: 48px 0 0; }
-  main > .wrap { display: grid; gap: 32px; }
+  main > .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  main > .wrap > section { min-width: 0; }
   .wrap.wide { max-width: 1080px; }
 
   /* ── INTRO ── */
