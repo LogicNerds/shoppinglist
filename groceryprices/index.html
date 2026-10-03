@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDK Grocery Prices — 2020 vs. now</title>
+<meta name="description" content="What nine everyday groceries cost in 2020 vs. now, from Bureau of Labor Statistics average price data. Build your own cart and see how its price moved.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KEZSNJZ4JW');
+</script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a1f2b">
+<link rel="icon" href="/icons/icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<style>
+  /* Page-only tokens; brand tokens (--teal, --navy-dark, --text…) come from site.css */
+  :root {
+    --panel: #102a38;
+    --teal-bright: #2dd4bf;
+    --up: #fb923c;
+    --down: #5eead4;
+  }
+
+  main { padding: 48px 0 0; }
+  main > .wrap { display: grid; gap: 32px; }
+
+  /* ── INTRO ── */
+  .intro { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; align-items: end; }
+  .intro h1 {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2.8rem, 8vw, 4.8rem);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+  .intro h1 span { color: var(--teal); }
+  .lede { color: var(--text-dim); margin-top: 14px; max-width: 52ch; line-height: 1.55; }
+
+  .readout { border-top: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
+  .readout div { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .readout .wide { grid-column: 1 / -1; }
+  .label { display: block; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dimmer); }
+  .num { display: block; font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .num.chg { color: var(--up); }
+  .note { font-size: 0.8rem; color: var(--text-dim); }
+
+  /* ── SLICERS ── */
+  .controls { display: grid; gap: 14px; }
+  .ctl-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px; }
+  .quick { display: flex; gap: 14px; }
+  .quick button { font: 500 0.85rem 'DM Sans', sans-serif; background: none; border: 0; color: var(--teal-bright); cursor: pointer; padding: 4px 0; }
+  .quick button:hover { text-decoration: underline; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 500 0.9rem 'DM Sans', sans-serif;
+    color: var(--text-dimmer); background: transparent;
+    border: 1px solid var(--rule); border-radius: 999px;
+    padding: 7px 14px 7px 10px; cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .chip .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--c); }
+  .chip[aria-pressed="true"] { color: var(--text); background: var(--panel); border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+  .chip[aria-pressed="true"] .dot { background: var(--c); }
+  .chip .pct { font-variant-numeric: tabular-nums; font-size: 0.78rem; color: var(--text-dim); }
+  .chip[aria-pressed="false"] .pct { color: var(--text-dimmer); }
+  main button:focus-visible { outline: 2px solid var(--teal-bright); outline-offset: 2px; }
+
+  /* ── CHART ── */
+  .chart-box { background: var(--panel); border-radius: 8px; padding: 18px 14px 10px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 6px; margin-bottom: 8px; }
+  .chart-head h2 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 1.6rem; letter-spacing: 0.02em; line-height: 1.1; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 3px; gap: 2px; }
+  .seg button { font: 500 0.85rem 'DM Sans', sans-serif; color: var(--text-dim); background: none; border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--teal); color: var(--text); }
+  .canvas-wrap { position: relative; height: 380px; }
+  .empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-dim); font-size: 0.95rem; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; border-top: 1px solid var(--rule); }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 680px; font-size: 0.95rem; }
+  th, td { padding: 10px 8px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dimmer); font-weight: 500; }
+  td.item i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; margin-right: 8px; }
+  td.item em { font-style: normal; color: var(--text-dimmer); font-size: 0.8rem; }
+  td.total { font-weight: 700; }
+  .pos { color: var(--up); }
+  .neg { color: var(--down); }
+  tfoot td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--rule); }
+  tr.off { display: none; }
+
+  /* ── TOOL TILES ── */
+  .next h2 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.4rem); letter-spacing: 0.01em; line-height: 1; margin-bottom: 16px; }
+  .next h2 span { color: var(--teal); }
+  .tools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  .tool {
+    display: flex; flex-direction: column; gap: 14px;
+    border: 1px solid var(--rule); border-radius: 8px;
+    padding: 22px; text-decoration: none; color: var(--text);
+    transition: border-color 0.15s, transform 0.2s;
+  }
+  .tool:hover { border-color: var(--teal); transform: translateY(-3px); }
+  .tool:focus-visible { outline: 3px solid var(--teal); outline-offset: 4px; }
+  .tool-mark { display: flex; align-items: center; gap: 6px; font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif; font-weight: 700; font-size: 1.5rem; line-height: 1; }
+  .tool-mark img { width: 30px; height: auto; display: block; }
+  .tool-mark small { font-weight: 600; font-size: 1rem; letter-spacing: 0.04em; margin-left: 4px; }
+  .tool p { color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+  .tool .go { margin-top: auto; color: var(--teal-bright); font-weight: 700; font-size: 0.95rem; }
+
+  /* ── FINE PRINT ── */
+  .fine { font-size: 0.75rem; line-height: 1.65; color: var(--text-dimmer); border-top: 1px solid var(--rule); padding-top: 20px; display: grid; gap: 8px; }
+  .fine p { max-width: 90ch; }
+  .fine a { color: var(--text-dimmer); }
+  .fine a:hover { color: var(--text-dim); }
+
+  @media (max-width: 700px) {
+    main { padding-top: 32px; }
+    main > .wrap { gap: 26px; }
+    .intro { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .canvas-wrap { height: 320px; }
+    .tools { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="IDK home"><img src="/idkassets/idk-money.png" alt="">IDK</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/mygroceries/">MyGroceries</a>
+      <a href="/mybudget/">MyBudget</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <section class="intro">
+      <div>
+        <h1>What groceries cost in 2020 vs. <span>now</span></h1>
+        <p class="lede">Nine everyday staples, priced by the Bureau of Labor Statistics every month. Turn items on and off to build your own cart and see how its price moved.</p>
+      </div>
+      <div class="readout" aria-live="polite">
+        <div><span class="label">Your cart, 2020</span><span class="num" id="b2020">$0</span></div>
+        <div><span class="label">Your cart, 2026</span><span class="num" id="b2026">$0</span></div>
+        <div class="wide"><span class="label">Change since 2020</span><span class="num chg" id="bchg">+0%</span><span class="note" id="bnote">One of each selected item</span></div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Choose items">
+      <div class="ctl-row">
+        <span class="label">Items in your cart</span>
+        <div class="quick"><button type="button" id="all">Select all</button><button type="button" id="none">Clear</button></div>
+      </div>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <section class="chart-box">
+      <div class="chart-head">
+        <h2 id="chartTitle">Change since 2020</h2>
+        <div class="seg" role="group" aria-label="Chart view">
+          <button type="button" id="mPct" aria-pressed="true">% vs. 2020</button>
+          <button type="button" id="mUsd" aria-pressed="false">Price ($)</button>
+          <button type="button" id="mYoy" aria-pressed="false">Year over year</button>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="chart" aria-label="Line chart of grocery prices by year"></canvas>
+        <div class="empty" id="empty" hidden>Pick at least one item above to draw the chart.</div>
+      </div>
+    </section>
+
+    <section class="table-wrap" aria-label="Average price by year">
+      <table>
+        <thead><tr><th>Item</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026 YTD</th><th>vs. 2020</th></tr></thead>
+        <tbody id="rows"></tbody>
+        <tfoot><tr id="foot"></tr></tfoot>
+      </table>
+    </section>
+
+    <section class="next" aria-label="IDK tools">
+      <h2>Prices move. <span>Your plan shouldn't guess.</span></h2>
+      <div class="tools">
+        <a class="tool" href="/mygroceries/">
+          <span class="tool-mark"><img src="/idkassets/idk-money.png" alt="">IDK<small>my groceries</small></span>
+          <p>Keep a running total as you shop, so you know what this trip costs before you hit checkout.</p>
+          <span class="go">Try MyGroceries →</span>
+        </a>
+        <a class="tool" href="/mybudget/">
+          <span class="tool-mark"><img src="/idkassets/idk-money.png" alt="">IDK<small>my budget</small></span>
+          <p>Give your grocery money a set amount with a zero-based budget, so a price jump shows up in your plan first.</p>
+          <span class="go">Try MyBudget →</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="fine" aria-label="Sources and notes">
+      <p>Source: U.S. Bureau of Labor Statistics, CPI Average Price Data, U.S. city average, via <a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener">FRED</a>. Each year is the average of that year's monthly prices. 2026 covers January through August. BLS did not publish October 2025 prices because of the federal shutdown, and potato prices are also missing for March–April 2020 and November 2025; those years average the months available.</p>
+      <p>National averages are not store prices. Prices in high-cost areas, including much of California, typically run higher.</p>
+      <p>Series: eggs APU0000708111 · ground beef APU0000703112 · chicken breast APU0000FF1101 · whole milk APU0000709112 · white bread APU0000702111 · bananas APU0000711211 · coffee APU0000717311 · potatoes APU0000712112 · bacon APU0000704111</p>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Logic Nerds</span>
+    <a href="/privacy.html">Privacy Policy</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const YEARS = ['2020', '2021', '2022', '2023', '2024', '2025', '2026 YTD'];
+// BLS annual averages of monthly prices (2026 = Jan–Aug)
+const ITEMS = [
+  { name: 'Coffee',         unit: 'lb',  c: '#f59e0b', p: [4.43, 4.71, 5.89, 6.16, 6.32, 8.18, 9.47] },
+  { name: 'Ground beef',    unit: 'lb',  c: '#f87171', p: [4.12, 4.33, 4.81, 5.02, 5.39, 6.09, 6.81] },
+  { name: 'Eggs',           unit: 'doz', c: '#fde047', p: [1.51, 1.67, 2.86, 2.80, 3.17, 4.25, 2.31] },
+  { name: 'Chicken breast', unit: 'lb',  c: '#fb923c', p: [3.22, 3.45, 4.32, 4.23, 4.05, 4.16, 4.17] },
+  { name: 'White bread',    unit: 'lb',  c: '#c4b5fd', p: [1.45, 1.52, 1.70, 1.96, 1.97, 1.87, 1.83] },
+  { name: 'Whole milk',     unit: 'gal', c: '#7dd3fc', p: [3.32, 3.54, 4.09, 4.03, 3.98, 4.07, 4.18] },
+  { name: 'Bacon',          unit: 'lb',  c: '#f9a8d4', p: [5.58, 6.64, 7.31, 6.65, 6.78, 7.02, 6.75] },
+  { name: 'Bananas',        unit: 'lb',  c: '#bef264', p: [0.58, 0.60, 0.64, 0.63, 0.62, 0.65, 0.65] },
+  { name: 'Potatoes',       unit: 'lb',  c: '#2dd4bf', p: [0.81, 0.78, 0.91, 1.00, 0.98, 0.96, 0.90] },
+];
+ITEMS.forEach(it => { it.on = true; });
+let mode = 'pct';
+
+const $ = id => document.getElementById(id);
+const usd = v => '$' + v.toFixed(2);
+const sign = v => (v > 0 ? '+' : '') + v.toFixed(1) + '%';
+const vs2020 = it => it.p.map(v => +((v / it.p[0] - 1) * 100).toFixed(1));
+const yoy = it => it.p.map((v, i) => i === 0 ? null : +((v / it.p[i - 1] - 1) * 100).toFixed(1));
+
+ITEMS.forEach((it, i) => {
+  const total = (it.p[6] / it.p[0] - 1) * 100;
+
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'chip';
+  chip.id = 'chip' + i;
+  chip.style.setProperty('--c', it.c);
+  chip.innerHTML = `<span class="dot"></span>${it.name}<span class="pct">${sign(total)}</span>`;
+  chip.addEventListener('click', () => { it.on = !it.on; render(); });
+  $('chips').appendChild(chip);
+  it.chip = chip;
+
+  const tr = document.createElement('tr');
+  tr.style.setProperty('--c', it.c);
+  tr.innerHTML = `<td class="item"><i></i>${it.name} <em>/${it.unit}</em></td>` +
+    it.p.map(v => `<td>${usd(v)}</td>`).join('') +
+    `<td class="total ${total >= 0 ? 'pos' : 'neg'}">${sign(total)}</td>`;
+  $('rows').appendChild(tr);
+  it.row = tr;
+});
+
+$('all').onclick = () => { ITEMS.forEach(it => { it.on = true; }); render(); };
+$('none').onclick = () => { ITEMS.forEach(it => { it.on = false; }); render(); };
+const modes = { pct: $('mPct'), usd: $('mUsd'), yoy: $('mYoy') };
+Object.entries(modes).forEach(([k, b]) => { b.onclick = () => { mode = k; render(); }; });
+
+const ink = 'rgba(255,255,255,0.62)';
+const grid = 'rgba(255,255,255,0.08)';
+let chart = null;
+if (window.Chart) {
+  Chart.defaults.font.family = "'DM Sans', 'Segoe UI', sans-serif";
+  Chart.defaults.color = ink;
+  chart = new Chart($('chart'), {
+    type: 'line',
+    data: { labels: YEARS, datasets: [] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      animation: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 350 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0a1f2b',
+          borderColor: 'rgba(255,255,255,0.15)',
+          borderWidth: 1,
+          padding: 10,
+          titleFont: { weight: '700' },
+          itemSort: (a, b) => b.parsed.y - a.parsed.y,
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.y;
+              if (v == null) return null;
+              return ` ${ctx.dataset.label}: ${mode === 'usd' ? usd(v) : sign(v)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: grid }, ticks: { color: ink } },
+        y: {
+          grid: { color: grid },
+          border: { display: false },
+          ticks: { color: ink, callback: v => mode === 'usd' ? '$' + v : (v > 0 ? '+' : '') + v + '%' }
+        }
+      }
+    }
+  });
+}
+
+function render() {
+  const on = ITEMS.filter(it => it.on);
+  ITEMS.forEach(it => {
+    it.chip.setAttribute('aria-pressed', it.on);
+    it.row.classList.toggle('off', !it.on);
+  });
+  Object.entries(modes).forEach(([k, b]) => b.setAttribute('aria-pressed', k === mode));
+  $('chartTitle').textContent = { pct: 'Change since 2020', usd: 'Average price', yoy: 'Change from the year before' }[mode];
+
+  const cart = YEARS.map((_, i) => on.reduce((s, it) => s + it.p[i], 0));
+  const ch = cart[0] ? (cart[6] / cart[0] - 1) * 100 : 0;
+  $('b2020').textContent = usd(cart[0]);
+  $('b2026').textContent = usd(cart[6]);
+  $('bchg').textContent = on.length ? sign(ch) : '—';
+  $('bchg').style.color = ch < 0 ? 'var(--down)' : 'var(--up)';
+  $('bnote').textContent = on.length
+    ? `One of each: ${on.length} of ${ITEMS.length} items selected`
+    : 'No items selected';
+  $('foot').innerHTML = on.length
+    ? `<td>Your cart (${on.length})</td>` + cart.map(v => `<td>${usd(v)}</td>`).join('') +
+      `<td class="total ${ch >= 0 ? 'pos' : 'neg'}">${sign(ch)}</td>`
+    : '<td colspan="9">No items selected</td>';
+
+  $('empty').hidden = on.length > 0;
+  if (!chart) return;
+  chart.data.datasets = on.map(it => ({
+    label: it.name,
+    data: mode === 'pct' ? vs2020(it) : mode === 'usd' ? it.p : yoy(it),
+    borderColor: it.c,
+    backgroundColor: it.c,
+    borderWidth: 2.5,
+    tension: 0.25,
+    pointRadius: 3,
+    pointHoverRadius: 6,
+    spanGaps: true
+  }));
+  chart.options.scales.y.beginAtZero = mode === 'usd';
+  chart.update();
+}
+render();
+</script>
+
+</body>
+</html>
