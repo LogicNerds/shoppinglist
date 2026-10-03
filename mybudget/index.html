@@ -405,6 +405,28 @@
     cursor:pointer;
   }
   .reset-btn:hover{ background:rgba(255,255,255,0.12); }
+  .reset-btn.armed{ background:rgba(255,92,92,0.14); border-color:#FF5C5C; color:#FFB3B3; }
+
+  .export-btn{
+    width:100%;
+    margin-top:18px;
+    background:var(--teal);
+    border:none;
+    color:#fff;
+    border-radius:8px;
+    padding:12px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .export-btn:hover{ background:var(--teal-dark); }
+  .export-btn:disabled{ opacity:0.6; cursor:wait; }
+  .export-btn:focus-visible, .reset-btn:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .export-msg{ margin:8px 0 0; min-height:0; font-size:12px; color:var(--text-soft); text-align:center; }
+  .export-msg:empty{ display:none; }
+  .export-msg.err{ color:#FF8F8F; }
 
   .cta-text{
     margin:16px 4px 0;
@@ -639,7 +661,9 @@
         <div id="byCheckLines"></div>
       </div>
 
-      <button class="reset-btn" id="resetBtn">Start a new budget</button>
+      <button class="export-btn" id="exportBtn" type="button">Download spreadsheet (.xlsx)</button>
+      <p class="export-msg" id="exportMsg" role="status" aria-live="polite"></p>
+      <button class="reset-btn" id="resetBtn" type="button">Start a new budget</button>
     </div>
 
     <p class="cta-text">Trying to figure out how to make your budget work? <a class="cta-link" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Schedule a free Budget Assessment</a></p>
@@ -1087,10 +1111,353 @@
     document.getElementById('resultsCover').style.display = 'none';
   });
 
-  // ---- reset ----
-  document.getElementById('resetBtn').addEventListener('click', function(){
-    if(!confirm('Clear everything and start a new budget?')) return;
-    location.reload();
+  // ---- reset (two taps, no browser pop-up: some in-app browsers block confirm()) ----
+  var resetBtn = document.getElementById('resetBtn');
+  var resetTimer = null;
+  function disarmReset(){
+    clearTimeout(resetTimer);
+    resetBtn.classList.remove('armed');
+    resetBtn.textContent = 'Start a new budget';
+  }
+  resetBtn.addEventListener('click', function(){
+    if(!resetBtn.classList.contains('armed')){
+      resetBtn.classList.add('armed');
+      resetBtn.textContent = 'Tap again to clear everything';
+      resetTimer = setTimeout(disarmReset, 4000);
+      return;
+    }
+    disarmReset();
+    state.incomeMode = 'paycheck';
+    state.paydays = '';
+    state.perCheck = '';
+    state.manualIncome = '';
+    state.checks = [ { categories: makeCategories(), open: true } ];
+    document.querySelector('.income-row').innerHTML = paycheckFieldsHTML();
+    bindPaycheckInputs();
+    document.getElementById('overrideToggle').textContent = 'Enter a total directly';
+    document.getElementById('resultsCover').style.display = '';
+    setExportMsg('', false);
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ---- spreadsheet export (.xlsx with live formulas) ----
+  // ExcelJS (MIT) is self-hosted next to this page and only loaded when someone exports.
+  var EXCELJS_SRC = '/mybudget/exceljs.min.js';
+  var SITE_URL = 'https://www.myidk.app/mybudget/';
+  var ASSESSMENT_URL = 'https://calendar.app.google/WLPvMMzoXyADSyUv7';
+
+  function loadExcelJS(){
+    if(window.ExcelJS) return Promise.resolve(window.ExcelJS);
+    return new Promise(function(resolve, reject){
+      var tag = document.createElement('script');
+      tag.src = EXCELJS_SRC;
+      tag.async = true;
+      tag.onload = function(){ window.ExcelJS ? resolve(window.ExcelJS) : reject(new Error('ExcelJS did not load')); };
+      tag.onerror = function(){ tag.remove(); reject(new Error('ExcelJS failed to download')); };
+      document.head.appendChild(tag);
+    });
+  }
+
+  function setExportMsg(text, isError){
+    var el = document.getElementById('exportMsg');
+    el.textContent = text;
+    el.className = 'export-msg' + (isError ? ' err' : '');
+  }
+
+  var XL = {
+    money: '"$"#,##0.00;[Red]-"$"#,##0.00',
+    pct: '0%',
+    teal: 'FF0D9488',
+    ink: 'FF0A1F2B',
+    soft: 'FF6B7C80',
+    inputFill: { type:'pattern', pattern:'solid', fgColor:{ argb:'FFE7F5F3' } },
+    groupColor: { essentials:'FF0D9488', debt:'FFD9774E', future:'FFB8912F', life:'FF6E7BC4' },
+    groupName: { essentials:'Cost of Living', debt:'Debt', future:'Your Future', life:'Lifestyle' }
+  };
+  var HINTS = {
+    debt: 'Include all credit cards and loan payments, including car payment.',
+    extras: 'Include all additional spending done throughout the month: eating out, shopping, extra expenses, etc. Every debit or credit card charge not covered by another category.'
+  };
+  var BLANK_ROWS = 3; // empty rows inside every category total, so new items are always counted
+
+  function round2(n){ return Math.round(n * 100) / 100; }
+
+  // Red when over, green when balanced, gold when money is still unassigned.
+  function addLeftColors(ws, ref){
+    ws.addConditionalFormatting({
+      ref: ref,
+      rules: [
+        { type:'expression', priority:1, formulae:['ROUND(' + ref + ',2)<0'], style:{ font:{ color:{ argb:'FFC0392B' }, bold:true } } },
+        { type:'expression', priority:2, formulae:['ROUND(' + ref + ',2)=0'], style:{ font:{ color:{ argb:'FF1E8E5A' }, bold:true } } },
+        { type:'expression', priority:3, formulae:['ROUND(' + ref + ',2)>0'], style:{ font:{ color:{ argb:'FFB7791F' }, bold:true } } }
+      ]
+    });
+  }
+
+  function sheetRef(name, cell){ return "'" + name + "'!" + cell; }
+
+  // One budget tab: income for this tab, assigned, left, group totals, then every category block.
+  function buildBudgetSheet(wb, name, categories, incomeFormula, incomeValue){
+    var ws = wb.addWorksheet(name, { views:[{ showGridLines:false }] });
+    ws.pageSetup = { orientation:'portrait', fitToPage:true, fitToWidth:1, fitToHeight:0 };
+    ws.columns = [ { width:32 }, { width:16 }, { width:64 } ];
+
+    ws.getCell('A1').value = name;
+    ws.getCell('A1').font = { size:16, bold:true, color:{ argb:XL.teal } };
+
+    // Category blocks start at row 13; totals are filled into rows 2-9 afterwards.
+    var row = 11;
+    ws.getCell('A' + row).value = 'Add new items in the shaded blank rows inside each category so they count toward the totals.';
+    ws.getCell('A' + row).font = { italic:true, size:10, color:{ argb:XL.soft } };
+    row = 13;
+
+    var catTotals = [];     // { group, cell, value }
+    GROUP_ORDER.forEach(function(groupKey){
+      categories.filter(function(c){ return c.group === groupKey; }).forEach(function(cat){
+        var head = ws.getRow(row);
+        head.getCell(1).value = cat.name;
+        head.getCell(2).value = 'Amount';
+        head.getCell(1).font = { bold:true, size:12, color:{ argb:XL.groupColor[groupKey] } };
+        head.getCell(2).font = { bold:true, color:{ argb:XL.soft } };
+        head.getCell(2).alignment = { horizontal:'right' };
+        [1,2].forEach(function(c){ head.getCell(c).border = { bottom:{ style:'medium', color:{ argb:XL.groupColor[groupKey] } } }; });
+        var hint = cat.id === 'debt' ? HINTS.debt : (cat.id === 'extras' ? HINTS.extras : '');
+        if(hint){
+          head.getCell(3).value = '← ' + hint;
+          head.getCell(3).font = { italic:true, size:10, color:{ argb:XL.soft } };
+          head.getCell(3).alignment = { wrapText:true, vertical:'top' };
+        }
+        row++;
+
+        var first = row;
+        var items = cat.rows.filter(function(r){ return (r.label || '').trim() !== '' || r.amount !== ''; });
+        items.forEach(function(item){
+          ws.getCell('A' + row).value = item.label || '';
+          var amt = ws.getCell('B' + row);
+          amt.value = item.amount === '' ? null : Number(item.amount) || 0;
+          row++;
+        });
+        for(var i = 0; i < BLANK_ROWS; i++) row++;
+        var last = row - 1;
+        for(var rr = first; rr <= last; rr++){
+          ws.getCell('B' + rr).numFmt = XL.money;
+          ws.getCell('B' + rr).fill = XL.inputFill;
+          ws.getCell('A' + rr).fill = XL.inputFill;
+        }
+
+        var total = categoryTotal(cat);
+        var tRow = ws.getRow(row);
+        tRow.getCell(1).value = cat.name + ' Total';
+        tRow.getCell(2).value = { formula:'SUM(B' + first + ':B' + last + ')', result:round2(total) };
+        tRow.getCell(2).numFmt = XL.money;
+        [1,2].forEach(function(c){
+          tRow.getCell(c).font = { bold:true };
+          tRow.getCell(c).border = { top:{ style:'thin', color:{ argb:'FFBFC9CC' } } };
+        });
+        catTotals.push({ group:groupKey, cell:'B' + row, value:total });
+        row += 2;
+      });
+    });
+
+    // Header block: income, assigned, left, group totals
+    var assigned = catTotals.reduce(function(s, t){ return s + t.value; }, 0);
+    var left = incomeValue - assigned;
+    function label(cellRef, text, bold){
+      ws.getCell(cellRef).value = text;
+      if(bold) ws.getCell(cellRef).font = { bold:true };
+    }
+    label('A2', name === 'Budget' ? "This month's income" : 'This check', true);
+    ws.getCell('B2').value = { formula:incomeFormula, result:round2(incomeValue) };
+    label('A3', 'Assigned', false);
+    ws.getCell('B3').value = catTotals.length
+      ? { formula:catTotals.map(function(t){ return t.cell; }).join('+'), result:round2(assigned) }
+      : 0;
+    label('A4', 'Left to assign', true);
+    ws.getCell('B4').value = { formula:'B2-B3', result:round2(left) };
+    ['B2','B3','B4'].forEach(function(c){ ws.getCell(c).numFmt = XL.money; });
+    ws.getCell('B4').font = { bold:true };
+    addLeftColors(ws, 'B4');
+
+    var groupCells = {}, groupVals = {};
+    var gRow = 6;
+    ['essentials','debt','future','life'].forEach(function(groupKey){
+      var parts = catTotals.filter(function(t){ return t.group === groupKey; });
+      var val = parts.reduce(function(s, t){ return s + t.value; }, 0);
+      ws.getCell('A' + gRow).value = XL.groupName[groupKey];
+      ws.getCell('A' + gRow).font = { color:{ argb:XL.groupColor[groupKey] }, bold:true };
+      ws.getCell('B' + gRow).value = parts.length
+        ? { formula:parts.map(function(t){ return t.cell; }).join('+'), result:round2(val) }
+        : 0;
+      ws.getCell('B' + gRow).numFmt = XL.money;
+      groupCells[groupKey] = 'B' + gRow;
+      groupVals[groupKey] = val;
+      gRow++;
+    });
+
+    return { name:name, groupCells:groupCells, groupVals:groupVals, assigned:assigned, left:left, income:incomeValue };
+  }
+
+  function buildWorkbook(ExcelJS){
+    var wb = new ExcelJS.Workbook();
+    wb.creator = 'IDK — myidk.app';
+    wb.created = new Date();
+
+    var ws = wb.addWorksheet('Summary', { views:[{ showGridLines:false }] });
+    ws.pageSetup = { orientation:'portrait', fitToPage:true, fitToWidth:1, fitToHeight:0 };
+    ws.columns = [ { width:34 }, { width:16 }, { width:16 }, { width:42 } ];
+
+    var today = new Date();
+    ws.getCell('A1').value = 'IDK my budget';
+    ws.getCell('A1').font = { size:22, bold:true, color:{ argb:XL.ink } };
+    ws.getCell('A2').value = 'Monthly Budget Worksheet · exported ' + today.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+    ws.getCell('A2').font = { color:{ argb:XL.soft } };
+    ws.getCell('A3').value = { text:'Free budget calculator: myidk.app/mybudget', hyperlink:SITE_URL };
+    ws.getCell('A3').font = { color:{ argb:XL.teal }, underline:true };
+    ws.getCell('A4').value = { text:'Need help making it work? Schedule a free Budget Assessment', hyperlink:ASSESSMENT_URL };
+    ws.getCell('A4').font = { color:{ argb:XL.teal }, underline:true, bold:true };
+
+    ws.getCell('A6').value = 'Paychecks';
+    ws.getCell('A6').font = { bold:true, size:13 };
+
+    var income = getIncome();
+    var split = isSplit();
+    var inputHint = { italic:true, size:10, color:{ argb:XL.soft } };
+    if(state.incomeMode === 'manual'){
+      ws.getCell('A9').value = "This month's income:";
+      ws.getCell('B9').value = round2(income);
+      ws.getCell('B9').fill = XL.inputFill;
+      ws.getCell('C9').value = '← enter amount here';
+      ws.getCell('C9').font = inputHint;
+    } else {
+      ws.getCell('A7').value = '# of paydays this month';
+      ws.getCell('B7').value = Number(state.paydays) || 0;
+      ws.getCell('B7').fill = XL.inputFill;
+      ws.getCell('C7').value = '← enter amount here';
+      ws.getCell('C7').font = inputHint;
+      ws.getCell('A8').value = 'How much will each check be?';
+      ws.getCell('B8').value = round2(Number(state.perCheck) || 0);
+      ws.getCell('B8').fill = XL.inputFill;
+      ws.getCell('B8').numFmt = XL.money;
+      ws.getCell('C8').value = '← enter amount here';
+      ws.getCell('C8').font = inputHint;
+      ws.getCell('A9').value = "This month's income:";
+      ws.getCell('B9').value = { formula:'B7*B8', result:round2(income) };
+    }
+    ws.getCell('A9').font = { bold:true };
+    ws.getCell('B9').numFmt = XL.money;
+    ws.getCell('B9').font = { bold:true, size:12, color:{ argb:XL.teal } };
+
+    // Budget tabs
+    var tabs = [];
+    if(split){
+      activeChecks().forEach(function(chk, ci){
+        tabs.push(buildBudgetSheet(wb, 'Check ' + (ci + 1), chk.categories, 'Summary!$B$8', checkIncome()));
+      });
+    } else {
+      tabs.push(buildBudgetSheet(wb, 'Budget', state.checks[0].categories, 'Summary!$B$9', income));
+    }
+
+    // Where it's going (worded like the IDK worksheet)
+    ws.getCell('A11').value = "Where it's going";
+    ws.getCell('A11').font = { bold:true, size:13 };
+    var lines = [
+      { key:'essentials', label:'Your cost of living is', tail:'of your income goes to cost of living' },
+      { key:'life',       label:'Your lifestyle cost is', tail:'of your income goes to lifestyle' },
+      { key:'debt',       label:'Your debt cost is',      tail:'of your income goes to debt' },
+      { key:'future',     label:"You're saving/investing", tail:'of your income goes toward your future' }
+    ];
+    var lr = 12, spent = 0;
+    lines.forEach(function(line){
+      var val = tabs.reduce(function(s, t){ return s + t.groupVals[line.key]; }, 0);
+      spent += val;
+      ws.getCell('A' + lr).value = line.label;
+      ws.getCell('A' + lr).font = { color:{ argb:XL.groupColor[line.key] }, bold:true };
+      ws.getCell('B' + lr).value = {
+        formula: tabs.map(function(t){ return sheetRef(t.name, t.groupCells[line.key]); }).join('+'),
+        result: round2(val)
+      };
+      ws.getCell('B' + lr).numFmt = XL.money;
+      ws.getCell('C' + lr).value = { formula:'IF($B$9>0,B' + lr + '/$B$9,0)', result: income > 0 ? val / income : 0 };
+      ws.getCell('C' + lr).numFmt = XL.pct;
+      ws.getCell('D' + lr).value = line.tail;
+      ws.getCell('D' + lr).font = { color:{ argb:XL.soft } };
+      lr++;
+    });
+    var remaining = income - spent;
+    ws.getCell('A17').value = 'Your remaining cash is';
+    ws.getCell('A17').font = { bold:true };
+    ws.getCell('B17').value = { formula:'B9-SUM(B12:B15)', result:round2(remaining) };
+    ws.getCell('B17').numFmt = XL.money;
+    ws.getCell('C17').value = { formula:'IF($B$9>0,B17/$B$9,0)', result: income > 0 ? remaining / income : 0 };
+    ws.getCell('C17').numFmt = XL.pct;
+    ws.getCell('D17').value = 'Zero means every dollar has a job.';
+    ws.getCell('D17').font = { color:{ argb:XL.soft } };
+    [ 'A17','B17','C17','D17' ].forEach(function(c){ ws.getCell(c).border = { top:{ style:'thin', color:{ argb:'FFBFC9CC' } } }; });
+    addLeftColors(ws, 'B17');
+
+    if(split){
+      ws.getCell('A19').value = 'By check';
+      ws.getCell('A19').font = { bold:true, size:13 };
+      var hdr = ws.getRow(20);
+      ['Check', 'This check', 'Assigned', 'Left to assign'].forEach(function(t, i){
+        hdr.getCell(i + 1).value = t;
+        hdr.getCell(i + 1).font = { bold:true, color:{ argb:XL.soft } };
+        hdr.getCell(i + 1).border = { bottom:{ style:'thin', color:{ argb:'FFBFC9CC' } } };
+        if(i > 0) hdr.getCell(i + 1).alignment = { horizontal:'right' };
+      });
+      tabs.forEach(function(t, i){
+        var rr = 21 + i;
+        ws.getCell('A' + rr).value = { text:t.name, hyperlink:"#'" + t.name + "'!A1" };
+        ws.getCell('A' + rr).font = { color:{ argb:XL.teal }, underline:true };
+        ws.getCell('B' + rr).value = { formula:sheetRef(t.name, 'B2'), result:round2(t.income) };
+        ws.getCell('C' + rr).value = { formula:sheetRef(t.name, 'B3'), result:round2(t.assigned) };
+        ws.getCell('D' + rr).value = { formula:sheetRef(t.name, 'B4'), result:round2(t.left) };
+        ['B','C','D'].forEach(function(col){ ws.getCell(col + rr).numFmt = XL.money; });
+        addLeftColors(ws, 'D' + rr);
+      });
+    }
+    // Name the font everywhere so Google Sheets / Numbers / LibreOffice don't fall back to a serif.
+    wb.eachSheet(function(sheet){
+      sheet.eachRow({ includeEmpty:false }, function(r){
+        r.eachCell({ includeEmpty:false }, function(c){
+          c.font = Object.assign({ name:'Calibri', family:2, size:11 }, c.font || {}, { name:'Calibri' });
+        });
+      });
+    });
+    return wb;
+  }
+
+  function exportFileName(){
+    var d = new Date();
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    return 'IDK-Budget-' + d.getFullYear() + '-' + mm + '.xlsx';
+  }
+
+  var exportBtn = document.getElementById('exportBtn');
+  exportBtn.addEventListener('click', function(){
+    exportBtn.disabled = true;
+    setExportMsg('Building your spreadsheet…', false);
+    loadExcelJS()
+      .then(function(ExcelJS){ return buildWorkbook(ExcelJS).xlsx.writeBuffer(); })
+      .then(function(buffer){
+        var blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = exportFileName();
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+        setExportMsg('Downloaded ' + exportFileName(), false);
+        if(window.gtag) gtag('event', 'budget_export', { checks: checkCount() });
+      })
+      .catch(function(err){
+        console.error(err);
+        setExportMsg("Couldn't build the spreadsheet. Check your connection and try again.", true);
+      })
+      .then(function(){ exportBtn.disabled = false; });
   });
 
   render();
