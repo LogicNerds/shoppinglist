@@ -139,6 +139,27 @@
 
   .steps-cta { margin-top: 32px; }
 
+  /* ── STORY ── */
+  .story-photo {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1080 / 609;
+    margin-top: 28px;
+    border-radius: 8px;
+    background: var(--panel);
+  }
+  .story-text { margin-top: 28px; max-width: 62ch; display: grid; gap: 16px; }
+  .story-text p { font-size: 1.02rem; line-height: 1.7; color: var(--text-dim); }
+  .story-text .turn { color: var(--text); font-weight: 700; font-size: 1.1rem; }
+  .story-text a { color: var(--teal-bright); font-weight: 700; }
+  .story-sign {
+    font-family: 'Jost', 'Futura', sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--text) !important;
+  }
+
   /* ── TOOLS ── */
   .after-stats { margin-top: 28px !important; }
   .tools-intro { margin-top: 12px; color: var(--text-dim); line-height: 1.55; max-width: 56ch; }
@@ -277,6 +298,21 @@
       </ol>
       <div class="steps-cta">
         <a class="btn" href="/assessment/">Start with the free assessment</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="story">
+    <div class="wrap">
+      <h2 class="title" id="story">Been <span>there.</span></h2>
+      <img class="story-photo" src="/idkassets/me-and-the-girls.jpg" alt="Elijah and his two daughters smiling in a selfie on a sunny day" width="1080" height="609" loading="lazy" decoding="async">
+      <div class="story-text">
+        <p>In 2022 I got sick of making more money every year and still feeling like I was getting nowhere. Paycheck to paycheck, barely making rent, nothing in savings, paying minimums on the credit cards. If I was ever going to get out of debt, I had to rearrange my spending, and my mindset, and make a plan.</p>
+        <p>By the next summer my cards were paid off, I had a decent emergency fund, and I was about to start attacking my car loan.</p>
+        <p class="turn">Then I was laid off.</p>
+        <p>The job search dragged on through the roughest market I’ve ever seen, and by the end I was leaning on credit cards just to cover rent and groceries. It was during this time that I made a small app to help us stay on budget at the grocery store that would later become “<a href="/mygroceries/">IDK MyGroceries</a>”.</p>
+        <p>When I landed a job in January 2025, I was sitting at nearly $30K in debt. My first focus was to get back on the attack and destroy the debt (again) so I could get back on track with my plan that I started before the layoff. In 2026 I’ve achieved that goal and have set another one: Share my strategies with others who are going through similar situations.</p>
+        <p class="story-sign">— Elijah</p>
       </div>
     </div>
   </section>
