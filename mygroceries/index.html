@@ -28,6 +28,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
 <style>
   /* ── HERO ── */
   .hero { padding: 72px 0 56px; }
@@ -199,9 +200,18 @@
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="/" aria-label="IDK home"><img src="/idkassets/idk-money.png" alt="">IDK</a>
-    <nav class="site-nav" aria-label="Main">
-      <a href="/mygroceries/" aria-current="page">MyGroceries</a>
-      <a href="/mybudget/">MyBudget</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <div class="nav-group">
+        <button class="nav-group-btn is-current" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
+        <ul class="nav-menu" id="nav-tools">
+          <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
+          <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
+          <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
+          <li><a href="/mygroceries/" aria-current="page">MyGroceries<small>Shopping list with a running total</small></a></li>
+        </ul>
+      </div>
+      <a class="nav-cta" href="/assessment/">Free Assessment</a>
     </nav>
   </div>
 </header>

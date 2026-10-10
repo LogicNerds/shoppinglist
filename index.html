@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IDK — MyGroceries &amp; MyBudget</title>
-<meta name="description" content="Two free tools. MyGroceries keeps a running total while you shop. MyBudget gives every dollar a job.">
+<title>IDK — Zero-Based Budgeting, One-on-One</title>
+<meta name="description" content="Find out where your paycheck actually goes. Book a free 15-minute budget assessment, then build a zero-based budget together.">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -24,9 +24,33 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
 <style>
+  :root { --panel: #102a38; --teal-bright: #2dd4bf; }
+
+  .section { padding: 56px 0; border-top: 1px solid var(--rule); }
+
+  .kicker {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teal-bright);
+    margin-bottom: 14px;
+  }
+
+  h2.title {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+  }
+  h2.title span { color: var(--teal); }
+
   /* ── HERO ── */
-  .hero { padding: 72px 0 48px; }
+  .hero { padding: 72px 0 60px; }
 
   .hero h1 {
     font-family: 'Bebas Neue', 'Impact', sans-serif;
@@ -36,126 +60,132 @@
     letter-spacing: 0.01em;
     max-width: 12ch;
   }
-
   .hero h1 span { color: var(--teal); }
 
-  /* ── TILES (logo lockups) ── */
-  .tiles {
-    display: grid;
-    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    gap: 16px;
-    padding-bottom: 24px;
-  }
-
-  .tile {
-    aspect-ratio: 1 / 1;
-    min-width: 0;
-    background: #fff;
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 30% 9% 0;
-    text-align: center;
-    text-decoration: none;
-    color: #000;
-    transition: transform 0.2s, box-shadow 0.2s;
-    container-type: inline-size;
-  }
-
-  .tile:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0 0 4px var(--teal);
-  }
-  .tile:focus-visible { outline: 3px solid var(--teal); outline-offset: 4px; }
-
-  /* Lockup: money mark | IDK, with the product line under IDK */
-  .lockup {
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-template-rows: auto auto;
-    column-gap: 2cqw;
-    align-items: center;
-    font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif;
-  }
-
-  .lockup img {
-    grid-row: 1;
-    width: 22cqw;
-    height: auto;
-    display: block;
-  }
-
-  .lockup .idk {
-    grid-row: 1;
-    font-weight: 700;
-    font-size: 25cqw;
-    line-height: 0.78;
-    letter-spacing: -0.01em;
-  }
-
-  .lockup .product {
-    grid-column: 2;
-    grid-row: 2;
-    font-weight: 600;
-    font-size: 6.8cqw;
-    line-height: 1;
-    letter-spacing: 0.04em;
-    margin-top: 2cqw;
-    white-space: nowrap;
-    justify-self: center;
-  }
-
-  .tile-blurb {
-    font-family: 'DM Sans', sans-serif;
-    font-size: clamp(0.72rem, 4.6cqw, 1.05rem);
-    line-height: 1.45;
-    color: #3b4a52;
-    max-width: 30ch;
-    margin-top: 8cqw;
-  }
-
-  /* ── STATS ── */
-  .col { min-width: 0; display: flex; flex-direction: column; }
-
-  .stats { list-style: none; margin-top: 28px; }
-
-  .stat {
-    padding: 18px 0;
-    border-top: 1px solid var(--rule);
-  }
-
-  .stat-num {
-    display: block;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.2rem, 6vw, 3.4rem);
-    line-height: 0.95;
-    color: var(--teal);
-    letter-spacing: 0.01em;
-  }
-
-  .stat-text {
-    display: block;
-    margin-top: 6px;
-    font-size: clamp(0.82rem, 2.2vw, 0.98rem);
-    line-height: 1.5;
+  .lede {
+    margin-top: 24px;
+    max-width: 50ch;
+    font-size: clamp(1.02rem, 2.4vw, 1.15rem);
+    line-height: 1.6;
     color: var(--text-dim);
   }
 
+  .hero-actions {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+  }
+
+  .text-link {
+    color: var(--teal-bright);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .text-link:hover { border-color: var(--teal-bright); }
+
+  .fine-note { margin-top: 14px; font-size: 0.85rem; color: var(--text-dimmer); }
+
+  /* ── STATS ── */
+  .stats {
+    list-style: none;
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .stat { padding-top: 16px; border-top: 2px solid var(--teal); }
+  .stat-num {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
+    line-height: 0.95;
+    color: var(--teal);
+  }
+  .stat-text {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-dim);
+  }
   .stat-text strong { color: var(--text); font-weight: 500; }
 
-  sup a {
-    color: var(--text-dimmer);
-    text-decoration: none;
-    font-size: 0.7em;
-    margin-left: 1px;
-  }
+  sup a { color: var(--text-dimmer); text-decoration: none; font-size: 0.7em; margin-left: 1px; }
   sup a:hover { color: var(--teal); }
+
+  /* ── STEPS ── */
+  .steps {
+    list-style: none;
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    counter-reset: step;
+  }
+  .step {
+    counter-increment: step;
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .step::before {
+    content: counter(step);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    line-height: 1;
+    color: var(--teal);
+  }
+  .step h3 { font-size: 1.08rem; font-weight: 700; line-height: 1.3; }
+  .step .price { display: block; margin-top: 2px; font-size: 0.85rem; font-weight: 700; color: var(--teal-bright); }
+  .step p { color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+
+  .steps-cta { margin-top: 32px; }
+
+  /* ── TOOLS ── */
+  .after-stats { margin-top: 28px !important; }
+  .tools-intro { margin-top: 12px; color: var(--text-dim); line-height: 1.55; max-width: 56ch; }
+  .tools {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .tool {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 22px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.15s, transform 0.2s;
+  }
+  .tool:hover { border-color: var(--teal); transform: translateY(-3px); }
+  .tool:focus-visible { outline: 3px solid var(--teal); outline-offset: 4px; }
+  .tool-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif;
+    font-weight: 700;
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+  .tool-name img { width: 26px; height: auto; display: block; }
+  .tool p { color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+  .tool .go { margin-top: auto; padding-top: 4px; color: var(--teal-bright); font-weight: 700; font-size: 0.95rem; }
 
   /* ── SOURCES ── */
   .sources {
-    margin-top: 48px;
+    margin-top: 40px;
     padding-top: 20px;
     border-top: 1px solid var(--rule);
     list-style: none;
@@ -164,20 +194,21 @@
     line-height: 1.6;
     color: var(--text-dimmer);
   }
-
   .sources li { counter-increment: src; }
   .sources li::before { content: counter(src) ". "; }
   .sources a { color: var(--text-dimmer); }
   .sources a:hover { color: var(--text-dim); }
 
-  /* ── SMALL SCREENS ── */
-  @media (max-width: 600px) {
-    .hero { padding: 48px 0 36px; }
-    .tiles { gap: 12px; }
-    .stats { margin-top: 16px; }
-    .stat { padding: 14px 0; }
+  @media (max-width: 760px) {
+    .stats, .steps { grid-template-columns: minmax(0, 1fr); }
   }
 
+  @media (max-width: 600px) {
+    .hero { padding: 48px 0 44px; }
+    .section { padding: 44px 0; }
+    .hero-actions .btn { width: 100%; text-align: center; padding-left: 20px; padding-right: 20px; }
+    .tools { grid-template-columns: minmax(0, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -185,9 +216,18 @@
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="/" aria-label="IDK home"><img src="/idkassets/idk-money.png" alt="">IDK</a>
-    <nav class="site-nav" aria-label="Main">
-      <a href="/mygroceries/">MyGroceries</a>
-      <a href="/mybudget/">MyBudget</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <div class="nav-group">
+        <button class="nav-group-btn" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
+        <ul class="nav-menu" id="nav-tools">
+          <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
+          <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
+          <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
+          <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
+        </ul>
+      </div>
+      <a class="nav-cta" href="/assessment/">Free Assessment</a>
     </nav>
   </div>
 </header>
@@ -195,62 +235,94 @@
 <main>
   <section class="hero">
     <div class="wrap">
-      <h1>Attention is the <span>cheapest bill</span> you'll ever pay.</h1>
+      <h1>No idea where your <span>paycheck goes?</span></h1>
+      <p class="lede">You're not bad with money. You just haven't told it where to go yet. A zero-based budget gives every dollar a job before the month starts, so you stop finding out where it went at the end.</p>
+      <div class="hero-actions">
+        <a class="btn" href="/assessment/">Book a free 15-minute assessment</a>
+        <a class="text-link" href="/mybudget/">Or run your numbers in MyBudget →</a>
+      </div>
+      <p class="fine-note">Free. 15 minutes. No pressure.</p>
     </div>
   </section>
 
-  <section class="wrap" aria-label="Tools">
-    <div class="tiles">
-
-      <div class="col">
-      <a class="tile" href="/mygroceries/" aria-label="IDK my groceries: Stop playing grocery roulette.">
-        <span class="lockup" aria-hidden="true">
-          <img src="/idkassets/idk-money.png" alt="">
-          <span class="idk">IDK</span>
-          <span class="product">my groceries</span>
-        </span>
-        <span class="tile-blurb">Stop playing grocery roulette.</span>
-      </a>
+  <section class="section" aria-labelledby="familiar">
+    <div class="wrap">
+      <h2 class="title" id="familiar">Sound <span>familiar?</span></h2>
       <ul class="stats">
         <li class="stat">
-          <span class="stat-num">56%</span>
-          <span class="stat-text">use a shopping list. <strong>Only 8% stick to it.</strong><sup><a href="#src-1" aria-label="Source 1">1</a></sup></span>
-        </li>
-        <li class="stat">
-          <span class="stat-num">47%</span>
-          <span class="stat-text">say groceries are where they overspend most.<sup><a href="#src-2" aria-label="Source 2">2</a></sup></span>
-        </li>
-      </ul>
-      </div>
-
-      <div class="col">
-      <a class="tile" href="/mybudget/" aria-label="IDK my budget: Assign every dollar before you spend a cent.">
-        <span class="lockup" aria-hidden="true">
-          <img src="/idkassets/idk-money.png" alt="">
-          <span class="idk">IDK</span>
-          <span class="product">my budget</span>
-        </span>
-        <span class="tile-blurb">Assign every dollar before you spend a cent.</span>
-      </a>
-      <ul class="stats">
-        <li class="stat">
-          <span class="stat-num">74%</span>
-          <span class="stat-text">have a budget. <strong>84% of them have blown it.</strong><sup><a href="#src-2" aria-label="Source 2">2</a></sup></span>
+          <span class="stat-num">84%</span>
+          <span class="stat-text">of people with a budget <strong>have blown it.</strong><sup><a href="#src-1" aria-label="Source 1">1</a></sup></span>
         </li>
         <li class="stat">
           <span class="stat-num">1 in 2</span>
-          <span class="stat-text">of people earning $100K+ still live paycheck to paycheck.<sup><a href="#src-3" aria-label="Source 3">3</a></sup></span>
+          <span class="stat-text">people earning $100K+ <strong>still live paycheck to paycheck.</strong><sup><a href="#src-2" aria-label="Source 2">2</a></sup></span>
+        </li>
+        <li class="stat">
+          <span class="stat-num">47%</span>
+          <span class="stat-text">say groceries are where they <strong>overspend most.</strong><sup><a href="#src-1" aria-label="Source 1">1</a></sup></span>
         </li>
       </ul>
+      <p class="tools-intro after-stats">More money rarely fixes it. A plan does.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="how">
+    <div class="wrap">
+      <span class="kicker">How it works</span>
+      <h2 class="title" id="how">Three steps. <span>You set the pace.</span></h2>
+      <ol class="steps">
+        <li class="step">
+          <h3>Free 15-minute assessment<span class="price">Free</span></h3>
+          <p>We look at your take-home pay next to your rent and car payment. If there's room to work with, a budget session makes sense. If there isn't, you'll hear that straight.</p>
+        </li>
+        <li class="step">
+          <h3>Build your budget together<span class="price">$45</span></h3>
+          <p>One session with your real numbers. Every dollar gets a job, and you leave with your own budget sheet to keep using.</p>
+        </li>
+        <li class="step">
+          <h3>Stay on track<span class="price">Optional</span></h3>
+          <p>Two more check-ins over the next two months. Real life happens, so we adjust the plan as it does.</p>
+        </li>
+      </ol>
+      <div class="steps-cta">
+        <a class="btn" href="/assessment/">Start with the free assessment</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tools">
+    <div class="wrap">
+      <span class="kicker">Free tools</span>
+      <h2 class="title" id="tools">Poke at your <span>numbers first.</span></h2>
+      <p class="tools-intro">No sign-up for any of these. Use them on your own, or bring what you find to your assessment.</p>
+      <div class="tools">
+        <a class="tool" href="/mybudget/">
+          <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">MyBudget</span>
+          <p>A zero-based budget calculator. Start with your take-home pay and give every dollar a job.</p>
+          <span class="go">Open MyBudget →</span>
+        </a>
+        <a class="tool" href="/rentmap/">
+          <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">Rent Map</span>
+          <p>See what rent and the basics cost in your area, and what your salary leaves after them.</p>
+          <span class="go">Open the Rent Map →</span>
+        </a>
+        <a class="tool" href="/groceryprices/">
+          <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">Grocery Prices</span>
+          <p>Build a cart of everyday staples and see what it cost in 2020 compared to now.</p>
+          <span class="go">Compare prices →</span>
+        </a>
+        <a class="tool" href="/mygroceries/">
+          <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">MyGroceries</span>
+          <p>A shopping list that keeps a running total, so you know what the trip costs before checkout.</p>
+          <span class="go">Try MyGroceries →</span>
+        </a>
       </div>
 
+      <ol class="sources" aria-label="Sources">
+        <li id="src-1"><a href="https://www.nerdwallet.com/finance/studies/data-2023-budgeting-report" target="_blank" rel="noopener">NerdWallet / The Harris Poll, Budgeting Report</a></li>
+        <li id="src-2"><a href="https://www.pymnts.com/consumer-finance/2024/nearly-half-of-us-consumers-earning-100k-live-paycheck-to-paycheck/" target="_blank" rel="noopener">PYMNTS Intelligence, The Paycheck-to-Paycheck Report</a></li>
+      </ol>
     </div>
-
-    <ol class="sources" aria-label="Sources">
-      <li id="src-1"><a href="https://storesight.com/resources/shopping-list-survey" target="_blank" rel="noopener">Storesight, The Science of Shopping Lists</a></li>
-      <li id="src-2"><a href="https://www.nerdwallet.com/finance/studies/data-2023-budgeting-report" target="_blank" rel="noopener">NerdWallet / The Harris Poll, Budgeting Report</a></li>
-      <li id="src-3"><a href="https://www.pymnts.com/consumer-finance/2024/nearly-half-of-us-consumers-earning-100k-live-paycheck-to-paycheck/" target="_blank" rel="noopener">PYMNTS Intelligence, The Paycheck-to-Paycheck Report</a></li>
-    </ol>
   </section>
 </main>
 

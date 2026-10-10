@@ -32,13 +32,20 @@ body {
 }
 
 /* ── HEADER ── */
-.site-header { border-bottom: 1px solid var(--rule); }
+.site-header {
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+  z-index: 50;
+  background: var(--navy-dark);
+}
 
 .site-header .wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  min-height: 64px;
 }
 
 .brand {
@@ -55,20 +62,220 @@ body {
 
 .brand img { width: 34px; height: auto; display: block; }
 
-.site-nav { display: flex; gap: 24px; }
+/* ── NAV ──
+   Without JS (no .nav-ready on the header) every link shows inline.
+   site.js adds .nav-ready, which turns on the Free Tools dropdown on
+   desktop and the hamburger panel on phones. */
+.site-nav { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 
-.site-nav a {
+.nav-group { position: relative; }
+
+.nav-menu { list-style: none; display: flex; gap: 20px; flex-wrap: wrap; }
+
+.nav-menu a,
+.nav-group-btn {
   text-decoration: none;
+  font-family: inherit;
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--text-dim);
   padding: 6px 0;
+  border: 0;
   border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
 }
 
-.site-nav a:hover,
-.site-nav a[aria-current="page"] { color: var(--text); border-color: var(--teal); }
+.nav-menu a small { display: none; }
+
+.nav-menu a:hover,
+.nav-menu a[aria-current="page"],
+.nav-group-btn:hover,
+.nav-group-btn.is-current,
+.nav-group.open .nav-group-btn { color: var(--text); border-bottom-color: var(--teal); }
+
+.nav-group-btn { display: none; align-items: center; gap: 6px; }
+.nav-group-btn::after {
+  content: "";
+  width: 6px; height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s;
+}
+.nav-group.open .nav-group-btn::after { transform: translateY(1px) rotate(-135deg); }
+
+.nav-group-btn:focus-visible,
+.nav-menu a:focus-visible,
+.nav-toggle:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 2px; }
+
+.nav-cta {
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--teal);
+  padding: 9px 16px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.nav-cta:hover, .nav-cta[aria-current="page"] { background: var(--teal-dark); }
+.nav-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.nav-toggle { display: none; }
+
+/* Desktop dropdown */
+.nav-ready .nav-group-btn { display: inline-flex; }
+.nav-ready .nav-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 290px;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px;
+  background: #102a38;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.4);
+}
+.nav-ready .nav-group.open .nav-menu { display: flex; }
+.nav-ready .nav-menu a {
+  display: block;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text);
+  font-weight: 700;
+}
+.nav-ready .nav-menu a small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+.nav-ready .nav-menu a:hover { background: rgba(255,255,255,0.06); }
+.nav-ready .nav-menu a[aria-current="page"] { background: rgba(13,148,136,0.18); }
+
+/* Phone: hamburger panel */
+@media (max-width: 720px) {
+  .nav-ready .nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    margin-right: -10px;
+    background: none;
+    border: 0;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .nav-toggle span,
+  .nav-toggle span::before,
+  .nav-toggle span::after {
+    display: block;
+    width: 22px; height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .nav-toggle span { position: relative; }
+  .nav-toggle span::before,
+  .nav-toggle span::after { content: ""; position: absolute; left: 0; }
+  .nav-toggle span::before { top: -7px; }
+  .nav-toggle span::after { top: 7px; }
+  .menu-open .nav-toggle span { background: transparent; }
+  .menu-open .nav-toggle span::before { transform: translateY(7px) rotate(45deg); }
+  .menu-open .nav-toggle span::after { transform: translateY(-7px) rotate(-45deg); }
+
+  .nav-ready .site-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 20px 24px;
+    background: var(--navy-dark);
+    border-bottom: 1px solid var(--rule);
+    box-shadow: 0 18px 30px rgba(0,0,0,0.45);
+  }
+  .nav-ready.menu-open .site-nav { display: flex; }
+
+  .nav-ready .nav-group { order: 2; }
+  .nav-ready .nav-group-btn {
+    display: block;
+    width: 100%;
+    padding: 16px 0 6px;
+    border: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dimmer);
+    cursor: default;
+    pointer-events: none;
+    text-align: left;
+  }
+  .nav-ready .nav-group-btn::after { display: none; }
+  .nav-ready .nav-menu,
+  .nav-ready .nav-group.open .nav-menu {
+    display: flex;
+    position: static;
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
+  .nav-ready .nav-menu a {
+    padding: 12px 0;
+    border-radius: 0;
+    border-top: 1px solid var(--rule);
+    font-size: 1.05rem;
+  }
+  .nav-ready .nav-menu a:hover,
+  .nav-ready .nav-menu a[aria-current="page"] { background: none; color: var(--teal); }
+
+  .nav-ready .nav-cta {
+    order: 1;
+    margin-top: 12px;
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 1rem;
+  }
+}
+
+/* ── ASSESSMENT BAND (used at the end of tool pages) ── */
+.assess-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px 32px;
+  padding: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(13,148,136,0.22), rgba(13,148,136,0.06));
+  border: 1px solid rgba(13,148,136,0.45);
+}
+.assess-band h2 {
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+.assess-band p { margin-top: 10px; color: var(--text-dim); line-height: 1.55; font-size: 0.98rem; max-width: 52ch; }
+.assess-band .btn { white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .assess-band { grid-template-columns: minmax(0, 1fr); padding: 22px; }
+  .assess-band .btn { text-align: center; }
+}
 
 /* ── BUTTON ── */
 .btn {
@@ -104,11 +311,6 @@ body {
 
 .site-footer a { text-decoration: none; color: var(--text-dimmer); }
 .site-footer a:hover { color: var(--text-dim); }
-
-@media (max-width: 600px) {
-  .site-nav { gap: 16px; }
-  .site-nav a { font-size: 0.85rem; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }

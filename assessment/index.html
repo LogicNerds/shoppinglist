@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Budget Assessment — IDK</title>
+<meta name="description" content="A free 15-minute call to see whether a zero-based budget session makes sense for you. No pressure, no judgment.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KEZSNJZ4JW');
+</script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a1f2b">
+<link rel="icon" href="/icons/icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
+<style>
+  :root { --panel: #102a38; --teal-bright: #2dd4bf; }
+
+  main { padding-bottom: 8px; }
+
+  .hero { padding: 64px 0 48px; }
+  .kicker {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teal-bright);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(3rem, 9vw, 5.6rem);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+    max-width: 13ch;
+  }
+  .hero h1 span { color: var(--teal); }
+  .lede {
+    margin-top: 22px;
+    max-width: 52ch;
+    font-size: clamp(1.02rem, 2.4vw, 1.15rem);
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .book { margin-top: 30px; }
+  .book-note { margin-top: 12px; font-size: 0.85rem; color: var(--text-dimmer); }
+
+  .section { padding: 48px 0; border-top: 1px solid var(--rule); }
+
+  h2.title {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2rem, 5.5vw, 2.8rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+  }
+  h2.title span { color: var(--teal); }
+
+  .two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px;
+  }
+
+  .checks { list-style: none; margin-top: 20px; display: grid; gap: 14px; }
+  .checks li {
+    position: relative;
+    padding-left: 30px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+  .checks li::before {
+    content: "";
+    position: absolute;
+    left: 2px; top: 5px;
+    width: 8px; height: 14px;
+    border-right: 3px solid var(--teal);
+    border-bottom: 3px solid var(--teal);
+    transform: rotate(45deg);
+  }
+  .checks.not li::before {
+    left: 0; top: 11px;
+    width: 16px; height: 0;
+    border-right: 0;
+    border-bottom: 3px solid var(--text-dimmer);
+    transform: none;
+  }
+
+  .timeline { list-style: none; margin-top: 24px; display: grid; gap: 0; }
+  .timeline li {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 16px;
+    padding: 18px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .timeline .when {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--teal);
+    white-space: nowrap;
+  }
+  .timeline h3 { font-size: 1.02rem; font-weight: 700; }
+  .timeline p { margin-top: 4px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+
+  .after { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border-radius: 8px; padding: 22px; }
+  .card .price {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--teal);
+  }
+  .card h3 { margin-top: 8px; font-size: 1.05rem; font-weight: 700; }
+  .card p { margin-top: 6px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+  .after-note { margin-top: 16px; font-size: 0.9rem; color: var(--text-dim); line-height: 1.55; }
+
+  .prep { margin-top: 12px; color: var(--text-dim); line-height: 1.6; max-width: 60ch; }
+  .prep a { color: var(--teal-bright); font-weight: 700; }
+
+  .final { padding: 8px 0 0; }
+
+  @media (max-width: 720px) {
+    .two, .after { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+    .after { gap: 16px; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 44px 0 40px; }
+    .section { padding: 40px 0; }
+    .book .btn { width: 100%; text-align: center; padding-left: 20px; padding-right: 20px; }
+    .timeline li { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="IDK home"><img src="/idkassets/idk-money.png" alt="">IDK</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <div class="nav-group">
+        <button class="nav-group-btn" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
+        <ul class="nav-menu" id="nav-tools">
+          <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
+          <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
+          <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
+          <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
+        </ul>
+      </div>
+      <a class="nav-cta" href="/assessment/" aria-current="page">Free Assessment</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <span class="kicker">Free budget assessment</span>
+      <h1>15 minutes to find out if <span>a budget fixes this.</span></h1>
+      <p class="lede">A quick call to look at where your money goes right now and whether a zero-based budget session is worth your time. If it isn't, you'll hear that too.</p>
+      <div class="book">
+        <a class="btn" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Pick a time</a>
+        <p class="book-note">Opens Google Calendar booking in a new tab. Free, 15 minutes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-label="Who this is for">
+    <div class="wrap two">
+      <div>
+        <h2 class="title">This is <span>for you if</span></h2>
+        <ul class="checks">
+          <li>You get paid and it's gone, and you're not sure where it went.</li>
+          <li>Your debt balances aren't really going down.</li>
+          <li>You've tried budgeting before and it didn't stick.</li>
+          <li>You have less than three months of expenses saved.</li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="title">What it <span>isn't</span></h2>
+        <ul class="checks not">
+          <li>A sales pitch. If a session won't help, I'll say so.</li>
+          <li>A lecture about lattes. Nobody's judging your spending.</li>
+          <li>Investment or tax advice. This is about your monthly cash flow.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="call">
+    <div class="wrap">
+      <h2 class="title" id="call">What happens <span>on the call</span></h2>
+      <ol class="timeline">
+        <li>
+          <span class="when">0–5</span>
+          <div><h3>Your numbers</h3><p>Roughly what you take home each month, plus your rent and car payment. Ballpark figures are fine.</p></div>
+        </li>
+        <li>
+          <span class="when">5–10</span>
+          <div><h3>The gut check</h3><p>Does your pay cover the big fixed costs with room to spare? That room is what a budget puts to work.</p></div>
+        </li>
+        <li>
+          <span class="when">10–15</span>
+          <div><h3>Your next move</h3><p>Either a budget session makes sense, or you'll leave with a clear idea of what to tackle first on your own.</p></div>
+        </li>
+      </ol>
+      <p class="prep">Want a head start? Run your numbers through <a href="/mybudget/">MyBudget</a> before the call.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="after">
+    <div class="wrap">
+      <h2 class="title" id="after">If it's <span>a fit</span></h2>
+      <div class="after">
+        <div class="card">
+          <span class="price">$45</span>
+          <h3>Budget session</h3>
+          <p>We build your zero-based budget together with your real numbers. You keep the budget sheet.</p>
+        </div>
+        <div class="card">
+          <span class="price">90 days</span>
+          <h3>Optional follow-up</h3>
+          <p>Two more sessions over the next two months to adjust the plan as real life happens.</p>
+        </div>
+      </div>
+      <p class="after-note">Nothing is booked or charged on the free call. You decide afterward.</p>
+    </div>
+  </section>
+
+  <section class="section final">
+    <div class="wrap">
+      <div class="assess-band">
+        <div>
+          <h2>Ready to know where it goes?</h2>
+          <p>Fifteen minutes, free. Pick whatever time works for you.</p>
+        </div>
+        <a class="btn" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Pick a time</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Logic Nerds</span>
+    <a href="/privacy.html">Privacy Policy</a>
+  </div>
+</footer>
+
+</body>
+</html>
