@@ -30,15 +30,6 @@
 
   .section { padding: 56px 0; border-top: 1px solid var(--rule); }
 
-  .kicker {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--teal-bright);
-    margin-bottom: 14px;
-  }
 
   h2.title {
     font-family: 'Bebas Neue', 'Impact', sans-serif;
@@ -120,7 +111,7 @@
   /* ── STEPS ── */
   .steps {
     list-style: none;
-    margin-top: 32px;
+    margin-top: 28px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
@@ -268,8 +259,8 @@
 
   <section class="section" aria-labelledby="how">
     <div class="wrap">
-      <span class="kicker">How it works</span>
-      <h2 class="title" id="how">Three steps. <span>You set the pace.</span></h2>
+      <h2 class="title" id="how">How it <span>works</span></h2>
+      <p class="tools-intro">Three steps, and you set the pace.</p>
       <ol class="steps">
         <li class="step">
           <h3>Free 15-minute assessment<span class="price">Free</span></h3>
@@ -292,9 +283,8 @@
 
   <section class="section" aria-labelledby="tools">
     <div class="wrap">
-      <span class="kicker">Free tools</span>
-      <h2 class="title" id="tools">Poke at your <span>numbers first.</span></h2>
-      <p class="tools-intro">No sign-up for any of these. Use them on your own, or bring what you find to your assessment.</p>
+      <h2 class="title" id="tools">Free <span>tools</span></h2>
+      <p class="tools-intro">Poke at your numbers first. No sign-up for any of these. Use them on your own, or bring what you find to your assessment.</p>
       <div class="tools">
         <a class="tool" href="/mybudget/">
           <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">MyBudget</span>
