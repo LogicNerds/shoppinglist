@@ -91,21 +91,7 @@
     transform: none;
   }
 
-  .timeline { list-style: none; margin-top: 24px; display: grid; gap: 0; }
-  .timeline li {
-    display: grid;
-    grid-template-columns: 72px minmax(0, 1fr);
-    gap: 16px;
-    padding: 18px 0;
-    border-top: 1px solid var(--rule);
-  }
-  .timeline .when {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    line-height: 1;
-    color: var(--teal);
-    white-space: nowrap;
-  }
+  .timeline { list-style: none; margin-top: 24px; display: grid; gap: 22px; max-width: 60ch; }
   .timeline h3 { font-size: 1.02rem; font-weight: 700; }
   .timeline p { margin-top: 4px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
 
@@ -122,7 +108,7 @@
   .card p { margin-top: 6px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
   .after-note { margin-top: 16px; font-size: 0.9rem; color: var(--text-dim); line-height: 1.55; }
 
-  .prep { margin-top: 12px; color: var(--text-dim); line-height: 1.6; max-width: 60ch; }
+  .prep { margin-top: 28px; color: var(--text-dim); line-height: 1.6; max-width: 60ch; }
   .prep a { color: var(--teal-bright); font-weight: 700; }
 
   .final { padding: 8px 0 0; }
@@ -135,7 +121,6 @@
     .hero { padding: 44px 0 40px; }
     .section { padding: 40px 0; }
     .book .btn { width: 100%; text-align: center; padding-left: 20px; padding-right: 20px; }
-    .timeline li { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
   }
 </style>
 </head>
@@ -163,7 +148,7 @@
 <main>
   <section class="hero">
     <div class="wrap">
-      <h1>15 minutes to find out if <span>a budget fixes this.</span></h1>
+      <h1>15 minutes to find out if <span>a budget can help.</span></h1>
       <p class="lede">A free call to look at where your money goes right now and whether a zero-based budget session is worth your time. If it isn't, you'll hear that too.</p>
       <div class="book">
         <a class="btn" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Pick a time</a>
@@ -199,16 +184,16 @@
       <h2 class="title" id="call">What happens <span>on the call</span></h2>
       <ol class="timeline">
         <li>
-          <span class="when">0–5</span>
-          <div><h3>Your numbers</h3><p>Roughly what you take home each month, plus your rent and car payment. Ballpark figures are fine.</p></div>
+          <h3>Your goals</h3><p>What you want your money to do. Pay off a card, build a cushion, stop dreading the end of the month. Big or small, it counts.</p>
         </li>
         <li>
-          <span class="when">5–10</span>
-          <div><h3>The gut check</h3><p>Does your pay cover the big fixed costs with room to spare? That room is what a budget puts to work.</p></div>
+          <h3>Your numbers</h3><p>Roughly what you take home each month, plus your rent and car payment. Ballpark figures are fine.</p>
         </li>
         <li>
-          <span class="when">10–15</span>
-          <div><h3>Your next move</h3><p>Either a budget session makes sense, or you'll leave with a clear idea of what to tackle first on your own.</p></div>
+          <h3>The gut check</h3><p>Does your pay cover the big fixed costs with room to spare? That room is what a budget puts toward your goals.</p>
+        </li>
+        <li>
+          <h3>Your next move</h3><p>Either a budget session makes sense, or you'll leave with a clear idea of what to tackle first on your own.</p>
         </li>
       </ol>
       <p class="prep">Want a head start? Run your numbers through <a href="/mybudget/">MyBudget</a> before the call.</p>
