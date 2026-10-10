@@ -1029,7 +1029,7 @@
     if(Math.abs(remaining) < 0.005){
       remainingEl.style.color = '#7FDCB5';
       remainingLineEl.style.color = '#7FDCB5';
-      statusEl.textContent = 'Balanced — every dollar has a job';
+      statusEl.textContent = 'Balanced — every dollar is assigned';
       statusEl.className = 'status status-balanced';
     } else if(remaining < 0){
       remainingEl.style.color = '#FF5C5C';
@@ -1039,7 +1039,7 @@
     } else {
       remainingEl.style.color = '#E8CE8F';
       remainingLineEl.style.color = '#E8CE8F';
-      statusEl.textContent = fmt(remaining) + ' still needs a job';
+      statusEl.textContent = fmt(remaining) + ' left to assign';
       statusEl.className = 'status status-under';
     }
 
@@ -1401,7 +1401,7 @@
     ws.getCell('B17').numFmt = XL.money;
     ws.getCell('C17').value = { formula:'IF($B$9>0,B17/$B$9,0)', result: income > 0 ? remaining / income : 0 };
     ws.getCell('C17').numFmt = XL.pct;
-    ws.getCell('D17').value = 'Zero means every dollar has a job.';
+    ws.getCell('D17').value = 'Zero means every dollar is assigned.';
     ws.getCell('D17').font = { color:{ argb:XL.soft } };
     [ 'A17','B17','C17','D17' ].forEach(function(c){ ws.getCell(c).border = { top:{ style:'thin', color:{ argb:'FFBFC9CC' } } }; });
     addLeftColors(ws, 'B17');
