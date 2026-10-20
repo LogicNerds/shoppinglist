@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Budget Assessment — IDK</title>
-<meta name="description" content="A free 15-minute call to see whether a zero-based budget session makes sense for you. No pressure, no judgment.">
+<title>Free Budgeting Session — IDK</title>
+<meta name="description" content="A free 45-minute, one-on-one session to build a zero-based budget with your real numbers. Nothing to buy, and you keep the budget.">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -95,27 +95,17 @@
   .timeline h3 { font-size: 1.02rem; font-weight: 700; }
   .timeline p { margin-top: 4px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
 
-  .after { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-  .card { background: var(--panel); border-radius: 8px; padding: 22px; }
-  .card .price {
-    display: block;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.2rem;
-    line-height: 1;
-    color: var(--teal);
-  }
-  .card h3 { margin-top: 8px; font-size: 1.05rem; font-weight: 700; }
-  .card p { margin-top: 6px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
-  .after-note { margin-top: 16px; font-size: 0.9rem; color: var(--text-dim); line-height: 1.55; }
+  .why-text { margin-top: 20px; max-width: 60ch; display: grid; gap: 14px; }
+  .why-text p { font-size: 1.02rem; line-height: 1.65; color: var(--text-dim); }
 
   .prep { margin-top: 28px; color: var(--text-dim); line-height: 1.6; max-width: 60ch; }
   .prep a { color: var(--teal-bright); font-weight: 700; }
+  .disclaimer { margin-top: 14px; font-size: 0.85rem; color: var(--text-dimmer); line-height: 1.55; max-width: 60ch; }
 
   .final { padding: 8px 0 0; }
 
   @media (max-width: 720px) {
-    .two, .after { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-    .after { gap: 16px; }
+    .two { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   }
   @media (max-width: 600px) {
     .hero { padding: 44px 0 40px; }
@@ -140,7 +130,7 @@
           <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
         </ul>
       </div>
-      <a class="nav-cta" href="/assessment/" aria-current="page">Free Assessment</a>
+      <a class="nav-cta" href="/free-session/" aria-current="page">Free Session</a>
     </nav>
   </div>
 </header>
@@ -148,11 +138,21 @@
 <main>
   <section class="hero">
     <div class="wrap">
-      <h1>15 minutes to find out if <span>a budget can help.</span></h1>
-      <p class="lede">A free call to look at where your money goes right now and whether a zero-based budget session is worth your time. If it isn't, you'll hear that too.</p>
+      <h1>Build your budget. <span>Free.</span></h1>
+      <p class="lede">A 45-minute, one-on-one session. We take your real income and bills, assign every dollar, and you leave with a budget sheet that's yours to keep running.</p>
       <div class="book">
         <a class="btn" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Pick a time</a>
-        <p class="book-note">Opens Google Calendar booking in a new tab. Free, 15 minutes.</p>
+        <p class="book-note">Opens Google Calendar booking in a new tab. Free, 45 minutes. Only a few spots each week.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="why">
+    <div class="wrap">
+      <h2 class="title" id="why">Why is it <span>free?</span></h2>
+      <div class="why-text">
+        <p>I'm working toward my Accredited Financial Counselor (AFC) certification, and part of earning it is logging real hours with real people. You get a budget built with you. I get the experience. That's the whole deal.</p>
+        <p>All I ask in return is honest feedback when we're done.</p>
       </div>
     </div>
   </section>
@@ -169,53 +169,39 @@
         </ul>
       </div>
       <div>
-        <h2 class="title">What it <span>isn't</span></h2>
+        <h2 class="title">What I <span>won't do</span></h2>
         <ul class="checks not">
-          <li>A sales pitch. If a session won't help, I'll say so.</li>
-          <li>A lecture about lattes. Nobody's judging your spending.</li>
-          <li>Investment or tax advice. This is about your monthly cash flow.</li>
+          <li>Sell you anything. No course, no investments, no insurance.</li>
+          <li>Ask for bank logins, account numbers, or your Social Security number.</li>
+          <li>Lecture you about lattes. Nobody's judging your spending.</li>
+          <li>Give investment or tax advice. This is about your monthly cash flow.</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <section class="section" aria-labelledby="call">
+  <section class="section" aria-labelledby="session">
     <div class="wrap">
-      <h2 class="title" id="call">What happens <span>on the call</span></h2>
+      <h2 class="title" id="session">What happens <span>in the session</span></h2>
       <ol class="timeline">
         <li>
           <h3>Your goals</h3><p>What you want your money to do. Pay off a card, build a cushion, stop dreading the end of the month. Big or small, it counts.</p>
         </li>
         <li>
-          <h3>Your numbers</h3><p>Roughly what you take home each month, plus your rent and car payment. Ballpark figures are fine.</p>
+          <h3>Your income</h3><p>What actually lands in your account each month, paycheck by paycheck.</p>
         </li>
         <li>
-          <h3>The gut check</h3><p>Does your pay cover the big fixed costs with room to spare? That room is what a budget puts toward your goals.</p>
+          <h3>Your bills and spending</h3><p>Rent, car, debt payments, groceries, subscriptions, the stuff that sneaks up on you. Ballpark figures are fine. Having your banking app handy helps you remember what's going out, but you never have to show it to me.</p>
         </li>
         <li>
-          <h3>Your next move</h3><p>Either a budget session makes sense, or you'll leave with a clear idea of what to tackle first on your own.</p>
+          <h3>Assign every dollar</h3><p>We build your zero-based budget together until every dollar of income has a place to go, with your goals included.</p>
+        </li>
+        <li>
+          <h3>Your sheet</h3><p>You leave with your own budget sheet to keep using month after month. You won't need me to run it.</p>
         </li>
       </ol>
-      <p class="prep">Want a head start? Run your numbers through <a href="/mybudget/">MyBudget</a> before the call.</p>
-    </div>
-  </section>
-
-  <section class="section" aria-labelledby="after">
-    <div class="wrap">
-      <h2 class="title" id="after">If it's <span>a fit</span></h2>
-      <div class="after">
-        <div class="card">
-          <span class="price">$45</span>
-          <h3>Budget session</h3>
-          <p>We build your zero-based budget together with your real numbers. You keep the budget sheet.</p>
-        </div>
-        <div class="card">
-          <span class="price">90 days</span>
-          <h3>Optional follow-up</h3>
-          <p>Two more sessions over the next two months to adjust the plan as real life happens.</p>
-        </div>
-      </div>
-      <p class="after-note">Nothing is booked or charged on the free call. You decide afterward.</p>
+      <p class="prep">Want a head start? Run your numbers through <a href="/mybudget/">MyBudget</a> before we meet.</p>
+      <p class="disclaimer">I'm not a licensed financial advisor, and this isn't investment, tax, or legal advice.</p>
     </div>
   </section>
 
@@ -224,7 +210,7 @@
       <div class="assess-band">
         <div>
           <h2>Ready to know where it goes?</h2>
-          <p>Fifteen minutes, free. Pick whatever time works for you.</p>
+          <p>45 minutes, free. Pick whatever time works for you.</p>
         </div>
         <a class="btn" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Pick a time</a>
       </div>

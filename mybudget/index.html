@@ -578,7 +578,7 @@
           <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
         </ul>
       </div>
-      <a class="nav-cta" href="/assessment/">Free Assessment</a>
+      <a class="nav-cta" href="/free-session/">Free Session</a>
     </nav>
   </div>
 </header>
@@ -591,7 +591,7 @@
     <span class="product">my budget</span>
   </div>
   <h1 class="app-sub">Assign <span>every dollar.</span></h1>
-  <p class="head-cta">Trying to figure out how to make your budget work? <a class="cta-link" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Schedule a free Budget Assessment</a></p>
+  <p class="head-cta">Want help making your budget work? <a class="cta-link" href="/free-session/">Book a free budgeting session</a></p>
 </div>
 <div class="app wrap">
   <div class="ledger" id="ledger">
@@ -676,7 +676,7 @@
       <button class="reset-btn" id="resetBtn" type="button">Start a new budget</button>
     </div>
 
-    <p class="cta-text">Trying to figure out how to make your budget work? <a class="cta-link" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Schedule a free Budget Assessment</a></p>
+    <p class="cta-text">Want help making your budget work? <a class="cta-link" href="/free-session/">Book a free budgeting session</a></p>
   </div>
 </div>
 </main>
@@ -1155,7 +1155,7 @@
   // ExcelJS (MIT) is self-hosted next to this page and only loaded when someone exports.
   var EXCELJS_SRC = '/mybudget/exceljs.min.js';
   var SITE_URL = 'https://www.myidk.app/mybudget/';
-  var ASSESSMENT_URL = 'https://calendar.app.google/WLPvMMzoXyADSyUv7';
+  var SESSION_URL = 'https://www.myidk.app/free-session/';
 
   function loadExcelJS(){
     if(window.ExcelJS) return Promise.resolve(window.ExcelJS);
@@ -1324,7 +1324,7 @@
     ws.getCell('A2').font = { color:{ argb:XL.soft } };
     ws.getCell('A3').value = { text:'Free budget calculator: myidk.app/mybudget', hyperlink:SITE_URL };
     ws.getCell('A3').font = { color:{ argb:XL.teal }, underline:true };
-    ws.getCell('A4').value = { text:'Need help making it work? Schedule a free Budget Assessment', hyperlink:ASSESSMENT_URL };
+    ws.getCell('A4').value = { text:'Want help making it work? Book a free budgeting session: myidk.app/free-session', hyperlink:SESSION_URL };
     ws.getCell('A4').font = { color:{ argb:XL.teal }, underline:true, bold:true };
 
     ws.getCell('A6').value = 'Paychecks';
