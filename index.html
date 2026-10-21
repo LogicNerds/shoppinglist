@@ -179,6 +179,7 @@
     color: var(--text);
     transition: border-color 0.15s, transform 0.2s;
   }
+  .tool-lead { grid-column: 1 / -1; }
   .tool:hover { border-color: var(--teal); transform: translateY(-3px); }
   .tool:focus-visible { outline: 3px solid var(--teal); outline-offset: 4px; }
   .tool-name {
@@ -332,7 +333,7 @@
       <h2 class="title" id="tools">Free <span>tools</span></h2>
       <p class="tools-intro">Poke at your numbers first. No sign-up for any of these. Use them on your own, or bring what you find to your session.</p>
       <div class="tools">
-        <a class="tool" href="/mybudget/">
+        <a class="tool tool-lead" href="/mybudget/">
           <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">MyBudget</span>
           <p>A zero-based budget calculator. Start with your take-home pay and assign every dollar.</p>
           <span class="go">Open MyBudget →</span>
@@ -346,6 +347,11 @@
           <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">Grocery Prices</span>
           <p>Build a cart of everyday staples and see what it cost in 2020 compared to now.</p>
           <span class="go">Compare prices →</span>
+        </a>
+        <a class="tool" href="/creditscore/">
+          <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">Credit Scores</span>
+          <p>See how the major credit score models weigh your credit, and which one you're probably looking at.</p>
+          <span class="go">See how scores work →</span>
         </a>
         <a class="tool" href="/mygroceries/">
           <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">MyGroceries</span>
