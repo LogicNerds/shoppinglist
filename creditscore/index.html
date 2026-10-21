@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDK Credit Scores — How your score is weighted</title>
+<meta name="description" content="How FICO Score 8, VantageScore 3.0 and VantageScore 4.0 weigh your credit, side by side. Find out which score you're looking at and what actually moves it.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KEZSNJZ4JW');
+</script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a1f2b">
+<link rel="icon" href="/icons/icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+<script src="/site.js" defer></script>
+<style>
+  /* Page-only tokens; brand tokens (--teal, --navy-dark, --text…) come from site.css */
+  :root {
+    --panel: #102a38;
+    --teal-bright: #2dd4bf;
+    --c-pay: #2dd4bf;
+    --c-debt: #fb923c;
+    --c-hist: #c4b5fd;
+    --c-new: #7dd3fc;
+  }
+
+  main { padding: 48px 0 0; }
+  main > .wrap { display: grid; gap: 40px; }
+
+  .h2 {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.8rem, 5vw, 2.4rem);
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+  .h2 span { color: var(--teal); }
+  .sub { color: var(--text-dim); line-height: 1.55; margin-top: 10px; max-width: 60ch; }
+  .label { display: block; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dimmer); }
+  main button:focus-visible { outline: 2px solid var(--teal-bright); outline-offset: 2px; }
+
+  /* ── INTRO ── */
+  .intro { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; align-items: end; }
+  .intro h1 {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2.8rem, 8vw, 4.8rem);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+  .intro h1 span { color: var(--teal); }
+  .lede { color: var(--text-dim); margin-top: 14px; max-width: 52ch; line-height: 1.55; }
+  .readout { border-top: 1px solid var(--rule); }
+  .readout div { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .big { display: block; font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.4rem, 7vw, 3.4rem); line-height: 1; color: var(--teal-bright); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .note { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; display: block; margin-top: 4px; }
+
+  /* ── WHICH SCORE ── */
+  .picks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+  .pick {
+    font: 500 0.95rem 'DM Sans', sans-serif;
+    text-align: left; color: var(--text-dim);
+    background: transparent; border: 1px solid var(--rule); border-radius: 8px;
+    padding: 14px 16px; cursor: pointer; line-height: 1.35;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .pick:hover { border-color: rgba(13,148,136,0.6); color: var(--text); }
+  .pick[aria-pressed="true"] { background: var(--panel); border-color: var(--teal); color: var(--text); }
+  .answer { margin-top: 14px; padding: 18px 20px; background: var(--panel); border-radius: 8px; border-left: 3px solid var(--teal); }
+  .answer h3 { font-family: 'Jost', 'Futura', sans-serif; font-weight: 700; font-size: 1.2rem; }
+  .answer p { color: var(--text-dim); line-height: 1.6; margin-top: 6px; max-width: 70ch; }
+  .answer.idle { border-left-color: var(--rule); }
+  .answer.idle p { margin-top: 0; }
+
+  /* ── WEIGHTS ── */
+  .chart-box { background: var(--panel); border-radius: 8px; padding: 22px 20px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .chart-head h2 { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 1.6rem; letter-spacing: 0.02em; line-height: 1.1; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 3px; gap: 2px; }
+  .seg button { font: 500 0.85rem 'DM Sans', sans-serif; color: var(--text-dim); background: none; border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--teal); color: var(--text); }
+  .mode-note { color: var(--text-dim); font-size: 0.9rem; line-height: 1.55; max-width: 70ch; }
+
+  .models { display: grid; gap: 22px; margin-top: 18px; }
+  .model { transition: opacity 0.2s; }
+  .models.focus .model:not(.on) { opacity: 0.35; }
+  .model-head { display: flex; align-items: baseline; justify-content: space-between; gap: 4px 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .model-name { font-family: 'Jost', 'Futura', sans-serif; font-weight: 700; font-size: 1.1rem; }
+  .model-use { font-size: 0.85rem; color: var(--text-dim); }
+  .bar { display: flex; gap: 2px; height: 36px; border-radius: 6px; overflow: hidden; }
+  .bar span {
+    background: var(--c); min-width: 0;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 0.85rem 'DM Sans', sans-serif; color: #0a1f2b;
+    font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden;
+    transition: flex-grow 0.35s;
+  }
+  .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 0.88rem; color: var(--text-dim); }
+  .legend li { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
+  .legend b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .chart-foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 0.85rem; color: var(--text-dim); line-height: 1.55; }
+
+  /* ── CASH FLOW ── */
+  .flow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .flow-text p { color: var(--text-dim); line-height: 1.65; margin-top: 14px; max-width: 56ch; }
+  .flow-text p strong { color: var(--text); }
+  .stack { border-top: 1px solid var(--rule); }
+  .stack div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .stack .big { margin-top: 0; }
+  .stack span:first-child { color: var(--text-dim); font-size: 0.95rem; }
+
+  /* ── DIFFERENCES ── */
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+  .card { border: 1px solid var(--rule); border-radius: 8px; padding: 20px; }
+  .card h3 { font-family: 'Jost', 'Futura', sans-serif; font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
+  .card p { color: var(--text-dim); line-height: 1.6; font-size: 0.95rem; margin-top: 8px; }
+  .card p.why { color: var(--text); }
+
+  /* ── MORTGAGE TIMELINE ── */
+  .timeline { list-style: none; margin-top: 18px; border-left: 2px solid var(--rule); padding-left: 22px; display: grid; gap: 18px; }
+  .timeline li { position: relative; }
+  .timeline li::before {
+    content: ""; position: absolute; left: -29px; top: 5px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--navy-dark); border: 2px solid var(--teal);
+  }
+  .timeline li.done::before { background: var(--teal); }
+  .timeline time, .timeline .when { display: block; font-weight: 700; font-size: 0.9rem; color: var(--teal-bright); }
+  .timeline p { color: var(--text-dim); line-height: 1.55; margin-top: 2px; max-width: 66ch; }
+  .aside { margin-top: 18px; color: var(--text-dim); font-size: 0.92rem; line-height: 1.6; max-width: 70ch; }
+
+  /* ── TOOL TILE ── */
+  .next .h2 { margin-bottom: 16px; }
+  .tool {
+    display: flex; flex-direction: column; gap: 14px;
+    border: 1px solid var(--rule); border-radius: 8px;
+    padding: 22px; text-decoration: none; color: var(--text);
+    transition: border-color 0.15s, transform 0.2s;
+  }
+  .tool:hover { border-color: var(--teal); transform: translateY(-3px); }
+  .tool:focus-visible { outline: 3px solid var(--teal); outline-offset: 4px; }
+  .tool-mark { display: flex; align-items: center; gap: 6px; font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif; font-weight: 700; font-size: 1.5rem; line-height: 1; }
+  .tool-mark img { width: 30px; height: auto; display: block; }
+  .tool-mark small { font-weight: 600; font-size: 1rem; letter-spacing: 0.04em; margin-left: 4px; }
+  .tool p { color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; max-width: 64ch; }
+  .tool .go { color: var(--teal-bright); font-weight: 700; font-size: 0.95rem; }
+
+  /* ── FINE PRINT ── */
+  .fine { font-size: 0.75rem; line-height: 1.65; color: var(--text-dimmer); border-top: 1px solid var(--rule); padding-top: 20px; display: grid; gap: 8px; }
+  .fine p { max-width: 90ch; }
+  .fine a { color: var(--text-dimmer); }
+  .fine a:hover { color: var(--text-dim); }
+
+  @media (max-width: 780px) {
+    .picks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cards { grid-template-columns: minmax(0, 1fr); }
+    .flow { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 700px) {
+    main { padding-top: 32px; }
+    main > .wrap { gap: 32px; }
+    .intro { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .chart-box { padding: 18px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="IDK home"><img src="/idkassets/idk-money.png" alt="">IDK</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <div class="nav-group">
+        <button class="nav-group-btn is-current" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
+        <ul class="nav-menu" id="nav-tools">
+          <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
+          <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
+          <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
+          <li><a href="/creditscore/" aria-current="page">Credit Scores<small>How your credit score is weighted</small></a></li>
+          <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
+        </ul>
+      </div>
+      <a class="nav-cta" href="/free-session/">Free Session</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <section class="intro">
+      <div>
+        <h1>How your credit score is <span>weighted</span></h1>
+        <p class="lede">You have more than one credit score, and the one in your app may not be the one a lender pulls. Here's how the three most common models weigh your credit, side by side.</p>
+      </div>
+      <div class="readout">
+        <div>
+          <span class="label">Paying on time + keeping debt low</span>
+          <span class="big">65–74%</span>
+          <span class="note">of your score in all three models</span>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="which">
+      <h2 class="h2" id="which">Where did you see <span>your score?</span></h2>
+      <p class="sub">Pick one to see which model you're probably looking at.</p>
+      <div class="picks" role="group" aria-label="Where you saw your score">
+        <button type="button" class="pick" data-pick="free" aria-pressed="false">A free credit app or site</button>
+        <button type="button" class="pick" data-pick="bank" aria-pressed="false">My bank or credit card app</button>
+        <button type="button" class="pick" data-pick="apply" aria-pressed="false">Applying for a card or car loan</button>
+        <button type="button" class="pick" data-pick="mortgage" aria-pressed="false">A mortgage lender</button>
+      </div>
+      <div class="answer idle" id="answer" aria-live="polite">
+        <p>The weights below will highlight the model that matches.</p>
+      </div>
+    </section>
+
+    <section class="chart-box" aria-labelledby="weights">
+      <div class="chart-head">
+        <h2 id="weights">What each model weighs</h2>
+        <div class="seg" role="group" aria-label="Category view">
+          <button type="button" id="vCommon" aria-pressed="true">Side by side</button>
+          <button type="button" id="vNative" aria-pressed="false">Each model's own labels</button>
+        </div>
+      </div>
+      <p class="mode-note" id="modeNote"></p>
+      <div class="models" id="models"></div>
+      <p class="chart-foot">These are the general weights FICO and VantageScore publish. They're a guide, not a formula: FICO says how much each category matters can vary from one person to another. FICO's mortgage, auto and card versions and FICO 10T use the same five categories, but FICO doesn't publish separate percentages for them.</p>
+    </section>
+
+    <section class="flow" aria-labelledby="cashflow">
+      <div class="flow-text">
+        <h2 class="h2" id="cashflow">Most of your score is a <span>cash-flow question</span></h2>
+        <p>The two biggest pieces of every model are <strong>paying on time</strong> and <strong>how much of your available credit you're using</strong>. Neither one is a credit trick. Both come down to knowing what's coming in, what's due and when, before the bill shows up.</p>
+        <p>A missed payment usually isn't about not caring. It's a due date that landed before payday, or a card that quietly carried this month's groceries. A budget puts those dates and balances where you can see them.</p>
+      </div>
+      <div class="stack" aria-label="Share of score from payment history and debt">
+        <div><span>FICO Score 8</span><span class="big">65%</span></div>
+        <div><span>VantageScore 3.0</span><span class="big">74%</span></div>
+        <div><span>VantageScore 4.0</span><span class="big">69%</span></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="diff">
+      <h2 class="h2" id="diff">What changes <span>besides the weights</span></h2>
+      <p class="sub">The bigger differences between models are in what data they read and how far back they look.</p>
+      <div class="cards">
+        <article class="card">
+          <h3>A trend, not a snapshot</h3>
+          <p>FICO 8 and VantageScore 3.0 look at your balances as of the latest report. VantageScore 4.0 looks back up to two years, and FICO 10T also uses trended data.</p>
+          <p class="why">Paying a card down steadily shows up as a pattern, not a one-month blip.</p>
+        </article>
+        <article class="card">
+          <h3>Short credit histories</h3>
+          <p>FICO needs an account at least six months old and some activity in the last six months. VantageScore can score you with a single account on file, even a new one.</p>
+          <p class="why">Just starting out? You may have a VantageScore before you have a FICO.</p>
+        </article>
+        <article class="card">
+          <h3>Rent can count</h3>
+          <p>The newer models can include rent payments when they're reported to the credit bureaus. Most rent isn't reported unless your landlord or a rent-reporting service sends it.</p>
+          <p class="why">On-time rent only helps if it's on your report.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="mortgage">
+      <h2 class="h2" id="mortgage">Mortgages are <span>switching models</span></h2>
+      <p class="sub">For decades, Fannie Mae and Freddie Mac loans required Classic FICO. That's changing. Updated October 2026.</p>
+      <ol class="timeline">
+        <li class="done"><time datetime="2022-10">October 2022</time><p>The agency that oversees Fannie Mae and Freddie Mac picks FICO 10T and VantageScore 4.0 as the newer scores for their loans.</p></li>
+        <li class="done"><time datetime="2026-04-22">April 22, 2026</time><p>Fannie Mae and Freddie Mac start accepting VantageScore 4.0 from approved lenders in a limited rollout. FHA says it will allow both newer models.</p></li>
+        <li class="done"><time datetime="2026-09">September 2026</time><p>Fannie Mae and Freddie Mac expand VantageScore 4.0 after being told to approve all lenders to use it.</p></li>
+        <li><time datetime="2027-01-01">January 1, 2027</time><p>FHA loans can use VantageScore 4.0 or FICO 10T alongside Classic FICO.</p></li>
+        <li><span class="when">Date not set</span><p>FICO 10T for Fannie Mae and Freddie Mac loans.</p></li>
+      </ol>
+      <p class="aside">Until your lender switches, expect Classic FICO: one older FICO version from each of the three bureaus, with the middle score usually deciding your rate.</p>
+    </section>
+
+    <section class="next" aria-labelledby="next">
+      <h2 class="h2" id="next">Paying on time starts with <span>knowing what's due.</span></h2>
+      <a class="tool" href="/mybudget/">
+        <span class="tool-mark"><img src="/idkassets/idk-money.png" alt="">IDK<small>my budget</small></span>
+        <p>Paying off debt? Start by seeing what you've got to work with. Enter your take-home pay, put your bills and minimum payments in first, and assign every dollar after that with a zero-based budget. Whatever's left is what you can throw at your balances.</p>
+        <span class="go">Try MyBudget →</span>
+      </a>
+    </section>
+
+    <section class="assess-band" aria-label="Free budgeting session">
+      <div>
+        <h2>Working on paying down debt?</h2>
+        <p>Book a free 45-minute budgeting session. We'll build a budget around your real take-home pay and payments, so you know what you can put toward your balances each month.</p>
+      </div>
+      <a class="btn" href="/free-session/">Book a free session</a>
+    </section>
+
+    <section class="fine" aria-label="Sources and notes">
+      <p><strong>Weights.</strong> FICO: <a href="https://www.myfico.com/crediteducation/whatsinyourscore.aspx" target="_blank" rel="noopener">myFICO, What's in my FICO Scores</a>. VantageScore 3.0 and 4.0: <a href="https://www.vantagescore.com/the-complete-guide-to-your-vantagescore/" target="_blank" rel="noopener">VantageScore, The Complete Guide to Your VantageScore</a>. The "side by side" view is IDK's own grouping so the models can be compared: FICO's amounts owed is compared with VantageScore's utilization, balances and available credit; FICO's length of history and credit mix with VantageScore's depth of credit; FICO's new credit with VantageScore's recent credit. "Paying on time + keeping debt low" adds payment history to that debt group.</p>
+      <p><strong>Which score.</strong> FICO Score 8 is the version most widely used by lenders, and mortgage lenders use FICO Score 2, 5 and 4 from Experian, Equifax and TransUnion: <a href="https://www.myfico.com/legal/fico-score-versions" target="_blank" rel="noopener">myFICO, FICO Score versions</a>. Free apps: <a href="https://www.creditkarma.com/credit/i/vantagescore-30" target="_blank" rel="noopener">Credit Karma</a> and <a href="https://www.chase.com/personal/credit-cards/education/credit-score/vantagescore-3-0-vs-4-0" target="_blank" rel="noopener">Chase Credit Journey</a> show VantageScore 3.0. Score ranges and minimum scoring rules: <a href="https://www.experian.com/blogs/ask-experian/the-difference-between-vantage-scores-and-fico-scores/" target="_blank" rel="noopener">Experian</a>.</p>
+      <p><strong>Mortgages.</strong> <a href="https://www.vantagescore.com/resources/knowledge-center/fhfa-to-change-credit-score-model-for-new-mortgages" target="_blank" rel="noopener">FHFA's October 2022 decision</a>; <a href="https://fhfa.gov/news/news-release/homebuying-advances-into-new-era-of-credit-score-competition" target="_blank" rel="noopener">FHFA and HUD, April 22, 2026</a>; <a href="https://www.icba.org/w/fha-releases-date-guide-for-alternative-credit-score-models" target="_blank" rel="noopener">ICBA, September 11, 2026</a> (FHA's January 1, 2027 date and the expansion to all lenders).</p>
+      <p>This page explains how scoring models work in general. It can't estimate your score; only a score pulled from your own credit report can.</p>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Logic Nerds</span>
+    <a href="/privacy.html">Privacy Policy</a>
+  </div>
+</footer>
+
+<script>
+// Published general weights. Each model's native categories carry the
+// common bucket they're grouped into for the side-by-side view.
+const BUCKETS = {
+  pay:  { name: 'Payment history',          c: 'var(--c-pay)' },
+  debt: { name: 'Debt and utilization',     c: 'var(--c-debt)' },
+  hist: { name: 'Account age and mix',      c: 'var(--c-hist)' },
+  neu:  { name: 'New credit',               c: 'var(--c-new)' },
+};
+const MODELS = [
+  { id: 'fico', name: 'FICO Score 8', use: 'The version most lenders use', parts: [
+    { name: 'Payment history',          b: 'pay',  w: 35, c: '#2dd4bf' },
+    { name: 'Amounts owed',             b: 'debt', w: 30, c: '#fb923c' },
+    { name: 'Length of credit history', b: 'hist', w: 15, c: '#c4b5fd' },
+    { name: 'Credit mix',               b: 'hist', w: 10, c: '#a78bfa' },
+    { name: 'New credit',               b: 'neu',  w: 10, c: '#7dd3fc' },
+  ]},
+  { id: 'vs3', name: 'VantageScore 3.0', use: 'What most free credit apps show', parts: [
+    { name: 'Payment history',    b: 'pay',  w: 40, c: '#2dd4bf' },
+    { name: 'Credit utilization', b: 'debt', w: 20, c: '#fb923c' },
+    { name: 'Balances',           b: 'debt', w: 11, c: '#fdba74' },
+    { name: 'Available credit',   b: 'debt', w: 3,  c: '#fed7aa' },
+    { name: 'Depth of credit',    b: 'hist', w: 21, c: '#c4b5fd' },
+    { name: 'Recent credit',      b: 'neu',  w: 5,  c: '#7dd3fc' },
+  ]},
+  { id: 'vs4', name: 'VantageScore 4.0', use: 'Newest; now accepted for mortgages', parts: [
+    { name: 'Payment history',    b: 'pay',  w: 41, c: '#2dd4bf' },
+    { name: 'Credit utilization', b: 'debt', w: 20, c: '#fb923c' },
+    { name: 'Balances',           b: 'debt', w: 6,  c: '#fdba74' },
+    { name: 'Available credit',   b: 'debt', w: 2,  c: '#fed7aa' },
+    { name: 'Depth of credit',    b: 'hist', w: 20, c: '#c4b5fd' },
+    { name: 'Recent credit',      b: 'neu',  w: 11, c: '#7dd3fc' },
+  ]},
+];
+
+const PICKS = {
+  free: {
+    hl: ['vs3'],
+    title: 'Most likely VantageScore 3.0',
+    body: "Credit Karma and Chase Credit Journey both show VantageScore 3.0, and plenty of other free apps do too. It's a real score from your real report, but it's usually not the one a lender pulls. It runs from 300 to 850."
+  },
+  bank: {
+    hl: ['fico'],
+    title: 'Often FICO Score 8',
+    body: "Many bank and card apps show FICO Score 8, the version most lenders use. Some show a VantageScore instead. The model's name is usually printed near the number, so check before you compare it with another app. Both run from 300 to 850."
+  },
+  apply: {
+    hl: ['fico'],
+    title: 'Usually a FICO Score',
+    body: "Most lenders use FICO Score 8. Card issuers and car lenders often use FICO's industry versions instead (Bankcard and Auto scores), which are tuned to that type of credit and run from 250 to 900. They're built on the same five categories."
+  },
+  mortgage: {
+    hl: ['fico', 'vs4'],
+    title: 'Classic FICO, with VantageScore 4.0 coming in',
+    body: "Most mortgage lenders still pull an older FICO version from each of the three bureaus (FICO 2, 5 and 4) and go by the middle score. Lenders can now use VantageScore 4.0 on Fannie Mae and Freddie Mac loans, and FHA loans follow in January 2027."
+  },
+};
+
+const NOTES = {
+  common: 'Each model names its categories differently, so they\'re grouped into four shared buckets here. Same colors mean the same kind of thing.',
+  native: 'VantageScore splits what FICO calls "amounts owed" into three parts (orange shades), and folds credit mix into depth of credit. That\'s why the side-by-side view groups them.',
+};
+
+const $ = id => document.getElementById(id);
+let view = 'common';
+let pick = null;
+
+function slices(m) {
+  if (view === 'native') return m.parts.map(p => ({ name: p.name, w: p.w, c: p.c }));
+  return Object.keys(BUCKETS).map(k => ({
+    name: BUCKETS[k].name,
+    c: BUCKETS[k].c,
+    w: m.parts.filter(p => p.b === k).reduce((s, p) => s + p.w, 0),
+  }));
+}
+
+// Build the rows once; render() only updates widths, labels and legends.
+const rows = MODELS.map(m => {
+  const el = document.createElement('div');
+  el.className = 'model';
+  el.innerHTML =
+    `<div class="model-head"><span class="model-name">${m.name}</span><span class="model-use">${m.use}</span></div>` +
+    `<div class="bar" role="img"></div><ul class="legend"></ul>`;
+  $('models').appendChild(el);
+  return { m, el, bar: el.querySelector('.bar'), legend: el.querySelector('.legend') };
+});
+
+function render() {
+  $('vCommon').setAttribute('aria-pressed', view === 'common');
+  $('vNative').setAttribute('aria-pressed', view === 'native');
+  $('modeNote').textContent = NOTES[view];
+
+  rows.forEach(r => {
+    const s = slices(r.m);
+    r.bar.setAttribute('aria-label', `${r.m.name}: ` + s.map(x => `${x.name} ${x.w}%`).join(', '));
+    r.bar.innerHTML = s.map(x =>
+      `<span style="--c:${x.c};flex:${x.w} 1 0">${x.w >= 9 ? x.w + '%' : ''}</span>`
+    ).join('');
+    r.legend.innerHTML = s.map(x =>
+      `<li><i style="--c:${x.c}"></i>${x.name} <b>${x.w}%</b></li>`
+    ).join('');
+    r.el.classList.toggle('on', !!pick && PICKS[pick].hl.includes(r.m.id));
+  });
+  $('models').classList.toggle('focus', !!pick);
+
+  document.querySelectorAll('.pick').forEach(b => b.setAttribute('aria-pressed', b.dataset.pick === pick));
+  const a = $('answer');
+  if (pick) {
+    a.classList.remove('idle');
+    a.innerHTML = `<h3>${PICKS[pick].title}</h3><p>${PICKS[pick].body}</p>`;
+  } else {
+    a.classList.add('idle');
+    a.innerHTML = '<p>The weights below will highlight the model that matches.</p>';
+  }
+}
+
+document.querySelectorAll('.pick').forEach(b => {
+  b.addEventListener('click', () => { pick = pick === b.dataset.pick ? null : b.dataset.pick; render(); });
+});
+$('vCommon').onclick = () => { view = 'common'; render(); };
+$('vNative').onclick = () => { view = 'native'; render(); };
+render();
+</script>
+
+</body>
+</html>
