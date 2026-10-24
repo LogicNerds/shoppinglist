@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IDK — Zero-Based Budgeting, One-on-One</title>
-<meta name="description" content="Find out where your paycheck actually goes. Book a free 45-minute session and build a zero-based budget together with your real numbers.">
+<title>IDK — Free Zero-Based Budgeting Help</title>
+<meta name="description" content="Find out where your paycheck actually goes. Send us your budget for a free review, join the free Wednesday workshop, or book a free one-on-one session.">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -23,8 +23,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/site.css">
-<script src="/site.js" defer></script>
+<link rel="stylesheet" href="/site.css?v=3">
+<script src="/site.js?v=3" defer></script>
 <style>
   :root { --panel: #102a38; --teal-bright: #2dd4bf; }
 
@@ -61,14 +61,6 @@
     color: var(--text-dim);
   }
 
-  .hero-actions {
-    margin-top: 32px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px 28px;
-  }
-
   .text-link {
     color: var(--teal-bright);
     font-weight: 700;
@@ -78,7 +70,6 @@
   }
   .text-link:hover { border-color: var(--teal-bright); }
 
-  .fine-note { margin-top: 14px; font-size: 0.85rem; color: var(--text-dimmer); }
 
   /* ── STATS ── */
   .stats {
@@ -108,36 +99,37 @@
   sup a { color: var(--text-dimmer); text-decoration: none; font-size: 0.7em; margin-left: 1px; }
   sup a:hover { color: var(--teal); }
 
-  /* ── STEPS ── */
-  .steps {
+  /* ── THREE CHOICES ── */
+  .choices {
     list-style: none;
-    margin-top: 28px;
+    margin-top: 36px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
-    counter-reset: step;
   }
-  .step {
-    counter-increment: step;
+  .choice {
     background: var(--panel);
+    border: 1px solid var(--rule);
     border-radius: 8px;
     padding: 24px 22px;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-  .step::before {
-    content: counter(step);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.4rem;
-    line-height: 1;
-    color: var(--teal);
+  .choice h2 {
+    font-family: 'Jost', 'Futura', sans-serif;
+    font-weight: 700;
+    font-size: 1.35rem;
+    line-height: 1.1;
   }
-  .step h3 { font-size: 1.08rem; font-weight: 700; line-height: 1.3; }
-  .step p { color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
-
-  .steps-cta { margin-top: 32px; }
-  .group-note { margin-top: 20px; max-width: 60ch; font-size: 0.95rem; line-height: 1.55; color: var(--text-dim); }
+  .choice .ask { color: var(--text); font-weight: 700; font-size: 1rem; line-height: 1.35; }
+  .choice p { color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+  .choice .btn {
+    font-size: 0.98rem;
+    padding: 12px 22px;
+  }
+  .choice .btn-wrap { margin-top: auto; padding-top: 8px; display: flex; }
+  .poke { margin-top: 24px; font-size: 0.95rem; color: var(--text-dim); }
 
   /* ── STORY ── */
   .story-photo {
@@ -213,13 +205,13 @@
   .sources a:hover { color: var(--text-dim); }
 
   @media (max-width: 760px) {
-    .stats, .steps { grid-template-columns: minmax(0, 1fr); }
+    .stats, .choices { grid-template-columns: minmax(0, 1fr); }
   }
 
   @media (max-width: 600px) {
     .hero { padding: 48px 0 44px; }
     .section { padding: 44px 0; }
-    .hero-actions .btn { width: 100%; text-align: center; padding-left: 20px; padding-right: 20px; }
+    .choice .btn { flex: 1; text-align: center; }
     .tools { grid-template-columns: minmax(0, 1fr); }
   }
 </style>
@@ -233,7 +225,7 @@
     <nav class="site-nav" id="site-nav" aria-label="Main">
       <div class="nav-group">
         <button class="nav-group-btn" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
-        <ul class="nav-menu" id="nav-tools">
+        <ul class="nav-menu" id="nav-tools" data-placement="nav">
           <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
           <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
           <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
@@ -241,7 +233,14 @@
           <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
         </ul>
       </div>
-      <a class="nav-cta" href="/free-session/">Free Session</a>
+      <div class="nav-group nav-group-help">
+        <button class="nav-group-btn nav-help-btn" type="button" aria-expanded="false" aria-controls="nav-help">Help Me Budget</button>
+        <ul class="nav-menu" id="nav-help" data-placement="nav">
+          <li><a href="/review/">Budget Review<small>Send it in, no call</small></a></li>
+          <li><a href="/workshop/">Workshop<small>Free group class, Wednesdays</small></a></li>
+          <li><a href="/free-session/">Free Session<small>45 minutes, one-on-one</small></a></li>
+        </ul>
+      </div>
     </nav>
   </div>
 </header>
@@ -250,12 +249,28 @@
   <section class="hero">
     <div class="wrap">
       <h1>No idea where your <span>paycheck goes?</span></h1>
-      <p class="lede">You're not bad with money. You just haven't told it where to go yet. A zero-based budget assigns every dollar before the month starts, so you stop finding out where it went at the end.</p>
-      <div class="hero-actions">
-        <a class="btn" href="/free-session/">Book a free budgeting session</a>
-        <a class="text-link" href="/mybudget/">Or run your numbers in MyBudget →</a>
-      </div>
-      <p class="fine-note">Free. 45 minutes, one-on-one. Nothing to buy.</p>
+      <p class="lede">You're not bad with money. You just haven't told it where to go yet. Pick how you want help. All three are free.</p>
+      <ul class="choices" data-placement="home_choices">
+        <li class="choice">
+          <h2>Budget Review</h2>
+          <p class="ask">Don't want to get on a call?</p>
+          <p>Fill in MyBudget and send it to us. We'll email you what's working and what we'd change within 7 days.</p>
+          <div class="btn-wrap"><a class="btn" href="/review/">Send us your budget</a></div>
+        </li>
+        <li class="choice">
+          <h2>Workshop</h2>
+          <p class="ask">Rather learn in a group?</p>
+          <p>A free live class every Wednesday, 6–7 PM Pacific, on Google Meet.</p>
+          <div class="btn-wrap"><a class="btn" href="/workshop/">Save my spot</a></div>
+        </li>
+        <li class="choice">
+          <h2>Free Session</h2>
+          <p class="ask">Want it built with you?</p>
+          <p>45 minutes, one-on-one. We build your budget together, and you leave with your own sheet.</p>
+          <div class="btn-wrap"><a class="btn" href="/free-session/">Pick a time</a></div>
+        </li>
+      </ul>
+      <p class="poke" data-placement="home_hero">Just want to poke at your numbers? <a class="text-link" href="/mybudget/">Open MyBudget →</a></p>
     </div>
   </section>
 
@@ -280,37 +295,11 @@
     </div>
   </section>
 
-  <section class="section" aria-labelledby="how">
-    <div class="wrap">
-      <h2 class="title" id="how">How it <span>works</span></h2>
-      <p class="tools-intro">One free session. Nothing to buy afterward.</p>
-      <ol class="steps">
-        <li class="step">
-          <h3>Pick a time</h3>
-          <p>Book a 45-minute, one-on-one session. Spots are limited each week, so grab one that works for you.</p>
-        </li>
-        <li class="step">
-          <h3>Bring your numbers</h3>
-          <p>What you take home each month and what goes out. Ballpark figures are fine, and you never share account logins.</p>
-        </li>
-        <li class="step">
-          <h3>Leave with your budget</h3>
-          <p>We assign every dollar together, and you walk away with your own budget sheet to keep running.</p>
-        </li>
-      </ol>
-      <div class="steps-cta">
-        <a class="btn" href="/free-session/">Book a free session</a>
-      </div>
-      <p class="group-note">Prefer a group? Free workshop every Wednesday, 6–7 PM Pacific, on Google Meet. <a class="text-link" href="/free-session/#workshop">Workshop details →</a></p>
-    </div>
-  </section>
-
   <section class="section" aria-labelledby="why">
     <div class="wrap">
       <h2 class="title" id="why">Why is it <span>free?</span></h2>
       <div class="story-text">
-        <p>I'm working toward my Accredited Financial Counselor (AFC) certification, and part of earning it is logging real hours with real people. You get a budget built with you. I get the experience.</p>
-        <p>No sales pitch, no course, no investment products. All I ask is honest feedback when we're done.</p>
+        <p>Everybody deserves access to financial knowledge, and IDK was founded with a mission to deliver that access to as many people as we can.</p>
       </div>
     </div>
   </section>
@@ -333,7 +322,7 @@
   <section class="section" aria-labelledby="tools">
     <div class="wrap">
       <h2 class="title" id="tools">Free <span>tools</span></h2>
-      <p class="tools-intro">Poke at your numbers first. No sign-up for any of these. Use them on your own, or bring what you find to your session.</p>
+      <p class="tools-intro">Poke at your numbers first. No sign-up for any of these. Use them on your own, or bring what you find to a workshop or session.</p>
       <div class="tools">
         <a class="tool tool-lead" href="/mybudget/">
           <span class="tool-name"><img src="/idkassets/idk-money.png" alt="">MyBudget</span>

@@ -23,8 +23,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/site.css">
-<script src="/site.js" defer></script>
+<link rel="stylesheet" href="/site.css?v=3">
+<script src="/site.js?v=3" defer></script>
 <style>
   :root{
     --panel:#0f2a37;
@@ -666,6 +666,19 @@
   .rd-done{ text-align:center; padding:12px 0 4px; }
   .rd-done h3{ margin:0 0 10px; font-size:20px; }
   .rd-done p{ margin:0 0 12px; font-size:14px; color:#D8DDD9; line-height:1.5; }
+  .rd-next{
+    margin:4px 0 18px; padding:14px 16px;
+    border:1px solid rgba(13,148,136,0.45); border-radius:12px;
+    background:linear-gradient(135deg, rgba(13,148,136,0.18), rgba(13,148,136,0.05));
+  }
+  .rd-next p{ margin:0 0 10px; font-size:14px; }
+  .rd-next .rd-next-alt{ margin:10px 0 0; font-size:13px; }
+  .rd-next a{ color:#7FDCD2; font-weight:700; }
+  .rd-next .rd-next-btn{
+    display:inline-block; color:#fff; background:var(--teal); text-decoration:none;
+    border-radius:8px; padding:9px 18px; font-size:14px;
+  }
+  .rd-next .rd-next-btn:hover{ background:var(--teal-dark); }
   .rd-code{
     display:inline-block; margin:4px 0 14px; padding:10px 16px;
     font:700 22px/1 Menlo,Consolas,monospace; letter-spacing:0.1em;
@@ -689,7 +702,7 @@
     <nav class="site-nav" id="site-nav" aria-label="Main">
       <div class="nav-group">
         <button class="nav-group-btn is-current" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
-        <ul class="nav-menu" id="nav-tools">
+        <ul class="nav-menu" id="nav-tools" data-placement="nav">
           <li><a href="/mybudget/" aria-current="page">MyBudget<small>Zero-based budget calculator</small></a></li>
           <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
           <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
@@ -697,7 +710,14 @@
           <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
         </ul>
       </div>
-      <a class="nav-cta" href="/free-session/">Free Session</a>
+      <div class="nav-group nav-group-help">
+        <button class="nav-group-btn nav-help-btn" type="button" aria-expanded="false" aria-controls="nav-help">Help Me Budget</button>
+        <ul class="nav-menu" id="nav-help" data-placement="nav">
+          <li><a href="/review/">Budget Review<small>Send it in, no call</small></a></li>
+          <li><a href="/workshop/">Workshop<small>Free group class, Wednesdays</small></a></li>
+          <li><a href="/free-session/">Free Session<small>45 minutes, one-on-one</small></a></li>
+        </ul>
+      </div>
     </nav>
   </div>
 </header>
@@ -710,7 +730,7 @@
     <span class="product">my budget</span>
   </div>
   <h1 class="app-sub">Assign <span>every dollar.</span></h1>
-  <p class="head-cta">Want help making your budget work? <a class="cta-link" href="/free-session/">Book a free budgeting session</a></p>
+  <p class="head-cta" data-placement="mybudget_top">Want our eyes on it? Fill this in, then hit Submit under your results for a free budget review. <a class="cta-link" href="/review/">How it works →</a></p>
 </div>
 <div class="app wrap">
   <div class="ledger" id="ledger">
@@ -799,7 +819,7 @@
       </div>
     </div>
 
-    <p class="cta-text">Want help making your budget work? <a class="cta-link" href="/free-session/">Book a free budgeting session</a></p>
+    <p class="cta-text" data-placement="mybudget_results">Rather talk it through? <a class="cta-link" href="/workshop/">Join a free workshop</a> or <a class="cta-link" href="/free-session/">book a free session</a>.</p>
   </div>
 </div>
 </main>
@@ -808,7 +828,7 @@
   <div class="rd-head">
     <div>
       <h2 id="rdTitle">Submit your budget for review</h2>
-      <p>I'll look over your numbers and tell you what's working and what I'd change.</p>
+      <p>We'll look over your numbers and tell you what's working and what we'd change.</p>
     </div>
     <button class="rd-close" id="rdClose" type="button" aria-label="Close">×</button>
   </div>
@@ -821,12 +841,12 @@
           <label class="rd-choice">
             <input type="radio" name="path" value="email" checked>
             <strong>Email me my assessment</strong>
-            <span>Private. I'll email you within 7 days.</span>
+            <span>Private. We'll email you within 7 days.</span>
           </label>
           <label class="rd-choice">
             <input type="radio" name="path" value="anonymous">
             <strong>Submit anonymously</strong>
-            <span>Under a made-up name, I may review it in a public video.</span>
+            <span>Under a made-up name, we may review it in a public video.</span>
           </label>
         </div>
       </fieldset>
@@ -843,7 +863,7 @@
           </div>
         </div>
         <div class="rd-field">
-          <label for="rdNote">Anything I should know? <span class="hint">(optional)</span></label>
+          <label for="rdNote">Anything we should know? <span class="hint">(optional)</span></label>
           <textarea id="rdNote" name="note" maxlength="1000"></textarea>
         </div>
         <p class="rd-fine" style="margin-top:-4px">Your name and email stay private.</p>
@@ -861,7 +881,7 @@
         </div>
         <label class="rd-check">
           <input type="checkbox" id="rdConsent">
-          <span id="rdConsentText">I'm OK with Elijah reviewing this budget in a public video.</span>
+          <span id="rdConsentText">I'm OK with IDK reviewing this budget in a public video.</span>
         </label>
       </div>
 
@@ -884,7 +904,7 @@
       </fieldset>
 
       <p class="rd-note"><strong>Before you send:</strong> your item names go along with your numbers. Take out names, employers, and account numbers.</p>
-      <p class="rd-fine">I'm not a licensed financial advisor, and this isn't investment, tax, or legal advice. See how submissions are handled in the <a href="/privacy.html#budget-reviews" target="_blank" rel="noopener">Privacy Policy</a>.</p>
+      <p class="rd-fine">We're not licensed financial advisors, and this isn't investment, tax, or legal advice. See how submissions are handled in the <a href="/privacy.html#budget-reviews" target="_blank" rel="noopener">Privacy Policy</a>.</p>
 
       <div class="rd-turnstile" id="rdTurnstile"></div>
 
@@ -901,6 +921,11 @@
       <p style="margin-bottom:4px">Your submission code:</p>
       <div class="rd-code" id="rdCode"></div>
       <p class="rd-fine">Save this code. To have your budget deleted, email <a href="mailto:idk@logicnerds.net">idk@logicnerds.net</a> with it.</p>
+      <div class="rd-next" data-placement="review_done">
+        <p><strong>While you wait:</strong> join the free workshop, any Wednesday, 6–7 PM Pacific.</p>
+        <a class="rd-next-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSfunAHVCCuAjFbHoMhHqPMZL0L4J8qsmu3dQxa-So4QPHDI8Q/viewform" target="_blank" rel="noopener noreferrer">Save my spot</a>
+        <p class="rd-next-alt">Or <a href="/free-session/">book a free one-on-one session →</a></p>
+      </div>
       <button class="export-btn" id="rdDoneBtn" type="button" style="width:auto;padding:11px 26px">Done</button>
     </div>
   </div>
@@ -1995,8 +2020,8 @@
     var text;
     if(payload.path === 'email'){
       text = data.confirmationSent
-        ? "I'll email your assessment by " + replyByText() + '. A confirmation is on its way to ' + payload.email + '.'
-        : "Your budget is saved, but the confirmation email didn't go through. I still have your email and will reply by " + replyByText() + '.';
+        ? "We'll email your assessment by " + replyByText() + '. A confirmation is on its way to ' + payload.email + '.'
+        : "Your budget is saved, but the confirmation email didn't go through. We still have your email and will reply by " + replyByText() + '.';
       if(payload.featureOptIn) text += ' If it shows up in a video, it will be as ' + payload.displayName + '.';
     } else {
       text = 'Thanks! If your budget shows up in a video, it will be as ' + payload.displayName + '.';

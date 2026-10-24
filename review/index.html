@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="canonical" href="https://www.myidk.app/review/">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Budget Review — IDK</title>
+<meta name="description" content="Don't want to get on a call? Fill in MyBudget, hit Submit, and we'll email you what's working and what we'd change. Free, within 7 days.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KEZSNJZ4JW');
+</script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a1f2b">
+<link rel="icon" href="/icons/icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css?v=3">
+<script src="/site.js?v=3" defer></script>
+<style>
+  :root { --panel: #102a38; --teal-bright: #2dd4bf; }
+
+  main { padding-bottom: 8px; }
+
+  .hero { padding: 64px 0 48px; }
+  .hero h1 {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(3rem, 9vw, 5.6rem);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+    max-width: 13ch;
+  }
+  .hero h1 span { color: var(--teal); }
+  .lede {
+    margin-top: 22px;
+    max-width: 52ch;
+    font-size: clamp(1.02rem, 2.4vw, 1.15rem);
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .book { margin-top: 30px; }
+  .book-note { margin-top: 12px; font-size: 0.85rem; color: var(--text-dimmer); }
+  .group-link { margin-top: 20px; font-size: 0.95rem; color: var(--text-dim); }
+  .group-link a { color: var(--teal-bright); font-weight: 700; text-decoration: none; }
+  .group-link a:hover { text-decoration: underline; }
+
+  .section { padding: 48px 0; border-top: 1px solid var(--rule); }
+
+  h2.title {
+    font-family: 'Bebas Neue', 'Impact', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2rem, 5.5vw, 2.8rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+  }
+  h2.title span { color: var(--teal); }
+
+  .two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px;
+  }
+
+  .checks { list-style: none; margin-top: 20px; display: grid; gap: 14px; }
+  .checks li {
+    position: relative;
+    padding-left: 30px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+  .checks li::before {
+    content: "";
+    position: absolute;
+    left: 2px; top: 5px;
+    width: 8px; height: 14px;
+    border-right: 3px solid var(--teal);
+    border-bottom: 3px solid var(--teal);
+    transform: rotate(45deg);
+  }
+  .checks.not li::before {
+    left: 0; top: 11px;
+    width: 16px; height: 0;
+    border-right: 0;
+    border-bottom: 3px solid var(--text-dimmer);
+    transform: none;
+  }
+
+  .timeline { list-style: none; margin-top: 24px; display: grid; gap: 22px; max-width: 60ch; }
+  .timeline h3 { font-size: 1.02rem; font-weight: 700; }
+  .timeline p { margin-top: 4px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+
+  .why-text { margin-top: 20px; max-width: 60ch; display: grid; gap: 14px; }
+  .why-text p { font-size: 1.02rem; line-height: 1.65; color: var(--text-dim); }
+
+  .prep { margin-top: 28px; color: var(--text-dim); line-height: 1.6; max-width: 60ch; }
+  .prep a { color: var(--teal-bright); font-weight: 700; }
+  .disclaimer { margin-top: 14px; font-size: 0.85rem; color: var(--text-dimmer); line-height: 1.55; max-width: 60ch; }
+
+  .final { padding: 8px 0 0; }
+
+  @media (max-width: 720px) {
+    .two { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 44px 0 40px; }
+    .section { padding: 40px 0; }
+    .book .btn { width: 100%; text-align: center; padding-left: 20px; padding-right: 20px; }
+  }
+
+  .steps { list-style: none; margin-top: 24px; display: grid; gap: 22px; max-width: 60ch; counter-reset: step; }
+  .steps li { counter-increment: step; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 8px; }
+  .steps li::before {
+    content: counter(step);
+    grid-row: 1 / span 2;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--teal);
+  }
+  .steps h3 { font-size: 1.02rem; font-weight: 700; }
+  .steps p { margin-top: 4px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+  .ways { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .way { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 22px; }
+  .way h3 { font-size: 1.08rem; font-weight: 700; }
+  .way p { margin-top: 8px; color: var(--text-dim); line-height: 1.55; font-size: 0.95rem; }
+  .next-links { margin-top: 18px; display: grid; gap: 10px; font-size: 1rem; color: var(--text-dim); }
+  .next-links a { color: var(--teal-bright); font-weight: 700; text-decoration: none; }
+  .next-links a:hover { text-decoration: underline; }
+  @media (max-width: 720px) { .ways { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="IDK home"><img src="/idkassets/idk-money.png" alt="">IDK</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <div class="nav-group">
+        <button class="nav-group-btn" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
+        <ul class="nav-menu" id="nav-tools" data-placement="nav">
+          <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
+          <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
+          <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
+          <li><a href="/creditscore/">Credit Scores<small>How your credit score is weighted</small></a></li>
+          <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
+        </ul>
+      </div>
+      <div class="nav-group nav-group-help">
+        <button class="nav-group-btn nav-help-btn is-current" type="button" aria-expanded="false" aria-controls="nav-help">Help Me Budget</button>
+        <ul class="nav-menu" id="nav-help" data-placement="nav">
+          <li><a href="/review/" aria-current="page">Budget Review<small>Send it in, no call</small></a></li>
+          <li><a href="/workshop/">Workshop<small>Free group class, Wednesdays</small></a></li>
+          <li><a href="/free-session/">Free Session<small>45 minutes, one-on-one</small></a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <h1>Send us <span>your budget.</span></h1>
+      <p class="lede">Don't want to get on a call? Fill in MyBudget, hit Submit, and we'll email you what's working and what we'd change. Free, within 7 days.</p>
+      <div class="book" data-placement="review_hero">
+        <a class="btn" href="/mybudget/">Start in MyBudget</a>
+        <p class="book-note">No account, no sign-up. Your numbers stay in your browser until you hit Submit.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="how">
+    <div class="wrap">
+      <h2 class="title" id="how">How it <span>works</span></h2>
+      <ol class="steps">
+        <li><h3>Fill in MyBudget</h3><p>Your take-home pay and where it goes. Ballpark figures are fine.</p></li>
+        <li><h3>Hit &ldquo;Submit my budget for review&rdquo;</h3><p>It's under your results. Pick private or anonymous.</p></li>
+        <li><h3>Check your inbox</h3><p>Within 7 days you get our notes: what's working, what we'd change, and where we'd start.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="ways">
+    <div class="wrap">
+      <h2 class="title" id="ways">Two ways <span>to send it</span></h2>
+      <div class="ways">
+        <div class="way">
+          <h3>Private</h3>
+          <p>We email our review to you. Your name and email stay private.</p>
+        </div>
+        <div class="way">
+          <h3>Anonymous</h3>
+          <p>Pick a made-up name, and we may break down your budget in a video. You don't give an email, so you won't get a written reply.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="look">
+    <div class="wrap">
+      <h2 class="title" id="look">What we <span>look at</span></h2>
+      <div class="why-text">
+        <p>Whether every dollar is assigned, how your money splits between cost of living, debt, your future, and lifestyle, and what we'd tackle first.</p>
+      </div>
+      <p class="disclaimer">We're not licensed financial advisors, and this isn't investment, tax, or legal advice. We'll never ask for account numbers or logins. See how submissions are handled in the <a href="/privacy.html#budget-reviews" style="color:inherit">Privacy Policy</a>.</p>
+    </div>
+  </section>
+
+  <section class="section final">
+    <div class="wrap">
+      <div class="assess-band" data-placement="review_next">
+        <div>
+          <h2>Want to talk it through live?</h2>
+          <div class="next-links">
+            <span>In a group: <a href="/workshop/">Join the free Wednesday workshop →</a></span>
+            <span>One-on-one: <a href="/free-session/">Book a free session →</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Logic Nerds</span>
+    <a href="/privacy.html">Privacy Policy</a>
+  </div>
+</footer>
+
+</body>
+</html>

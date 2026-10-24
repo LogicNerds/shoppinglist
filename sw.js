@@ -1,4 +1,4 @@
-const CACHE_NAME = 'idk-groceries-v2';
+const CACHE_NAME = 'idk-groceries-v3';
 const ASSETS = [
   '/',
   '/index.html',

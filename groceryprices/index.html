@@ -23,8 +23,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/site.css">
-<script src="/site.js" defer></script>
+<link rel="stylesheet" href="/site.css?v=3">
+<script src="/site.js?v=3" defer></script>
 <style>
   /* Page-only tokens; brand tokens (--teal, --navy-dark, --text…) come from site.css */
   :root {
@@ -146,7 +146,7 @@
     <nav class="site-nav" id="site-nav" aria-label="Main">
       <div class="nav-group">
         <button class="nav-group-btn is-current" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
-        <ul class="nav-menu" id="nav-tools">
+        <ul class="nav-menu" id="nav-tools" data-placement="nav">
           <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
           <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
           <li><a href="/groceryprices/" aria-current="page">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
@@ -154,7 +154,14 @@
           <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
         </ul>
       </div>
-      <a class="nav-cta" href="/free-session/">Free Session</a>
+      <div class="nav-group nav-group-help">
+        <button class="nav-group-btn nav-help-btn" type="button" aria-expanded="false" aria-controls="nav-help">Help Me Budget</button>
+        <ul class="nav-menu" id="nav-help" data-placement="nav">
+          <li><a href="/review/">Budget Review<small>Send it in, no call</small></a></li>
+          <li><a href="/workshop/">Workshop<small>Free group class, Wednesdays</small></a></li>
+          <li><a href="/free-session/">Free Session<small>45 minutes, one-on-one</small></a></li>
+        </ul>
+      </div>
     </nav>
   </div>
 </header>
@@ -221,10 +228,11 @@
       </div>
     </section>
 
-    <section class="assess-band" aria-label="Free budgeting session">
+    <section class="assess-band" aria-label="Free budgeting session" data-placement="tool_band">
       <div>
         <h2>Prices went up. Did your plan?</h2>
         <p>Book a free 45-minute session and build a budget around what things cost now.</p>
+        <p class="band-alt">Not ready for a call? <a href="/review/">Send us your budget</a> or <a href="/workshop/">join a free workshop</a>.</p>
       </div>
       <a class="btn" href="/free-session/">Book a free session</a>
     </section>

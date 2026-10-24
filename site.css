@@ -126,6 +126,24 @@ body {
 
 .nav-toggle { display: none; }
 
+/* "Help Me Budget" is a dropdown styled as the teal call-to-action */
+.nav-ready .nav-help-btn,
+.nav-ready .nav-help-btn:hover,
+.nav-ready .nav-help-btn.is-current,
+.nav-ready .nav-group.open .nav-help-btn {
+  color: #fff;
+  font-weight: 700;
+  background: var(--teal);
+  padding: 9px 14px;
+  border-radius: 6px;
+  border-bottom: 0;
+  transition: background 0.15s;
+}
+.nav-ready .nav-help-btn:hover,
+.nav-ready .nav-help-btn.is-current,
+.nav-ready .nav-group.open .nav-help-btn { background: var(--teal-dark); }
+.nav-ready .nav-help-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
 /* Desktop dropdown */
 .nav-ready .nav-group-btn { display: inline-flex; }
 .nav-ready .nav-menu {
@@ -208,6 +226,7 @@ body {
   .nav-ready.menu-open .site-nav { display: flex; }
 
   .nav-ready .nav-group { order: 2; }
+  .nav-ready .nav-group-help { order: 1; }
   .nav-ready .nav-group-btn {
     display: block;
     width: 100%;
@@ -221,6 +240,16 @@ body {
     text-align: left;
   }
   .nav-ready .nav-group-btn::after { display: none; }
+  .nav-ready .nav-help-btn,
+  .nav-ready .nav-help-btn:hover,
+  .nav-ready .nav-help-btn.is-current,
+  .nav-ready .nav-group.open .nav-help-btn {
+    background: none;
+    padding: 16px 0 6px;
+    border-radius: 0;
+    color: var(--teal);
+    font-weight: 700;
+  }
   .nav-ready .nav-menu,
   .nav-ready .nav-group.open .nav-menu {
     display: flex;
@@ -269,6 +298,9 @@ body {
 }
 .assess-band p { margin-top: 10px; color: var(--text-dim); line-height: 1.55; font-size: 0.98rem; max-width: 52ch; }
 .assess-band .btn { white-space: nowrap; }
+.assess-band .band-alt { margin-top: 12px; font-size: 0.9rem; color: var(--text-dim); }
+.assess-band .band-alt a { color: #2dd4bf; font-weight: 700; text-decoration: none; }
+.assess-band .band-alt a:hover { text-decoration: underline; }
 
 @media (max-width: 640px) {
   .assess-band { grid-template-columns: minmax(0, 1fr); padding: 22px; }

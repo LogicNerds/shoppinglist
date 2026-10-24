@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Budgeting Session — IDK</title>
-<meta name="description" content="A free 45-minute, one-on-one session to build a zero-based budget with your real numbers, or a free group workshop every Wednesday at 6 PM Pacific. Nothing to buy.">
+<meta name="description" content="A free 45-minute, one-on-one session to build a zero-based budget with your real numbers. Nothing to buy.">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-KEZSNJZ4JW"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -23,8 +23,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/site.css">
-<script src="/site.js" defer></script>
+<link rel="stylesheet" href="/site.css?v=3">
+<script src="/site.js?v=3" defer></script>
 <style>
   :root { --panel: #102a38; --teal-bright: #2dd4bf; }
 
@@ -52,7 +52,7 @@
   .group-link { margin-top: 20px; font-size: 0.95rem; color: var(--text-dim); }
   .group-link a { color: var(--teal-bright); font-weight: 700; text-decoration: none; }
   .group-link a:hover { text-decoration: underline; }
-  #workshop { scroll-margin-top: 24px; }
+  .group-link span { display: block; margin-top: 6px; }
 
   .section { padding: 48px 0; border-top: 1px solid var(--rule); }
 
@@ -127,7 +127,7 @@
     <nav class="site-nav" id="site-nav" aria-label="Main">
       <div class="nav-group">
         <button class="nav-group-btn" type="button" aria-expanded="false" aria-controls="nav-tools">Free Tools</button>
-        <ul class="nav-menu" id="nav-tools">
+        <ul class="nav-menu" id="nav-tools" data-placement="nav">
           <li><a href="/mybudget/">MyBudget<small>Zero-based budget calculator</small></a></li>
           <li><a href="/rentmap/">Rent Map<small>What rent and the basics cost near you</small></a></li>
           <li><a href="/groceryprices/">Grocery Prices<small>What groceries cost in 2020 vs. now</small></a></li>
@@ -135,7 +135,14 @@
           <li><a href="/mygroceries/">MyGroceries<small>Shopping list with a running total</small></a></li>
         </ul>
       </div>
-      <a class="nav-cta" href="/free-session/" aria-current="page">Free Session</a>
+      <div class="nav-group nav-group-help">
+        <button class="nav-group-btn nav-help-btn is-current" type="button" aria-expanded="false" aria-controls="nav-help">Help Me Budget</button>
+        <ul class="nav-menu" id="nav-help" data-placement="nav">
+          <li><a href="/review/">Budget Review<small>Send it in, no call</small></a></li>
+          <li><a href="/workshop/">Workshop<small>Free group class, Wednesdays</small></a></li>
+          <li><a href="/free-session/" aria-current="page">Free Session<small>45 minutes, one-on-one</small></a></li>
+        </ul>
+      </div>
     </nav>
   </div>
 </header>
@@ -145,11 +152,11 @@
     <div class="wrap">
       <h1>Build your budget. <span>Free.</span></h1>
       <p class="lede">A 45-minute, one-on-one session. We take your real income and bills, assign every dollar, and you leave with a budget sheet that's yours to keep running.</p>
-      <div class="book">
+      <div class="book" data-placement="session_hero">
         <a class="btn" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Pick a time</a>
         <p class="book-note">Opens Google Calendar booking in a new tab. Free, 45 minutes. Only a few spots each week.</p>
       </div>
-      <p class="group-link">Rather start in a group? <a href="#workshop">Join the free Wednesday workshop ↓</a></p>
+      <p class="group-link" data-placement="session_hero_alt"><span>Rather start in a group? <a href="/workshop/">Join the free Wednesday workshop →</a></span><span>Not ready for a call? <a href="/review/">Send us your budget instead →</a></span></p>
     </div>
   </section>
 
@@ -157,8 +164,7 @@
     <div class="wrap">
       <h2 class="title" id="why">Why is it <span>free?</span></h2>
       <div class="why-text">
-        <p>I'm working toward my Accredited Financial Counselor (AFC) certification, and part of earning it is logging real hours with real people. You get a budget built with you. I get the experience. That's the whole deal.</p>
-        <p>All I ask in return is honest feedback when we're done.</p>
+        <p>Everybody deserves access to financial knowledge, and IDK was founded with a mission to deliver that access to as many people as we can.</p>
       </div>
     </div>
   </section>
@@ -175,7 +181,7 @@
         </ul>
       </div>
       <div>
-        <h2 class="title">What I <span>won't do</span></h2>
+        <h2 class="title">What we <span>won't do</span></h2>
         <ul class="checks not">
           <li>Sell you anything. No course, no investments, no insurance.</li>
           <li>Ask for bank logins, account numbers, or your Social Security number.</li>
@@ -197,45 +203,27 @@
           <h3>Your income</h3><p>What actually lands in your account each month, paycheck by paycheck.</p>
         </li>
         <li>
-          <h3>Your bills and spending</h3><p>Rent, car, debt payments, groceries, subscriptions, the stuff that sneaks up on you. Ballpark figures are fine. Having your banking app handy helps you remember what's going out, but you never have to show it to me.</p>
+          <h3>Your bills and spending</h3><p>Rent, car, debt payments, groceries, subscriptions, the stuff that sneaks up on you. Ballpark figures are fine. Having your banking app handy helps you remember what's going out, but you never have to show it to us.</p>
         </li>
         <li>
           <h3>Assign every dollar</h3><p>We build your zero-based budget together until every dollar of income has a place to go, with your goals included.</p>
         </li>
         <li>
-          <h3>Your sheet</h3><p>You leave with your own budget sheet to keep using month after month. You won't need me to run it.</p>
+          <h3>Your sheet</h3><p>You leave with your own budget sheet to keep using month after month. You won't need us to run it.</p>
         </li>
       </ol>
       <p class="prep">Want a head start? Run your numbers through <a href="/mybudget/">MyBudget</a> before we meet.</p>
-      <p class="disclaimer">I'm not a licensed financial advisor, and this isn't investment, tax, or legal advice.</p>
-    </div>
-  </section>
-
-  <section class="section" aria-labelledby="workshop">
-    <div class="wrap">
-      <h2 class="title" id="workshop">Prefer a <span>group?</span></h2>
-      <div class="why-text">
-        <p>Join the free Zero-Based Budgeting Workshop. Every Wednesday, 6–7 PM Pacific, on Google Meet. Bring your phone and follow along in MyBudget.</p>
-      </div>
-      <ul class="checks">
-        <li>What zero-based budgeting is, and what it isn't</li>
-        <li>The four buckets every dollar goes into</li>
-        <li>How leftovers pay for the fun stuff</li>
-        <li>The mindset traps that make people quit budgeting</li>
-      </ul>
-      <div class="book">
-        <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSfunAHVCCuAjFbHoMhHqPMZL0L4J8qsmu3dQxa-So4QPHDI8Q/viewform" target="_blank" rel="noopener noreferrer">Save my spot</a>
-        <p class="book-note">Opens a short Google Form in a new tab. Pick your Wednesday, and the Meet link comes by email.</p>
-      </div>
+      <p class="disclaimer">We're not licensed financial advisors, and this isn't investment, tax, or legal advice.</p>
     </div>
   </section>
 
   <section class="section final">
     <div class="wrap">
-      <div class="assess-band">
+      <div class="assess-band" data-placement="session_final">
         <div>
           <h2>Ready to know where it goes?</h2>
           <p>45 minutes, free. Pick whatever time works for you.</p>
+          <p class="band-alt">Rather start in a group? <a href="/workshop/">Join the free Wednesday workshop →</a><br>Not ready for a call? <a href="/review/">Send us your budget instead →</a></p>
         </div>
         <a class="btn" href="https://calendar.app.google/WLPvMMzoXyADSyUv7" target="_blank" rel="noopener noreferrer">Pick a time</a>
       </div>
