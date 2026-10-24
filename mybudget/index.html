@@ -555,6 +555,124 @@
   }
   .by-check .bc-line span:last-child{ font-weight:600; font-variant-numeric:tabular-nums; }
 
+  #resultsHeading:focus{ outline:none; }
+
+  /* ---------- Submit for review ---------- */
+  .review-btn{
+    width:100%;
+    margin-top:12px;
+    background:transparent;
+    border:1px solid var(--teal);
+    color:#7FDCD2;
+    border-radius:8px;
+    padding:11px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .review-btn:hover{ background:rgba(13,148,136,0.14); color:#fff; }
+  .review-btn:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+
+  .review-dialog{
+    margin:auto; /* site.css zeroes margins, which would pin the dialog to the top-left */
+    width:min(560px, calc(100vw - 32px));
+    max-height:calc(100dvh - 32px);
+    padding:0;
+    border:1px solid var(--panel-line);
+    border-radius:16px;
+    background:#0b2230;
+    color:var(--text);
+    box-shadow:0 20px 60px rgba(0,0,0,0.55);
+  }
+  .review-dialog::backdrop{ background:rgba(4,12,18,0.72); }
+  .review-dialog[open]{ display:flex; flex-direction:column; }
+  .rd-head{
+    display:flex; align-items:flex-start; gap:12px;
+    padding:20px 22px 12px;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .rd-head h2{
+    margin:0;
+    font-family:'Bebas Neue',sans-serif;
+    font-weight:400;
+    font-size:1.9rem;
+    line-height:1;
+    letter-spacing:0.02em;
+  }
+  .rd-head p{ margin:6px 0 0; font-size:13px; color:var(--text-soft); line-height:1.45; }
+  .rd-close{
+    margin-left:auto;
+    background:none; border:none; color:var(--text-soft);
+    font-size:24px; line-height:1; cursor:pointer; padding:2px 6px; border-radius:6px;
+  }
+  .rd-close:hover{ color:#fff; background:rgba(255,255,255,0.08); }
+  .rd-close:focus-visible{ outline:2px solid var(--teal); }
+  .rd-body{ padding:16px 22px 22px; overflow-y:auto; }
+  .rd-body fieldset{ border:none; margin:0 0 18px; padding:0; min-width:0; }
+  .rd-body legend{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--text-soft); font-weight:700; margin-bottom:10px; padding:0;
+  }
+  .rd-choices{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:520px){ .rd-choices{ grid-template-columns:1fr; } }
+  .rd-choice{
+    display:block; cursor:pointer;
+    border:1px solid var(--panel-line); border-radius:12px;
+    padding:12px 14px; background:rgba(255,255,255,0.03);
+  }
+  .rd-choice:has(input:checked){ border-color:var(--teal); background:rgba(13,148,136,0.12); }
+  .rd-choice:has(input:focus-visible){ outline:2px solid var(--teal); outline-offset:2px; }
+  .rd-choice input{ position:absolute; opacity:0; pointer-events:none; }
+  .rd-choice strong{ display:block; font-size:14px; margin-bottom:3px; }
+  .rd-choice span{ font-size:12px; color:var(--text-soft); line-height:1.4; }
+  .rd-field{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .rd-field label{ font-size:12px; color:var(--text-soft); font-weight:600; }
+  .rd-field .hint{ font-size:11px; color:var(--text-soft); }
+  .rd-field input, .rd-field select, .rd-field textarea{
+    font-family:inherit; font-size:15px; color:var(--text);
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--panel-line); border-radius:8px; padding:9px 10px;
+    width:100%;
+  }
+  .rd-field select option{ background:#0b2230; color:#fff; }
+  .rd-field textarea{ min-height:76px; resize:vertical; }
+  .rd-field input:focus, .rd-field select:focus, .rd-field textarea:focus{ outline:2px solid var(--emerald); outline-offset:1px; }
+  .rd-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .rd-row-3{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .rd-row-3 .rd-field:last-child{ grid-column:1 / -1; }
+  @media (max-width:520px){ .rd-row{ grid-template-columns:1fr; } }
+  .rd-check{ display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.4; margin:4px 0 12px; cursor:pointer; }
+  .rd-check input{ margin-top:3px; width:16px; height:16px; accent-color:var(--teal); flex:0 0 auto; }
+  .rd-feature{ border-left:2px solid var(--teal); padding-left:12px; margin:0 0 12px; }
+  .rd-note{
+    font-size:13px; line-height:1.5; color:#E8CE8F;
+    background:rgba(227,196,130,0.08); border:1px solid rgba(227,196,130,0.25);
+    border-radius:10px; padding:10px 12px; margin:0 0 12px;
+  }
+  .rd-fine{ font-size:12px; color:var(--text-soft); line-height:1.5; margin:0 0 14px; }
+  .rd-fine a{ color:var(--emerald); }
+  .rd-turnstile{ min-height:65px; margin:0 0 12px; }
+  .rd-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .rd-actions .export-btn{ width:auto; margin:0; padding:11px 20px; }
+  .rd-cancel{
+    background:none; border:none; color:var(--text-soft); font:inherit; font-size:14px;
+    cursor:pointer; padding:10px 8px;
+  }
+  .rd-cancel:hover{ color:#fff; }
+  .rd-status{ font-size:13px; margin:12px 0 0; min-height:0; color:var(--text-soft); }
+  .rd-status:empty{ display:none; }
+  .rd-status.err{ color:#FF8F8F; }
+  .rd-done{ text-align:center; padding:12px 0 4px; }
+  .rd-done h3{ margin:0 0 10px; font-size:20px; }
+  .rd-done p{ margin:0 0 12px; font-size:14px; color:#D8DDD9; line-height:1.5; }
+  .rd-code{
+    display:inline-block; margin:4px 0 14px; padding:10px 16px;
+    font:700 22px/1 Menlo,Consolas,monospace; letter-spacing:0.1em;
+    background:rgba(255,255,255,0.06); border:1px dashed var(--teal); border-radius:10px;
+    user-select:all;
+  }
+
   @media (max-width: 860px){
     .app{ flex-direction:column; align-items:stretch; }
     .page-head{ padding-top:36px; }
@@ -630,7 +748,8 @@
         <button class="show-results-btn" id="showResultsBtn">Show Results</button>
       </div>
 
-      <h2>Where it's going</h2>
+      <div class="results-body" id="resultsBody" inert aria-hidden="true">
+      <h2 id="resultsHeading" tabindex="-1">Where it's going</h2>
 
       <div class="balance-hero">
         <div class="label">Remaining Cash</div>
@@ -674,13 +793,118 @@
 
       <button class="export-btn" id="exportBtn" type="button">Download spreadsheet (.xlsx)</button>
       <p class="export-msg" id="exportMsg" role="status" aria-live="polite"></p>
+      <button class="review-btn" id="reviewBtn" type="button">Submit my budget for review</button>
+      <p class="export-msg" id="reviewMsg" role="status" aria-live="polite"></p>
       <button class="reset-btn" id="resetBtn" type="button">Start a new budget</button>
+      </div>
     </div>
 
     <p class="cta-text">Want help making your budget work? <a class="cta-link" href="/free-session/">Book a free budgeting session</a></p>
   </div>
 </div>
 </main>
+
+<dialog class="review-dialog" id="reviewDialog" aria-labelledby="rdTitle">
+  <div class="rd-head">
+    <div>
+      <h2 id="rdTitle">Submit your budget for review</h2>
+      <p>I'll look over your numbers and tell you what's working and what I'd change.</p>
+    </div>
+    <button class="rd-close" id="rdClose" type="button" aria-label="Close">×</button>
+  </div>
+
+  <div class="rd-body">
+    <form id="reviewForm" novalidate>
+      <fieldset>
+        <legend>How do you want it reviewed?</legend>
+        <div class="rd-choices">
+          <label class="rd-choice">
+            <input type="radio" name="path" value="email" checked>
+            <strong>Email me my assessment</strong>
+            <span>Private. I'll email you within 7 days.</span>
+          </label>
+          <label class="rd-choice">
+            <input type="radio" name="path" value="anonymous">
+            <strong>Submit anonymously</strong>
+            <span>Under a made-up name, I may review it in a public video.</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div id="rdEmailFields">
+        <div class="rd-row">
+          <div class="rd-field">
+            <label for="rdFirstName">First name</label>
+            <input id="rdFirstName" name="firstName" type="text" autocomplete="given-name" maxlength="50">
+          </div>
+          <div class="rd-field">
+            <label for="rdEmail">Email</label>
+            <input id="rdEmail" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254">
+          </div>
+        </div>
+        <div class="rd-field">
+          <label for="rdNote">Anything I should know? <span class="hint">(optional)</span></label>
+          <textarea id="rdNote" name="note" maxlength="1000"></textarea>
+        </div>
+        <p class="rd-fine" style="margin-top:-4px">Your name and email stay private.</p>
+        <label class="rd-check">
+          <input type="checkbox" id="rdFeatureOptIn">
+          <span>You can also feature my budget anonymously in a video.</span>
+        </label>
+      </div>
+
+      <div class="rd-feature" id="rdFeatureFields" hidden>
+        <div class="rd-field">
+          <label for="rdDisplayName">Made-up name for the video</label>
+          <input id="rdDisplayName" name="displayName" type="text" autocomplete="off" maxlength="40" placeholder="e.g. Budget Betty">
+          <span class="hint">Don't use your real name.</span>
+        </div>
+        <label class="rd-check">
+          <input type="checkbox" id="rdConsent">
+          <span id="rdConsentText">I'm OK with Elijah reviewing this budget in a public video.</span>
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>About you</legend>
+        <div class="rd-row-3">
+          <div class="rd-field">
+            <label for="rdState">State</label>
+            <select id="rdState" name="state" required></select>
+          </div>
+          <div class="rd-field">
+            <label for="rdHousehold">Household size</label>
+            <select id="rdHousehold" name="householdSize" required></select>
+          </div>
+          <div class="rd-field">
+            <label for="rdGoal">Main goal</label>
+            <select id="rdGoal" name="mainGoal" required></select>
+          </div>
+        </div>
+      </fieldset>
+
+      <p class="rd-note"><strong>Before you send:</strong> your item names go along with your numbers. Take out names, employers, and account numbers.</p>
+      <p class="rd-fine">I'm not a licensed financial advisor, and this isn't investment, tax, or legal advice. See how submissions are handled in the <a href="/privacy.html#budget-reviews" target="_blank" rel="noopener">Privacy Policy</a>.</p>
+
+      <div class="rd-turnstile" id="rdTurnstile"></div>
+
+      <div class="rd-actions">
+        <button class="export-btn" id="rdSubmit" type="submit">Send my budget</button>
+        <button class="rd-cancel" id="rdCancel" type="button">Cancel</button>
+      </div>
+      <p class="rd-status" id="rdStatus" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="rd-done" id="rdDone" hidden>
+      <h3 id="rdDoneTitle" tabindex="-1">Got it.</h3>
+      <p id="rdDoneText"></p>
+      <p style="margin-bottom:4px">Your submission code:</p>
+      <div class="rd-code" id="rdCode"></div>
+      <p class="rd-fine">Save this code. To have your budget deleted, email <a href="mailto:idk@logicnerds.net">idk@logicnerds.net</a> with it.</p>
+      <button class="export-btn" id="rdDoneBtn" type="button" style="width:auto;padding:11px 26px">Done</button>
+    </div>
+  </div>
+</dialog>
 
 <footer class="site-footer">
   <div class="wrap">
@@ -863,6 +1087,7 @@
           labelInput.className = 'label-input';
           labelInput.type = 'text';
           labelInput.placeholder = 'Item name';
+          labelInput.maxLength = 80;
           labelInput.value = row.label;
           labelInput.addEventListener('input', function(e){
             row.label = e.target.value;
@@ -1118,8 +1343,17 @@
   });
 
   // ---- reveal results ----
+  // The results stay unreachable (keyboard and screen readers too) until revealed.
+  function setResultsCovered(covered){
+    var body = document.getElementById('resultsBody');
+    document.getElementById('resultsCover').style.display = covered ? '' : 'none';
+    body.inert = covered;
+    if(covered) body.setAttribute('aria-hidden', 'true');
+    else body.removeAttribute('aria-hidden');
+  }
   document.getElementById('showResultsBtn').addEventListener('click', function(){
-    document.getElementById('resultsCover').style.display = 'none';
+    setResultsCovered(false);
+    document.getElementById('resultsHeading').focus({ preventScroll:true });
   });
 
   // ---- reset (two taps, no browser pop-up: some in-app browsers block confirm()) ----
@@ -1146,8 +1380,9 @@
     document.querySelector('.income-row').innerHTML = paycheckFieldsHTML();
     bindPaycheckInputs();
     document.getElementById('overrideToggle').textContent = 'Enter a total directly';
-    document.getElementById('resultsCover').style.display = '';
+    setResultsCovered(true);
     setExportMsg('', false);
+    resetReview();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -1471,6 +1706,309 @@
       .then(function(){ exportBtn.disabled = false; });
   });
 
+  // ---- submit for review ----
+  // Sends a snapshot of this budget to the IDK submissions Worker, which checks it,
+  // saves it, and sends the emails. Nothing is sent until the person presses Send.
+  var SUBMIT_URL = 'https://idk-budget-submissions.elijah-029.workers.dev/submit';
+  var TURNSTILE_SITE_KEY = '0x4AAAAAAFkDvy8AvtewPoet';
+  var REPLY_DAYS = 7;
+
+  var STATES = [
+    ['AL','Alabama'],['AK','Alaska'],['AZ','Arizona'],['AR','Arkansas'],['CA','California'],['CO','Colorado'],
+    ['CT','Connecticut'],['DE','Delaware'],['DC','District of Columbia'],['FL','Florida'],['GA','Georgia'],
+    ['HI','Hawaii'],['ID','Idaho'],['IL','Illinois'],['IN','Indiana'],['IA','Iowa'],['KS','Kansas'],
+    ['KY','Kentucky'],['LA','Louisiana'],['ME','Maine'],['MD','Maryland'],['MA','Massachusetts'],
+    ['MI','Michigan'],['MN','Minnesota'],['MS','Mississippi'],['MO','Missouri'],['MT','Montana'],
+    ['NE','Nebraska'],['NV','Nevada'],['NH','New Hampshire'],['NJ','New Jersey'],['NM','New Mexico'],
+    ['NY','New York'],['NC','North Carolina'],['ND','North Dakota'],['OH','Ohio'],['OK','Oklahoma'],
+    ['OR','Oregon'],['PA','Pennsylvania'],['RI','Rhode Island'],['SC','South Carolina'],['SD','South Dakota'],
+    ['TN','Tennessee'],['TX','Texas'],['UT','Utah'],['VT','Vermont'],['VA','Virginia'],['WA','Washington'],
+    ['WV','West Virginia'],['WI','Wisconsin'],['WY','Wyoming']
+  ];
+  var HOUSEHOLD_SIZES = ['1','2','3','4','5','6','7','8+'];
+  var GOALS = [
+    ['pay-off-debt','Pay off debt'],
+    ['build-savings','Build savings'],
+    ['paycheck-to-paycheck','Stop living paycheck to paycheck'],
+    ['save-for-something','Save for something specific'],
+    ['other','Other']
+  ];
+
+  var dialog = document.getElementById('reviewDialog');
+  var form = document.getElementById('reviewForm');
+  var rd = {
+    emailFields: document.getElementById('rdEmailFields'),
+    featureFields: document.getElementById('rdFeatureFields'),
+    firstName: document.getElementById('rdFirstName'),
+    email: document.getElementById('rdEmail'),
+    note: document.getElementById('rdNote'),
+    featureOptIn: document.getElementById('rdFeatureOptIn'),
+    displayName: document.getElementById('rdDisplayName'),
+    consent: document.getElementById('rdConsent'),
+    state: document.getElementById('rdState'),
+    household: document.getElementById('rdHousehold'),
+    goal: document.getElementById('rdGoal'),
+    submit: document.getElementById('rdSubmit'),
+    status: document.getElementById('rdStatus'),
+    done: document.getElementById('rdDone'),
+    doneTitle: document.getElementById('rdDoneTitle'),
+    doneText: document.getElementById('rdDoneText'),
+    code: document.getElementById('rdCode')
+  };
+
+  function fillSelect(sel, options, placeholder){
+    var first = document.createElement('option');
+    first.value = '';
+    first.textContent = placeholder;
+    sel.appendChild(first);
+    options.forEach(function(o){
+      var opt = document.createElement('option');
+      opt.value = Array.isArray(o) ? o[0] : o;
+      opt.textContent = Array.isArray(o) ? o[1] : o;
+      sel.appendChild(opt);
+    });
+  }
+  fillSelect(rd.state, STATES, 'Choose…');
+  fillSelect(rd.household, HOUSEHOLD_SIZES, 'Choose…');
+  fillSelect(rd.goal, GOALS, 'Choose…');
+
+  function currentPath(){
+    var picked = form.querySelector('input[name="path"]:checked');
+    return picked ? picked.value : 'email';
+  }
+
+  // Email path: contact fields, plus the optional video opt-in.
+  // Anonymous path: made-up name and consent only.
+  function updateReviewFields(){
+    var anon = currentPath() === 'anonymous';
+    rd.emailFields.hidden = anon;
+    rd.featureFields.hidden = !(anon || rd.featureOptIn.checked);
+  }
+  form.querySelectorAll('input[name="path"]').forEach(function(r){ r.addEventListener('change', updateReviewFields); });
+  rd.featureOptIn.addEventListener('change', updateReviewFields);
+
+  function setReviewMsg(text, isError){
+    var el = document.getElementById('reviewMsg');
+    el.textContent = text;
+    el.className = 'export-msg' + (isError ? ' err' : '');
+  }
+  function setRdStatus(text, isError){
+    rd.status.textContent = text;
+    rd.status.className = 'rd-status' + (isError ? ' err' : '');
+  }
+
+  // Matches the server: income, plus at least one amount in Essentials, Future and Life.
+  function missingForReview(){
+    if(!(getIncome() > 0)) return 'Add your income first.';
+    var missing = [];
+    if(!(groupTotal('essentials') > 0)) missing.push('Essentials');
+    if(!(groupTotal('future') > 0)) missing.push('Future');
+    if(!(groupTotal('life') > 0)) missing.push('Life');
+    if(missing.length) return 'Add at least one amount in ' + joinWords(missing) + ' first.';
+    return '';
+  }
+  function joinWords(list){
+    if(list.length < 2) return list.join('');
+    return list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1];
+  }
+
+  // ---- Turnstile (spam check), loaded only when the popup opens ----
+  var turnstileState = { loading:null, widgetId:null, token:'' };
+  function loadTurnstile(){
+    if(window.turnstile) return Promise.resolve(window.turnstile);
+    if(turnstileState.loading) return turnstileState.loading;
+    turnstileState.loading = new Promise(function(resolve, reject){
+      window.__idkTurnstileReady = function(){ resolve(window.turnstile); };
+      var tag = document.createElement('script');
+      tag.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__idkTurnstileReady';
+      tag.async = true;
+      tag.onerror = function(){ turnstileState.loading = null; tag.remove(); reject(new Error('Turnstile failed to load')); };
+      document.head.appendChild(tag);
+    });
+    return turnstileState.loading;
+  }
+  function renderTurnstile(){
+    loadTurnstile().then(function(ts){
+      if(turnstileState.widgetId !== null){ return; }
+      turnstileState.widgetId = ts.render('#rdTurnstile', {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'dark',
+        action: 'budget_review',
+        callback: function(token){ turnstileState.token = token; },
+        'expired-callback': function(){ turnstileState.token = ''; },
+        'error-callback': function(){ turnstileState.token = ''; }
+      });
+    }).catch(function(){
+      setRdStatus("The spam check couldn't load. Check your connection, or turn off any blocker for this page, then reopen this window.", true);
+    });
+  }
+  function resetTurnstile(){
+    turnstileState.token = '';
+    if(window.turnstile && turnstileState.widgetId !== null){
+      try { window.turnstile.reset(turnstileState.widgetId); } catch(e){}
+    }
+  }
+
+  // ---- open / close ----
+  function showForm(){
+    form.hidden = false;
+    rd.done.hidden = true;
+    setRdStatus('', false);
+  }
+  function openReview(){
+    var missing = missingForReview();
+    if(missing){ setReviewMsg(missing, true); return; }
+    setReviewMsg('', false);
+    showForm();
+    updateReviewFields();
+    if(typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', '');
+    renderTurnstile();
+  }
+  function closeReview(){
+    if(typeof dialog.close === 'function' && dialog.open) dialog.close();
+    else dialog.removeAttribute('open');
+    document.getElementById('reviewBtn').focus({ preventScroll:true });
+  }
+  // Clears everything typed into the popup ("Start a new budget" on a shared device).
+  function resetReview(){
+    if(dialog.open) closeReview();
+    form.reset();
+    updateReviewFields();
+    showForm();
+    resetTurnstile();
+    setReviewMsg('', false);
+  }
+
+  document.getElementById('reviewBtn').addEventListener('click', openReview);
+  document.getElementById('rdClose').addEventListener('click', closeReview);
+  document.getElementById('rdCancel').addEventListener('click', closeReview);
+  document.getElementById('rdDoneBtn').addEventListener('click', closeReview);
+  dialog.addEventListener('click', function(e){ if(e.target === dialog) closeReview(); }); // backdrop
+
+  // ---- build and send ----
+  function cleanAmount(v){ return v === '.' ? '' : v; }
+
+  function reviewPayload(){
+    var path = currentPath();
+    var featureOn = path === 'anonymous' || rd.featureOptIn.checked;
+    return {
+      path: path,
+      firstName: path === 'email' ? rd.firstName.value.trim() : '',
+      email: path === 'email' ? rd.email.value.trim() : '',
+      note: path === 'email' ? rd.note.value.trim() : '',
+      featureOptIn: path === 'email' && rd.featureOptIn.checked,
+      displayName: featureOn ? rd.displayName.value.trim() : '',
+      consent: featureOn && rd.consent.checked,
+      context: { state: rd.state.value, householdSize: rd.household.value, mainGoal: rd.goal.value },
+      budget: {
+        incomeMode: state.incomeMode,
+        paydays: state.paydays,
+        perCheck: cleanAmount(state.perCheck),
+        manualIncome: cleanAmount(String(state.manualIncome)),
+        checks: activeChecks().map(function(chk){
+          return {
+            categories: chk.categories.map(function(cat){
+              return {
+                id: cat.id,
+                rows: cat.rows.map(function(r){ return { label: r.label, amount: cleanAmount(r.amount) }; })
+              };
+            })
+          };
+        })
+      },
+      turnstileToken: turnstileState.token
+    };
+  }
+
+  // Returns [message, field to focus] for the first problem, or null.
+  function reviewProblem(p){
+    if(p.path === 'email'){
+      if(!p.firstName) return ['Enter your first name.', rd.firstName];
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(p.email)) return ['Enter a valid email address.', rd.email];
+    }
+    if(p.path === 'anonymous' || p.featureOptIn){
+      if(!p.displayName) return ['Enter a made-up name for the video.', rd.displayName];
+      if(!p.consent) return ['Check the box to agree to a public video review.', rd.consent];
+    }
+    if(!p.context.state) return ['Pick your state.', rd.state];
+    if(!p.context.householdSize) return ['Pick your household size.', rd.household];
+    if(!p.context.mainGoal) return ['Pick your main goal.', rd.goal];
+    var missing = missingForReview();
+    if(missing) return [missing, null];
+    if(!p.turnstileToken) return ['Please finish the spam check above.', null];
+    return null;
+  }
+
+  function replyByText(){
+    var d = new Date(Date.now() + REPLY_DAYS * 24 * 60 * 60 * 1000);
+    return d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  }
+
+  var sending = false;
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(sending) return;
+    var payload = reviewPayload();
+    var problem = reviewProblem(payload);
+    if(problem){
+      setRdStatus(problem[0], true);
+      if(problem[1]) problem[1].focus();
+      return;
+    }
+
+    sending = true;
+    rd.submit.disabled = true;
+    rd.submit.textContent = 'Sending…';
+    setRdStatus('', false);
+
+    fetch(SUBMIT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(data){ return { res: res, data: data }; });
+      })
+      .then(function(r){
+        if(!r.res.ok || !r.data.ok){
+          throw new Error(r.data.message || "Couldn't send your budget. Please try again.");
+        }
+        showDone(payload, r.data);
+        if(window.gtag) gtag('event', 'budget_review_submit', { path: payload.path, checks: checkCount() });
+      })
+      .catch(function(err){
+        var msg = err && err.message && !/Failed to fetch|NetworkError|Load failed/i.test(err.message)
+          ? err.message
+          : "Couldn't reach the server. Check your connection and try again.";
+        setRdStatus(msg, true);
+      })
+      .then(function(){
+        sending = false;
+        rd.submit.disabled = false;
+        rd.submit.textContent = 'Send my budget';
+        resetTurnstile(); // each spam-check token works once
+      });
+  });
+
+  function showDone(payload, data){
+    var text;
+    if(payload.path === 'email'){
+      text = data.confirmationSent
+        ? "I'll email your assessment by " + replyByText() + '. A confirmation is on its way to ' + payload.email + '.'
+        : "Your budget is saved, but the confirmation email didn't go through. I still have your email and will reply by " + replyByText() + '.';
+      if(payload.featureOptIn) text += ' If it shows up in a video, it will be as ' + payload.displayName + '.';
+    } else {
+      text = 'Thanks! If your budget shows up in a video, it will be as ' + payload.displayName + '.';
+    }
+    rd.doneText.textContent = text;
+    rd.code.textContent = data.code;
+    form.hidden = true;
+    rd.done.hidden = false;
+    rd.doneTitle.focus({ preventScroll:true });
+  }
+
+  updateReviewFields();
   render();
 })();
 </script>

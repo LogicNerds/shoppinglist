@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy – IDK My Groceries</title>
+<title>Privacy Policy – IDK</title>
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -78,6 +78,15 @@
     line-height: 1.7;
   }
 
+  .section ul {
+    margin: 10px 0 0 20px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.95em;
+    line-height: 1.7;
+  }
+  .section ul + p, .section p + p { margin-top: 10px; }
+  .section a { color: var(--teal); }
+
   .footer-text {
     margin-top: 48px;
     font-size: 0.75em;
@@ -96,42 +105,76 @@
 
   <div class="section">
     <h2>Overview</h2>
-    <p>IDK My Groceries is a personal shopping and budgeting tool built and operated by Logic Nerds. We are committed to protecting your privacy. This policy explains what information is collected when you use the app and how it is used.</p>
+    <p>IDK (myidk.app) is a set of free budgeting tools built and operated by Logic Nerds: the MyBudget calculator, the MyGroceries shopping app, the Rent Map, Grocery Prices and Credit Scores pages, plus free budgeting sessions and workshops. This policy explains what information each one collects and how it is used. We never sell your information.</p>
   </div>
 
   <div class="section">
-    <h2>Information We Collect</h2>
-    <p>We do not collect or store any personal information beyond what is required for the app to function. When you sign in with Google, we receive your Google account name, email address, and profile photo solely to identify your account and display your avatar. This information is handled by Google Firebase Authentication and is not stored, sold, or shared by Logic Nerds.</p>
+    <h2>MyBudget</h2>
+    <p>The numbers and item names you type into MyBudget stay in your browser. They aren't sent anywhere, and they're gone when you close or refresh the page. The spreadsheet download is built on your own device. Nothing leaves your browser unless you choose to submit your budget for review.</p>
+  </div>
+
+  <div class="section" id="budget-reviews">
+    <h2>Budget Review Submissions</h2>
+    <p>If you press &ldquo;Submit my budget for review,&rdquo; we receive:</p>
+    <ul>
+      <li>Your budget: your income, every amount you entered, and the names of your line items</li>
+      <li>Your state, household size, and main goal</li>
+      <li>If you choose an emailed assessment: your first name, email address, and any note you add</li>
+      <li>If you agree to a video review: the made-up name you pick, and a record that you agreed, including the exact wording and when</li>
+    </ul>
+    <p>Your budget is stored in Google Firebase. Your name, email, and note are stored separately from your budget and are only used to send you your assessment. Emails are sent through Resend.</p>
+    <p>Budgets are only shown in a public video if you check the box agreeing to it. A video uses your made-up name, never your real name or email, and may show your numbers and line item names. That's why we ask you to take names, employers, and account numbers out of your line items before you send.</p>
+    <p>To stop spam, submissions go through Cloudflare, which runs a quick check (Cloudflare Turnstile) and handles the request. To limit submissions to 5 per hour, we keep a scrambled (hashed) version of your IP address for one hour, then it's deleted.</p>
+    <p>We delete your name, email, and note 90 days after we send your assessment. Your budget is kept until you ask us to delete it. To have it deleted, email <a href="mailto:idk@logicnerds.net">idk@logicnerds.net</a> with the submission code you were shown. If your budget was in a video, we'll stop using it in new videos and remove or edit published videos where we can.</p>
+    <p>Elijah is not a licensed financial advisor, and reviews aren't investment, tax, or legal advice.</p>
   </div>
 
   <div class="section">
-    <h2>App Data</h2>
-    <p>Shopping lists, budgets, and item data you enter into the app are stored in Google Firebase under your account. This data is used only to power the app's features and is not accessed, analyzed, or shared by Logic Nerds for any other purpose.</p>
+    <h2>MyGroceries: Signing In</h2>
+    <p>When you sign in with Google, we receive your name, email address, and profile photo from your Google account. Sign-in is handled by Google Firebase Authentication. Each time you sign in, we also save your name, email address, and the time, so we can see how the app is used. These records can only be viewed by Logic Nerds.</p>
   </div>
 
   <div class="section">
-    <h2>Budgeting Sessions</h2>
-    <p>If you book a free budgeting session, Google Calendar collects the name and email address you enter so the session can be scheduled. During the session you share income and expense figures so we can build your budget together. You are never asked for bank logins, account numbers, or government ID numbers. Anything you share is used only to help you build your budget and is never sold or shared. To have your session information deleted, email <a href="mailto:idk@logicnerds.net" style="color: #0d9488;">idk@logicnerds.net</a>.</p>
+    <h2>MyGroceries: Your Data</h2>
+    <p>Your shopping lists, completed trips, meal plans, and staples are stored in Google Firebase under your account. They're used only to run the app's features and are not sold or shared.</p>
+    <p>If you use the app as a guest without signing in, your list is saved only in your browser. We record anonymous events, such as when a guest session starts and your browser type, to see how the app is used.</p>
+  </div>
+
+  <div class="section">
+    <h2>MyGroceries: My Shoppers</h2>
+    <p>You can share your lists with up to 6 people using your code. When someone joins with your code, their name and Google profile photo are saved and shown to you in My Shoppers. Shoppers can see and edit your lists, meal plans, and staples. They can't see incognito lists, and they can't delete your lists, meal plans, or staples. You can remove a shopper at any time, and a shopper can leave at any time.</p>
+  </div>
+
+  <div class="section">
+    <h2>Budgeting Sessions and Workshops</h2>
+    <p>If you book a free budgeting session, Google Calendar collects the name and email address you enter so the session can be scheduled. If you sign up for a workshop, Google Forms collects what you enter on the form so we can send you the meeting link. During a session you share income and expense figures so we can build your budget together. You are never asked for bank logins, account numbers, or government ID numbers. Anything you share is used only to help you build your budget and is never sold or shared. To have your session information deleted, email <a href="mailto:idk@logicnerds.net">idk@logicnerds.net</a>.</p>
   </div>
 
   <div class="section">
     <h2>Third-Party Services</h2>
-    <p>IDK My Groceries uses the following third-party services, each governed by their own privacy policies: Google Firebase (authentication and data storage), Google Calendar (session booking), and Google Analytics (anonymous site usage statistics). We encourage you to review Google's Privacy Policy at <a href="https://policies.google.com/privacy" style="color: #0d9488;">policies.google.com/privacy</a>.</p>
+    <p>IDK uses these services, each governed by its own privacy policy:</p>
+    <ul>
+      <li>Google Firebase (sign-in and data storage)</li>
+      <li>Google Calendar and Google Forms (session and workshop sign-ups)</li>
+      <li>Google Analytics (anonymous site usage statistics)</li>
+      <li>Cloudflare, including Turnstile (spam protection and handling budget submissions)</li>
+      <li>Resend (sending budget submission emails)</li>
+    </ul>
   </div>
 
   <div class="section">
     <h2>Children's Privacy</h2>
-    <p>This app is not directed at children under the age of 13. We do not knowingly collect personal information from children.</p>
+    <p>IDK is not directed at children under the age of 13. We do not knowingly collect personal information from children.</p>
   </div>
 
   <div class="section">
     <h2>Changes to This Policy</h2>
-    <p>We may update this Privacy Policy from time to time. Any changes will be reflected on this page with an updated date. Continued use of the app after changes constitutes acceptance of the revised policy.</p>
+    <p>We may update this Privacy Policy from time to time. Any changes will be reflected on this page with an updated date. Continued use of IDK after changes constitutes acceptance of the revised policy.</p>
   </div>
 
   <div class="section">
     <h2>Contact</h2>
-    <p>If you have any questions about this Privacy Policy, you can reach Logic Nerds at <a href="mailto:idk@logicnerds.net" style="color: #0d9488;">idk@logicnerds.net</a>.</p>
+    <p>If you have any questions about this Privacy Policy, or want your information deleted, email Logic Nerds at <a href="mailto:idk@logicnerds.net">idk@logicnerds.net</a>.</p>
   </div>
 
   <p class="footer-text">© 2026 Logic Nerds. All Rights Reserved.</p>
