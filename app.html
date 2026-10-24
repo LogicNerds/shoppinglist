@@ -2876,7 +2876,21 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp, getDoc, setDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, serverTimestamp, getDoc, setDoc, getDocs, writeBatch, runTransaction } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Escape anything people type before it goes into the page as HTML.
+        function esc(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        // A value passed as an argument inside an onclick="..." attribute.
+        function jsArg(v) {
+            return esc(JSON.stringify(v ?? ''));
+        }
+        // A number from stored data (guards against non-numbers).
+        function num(v) {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : 0;
+        }
 
         // Firebase configuration
         const firebaseConfig = {
@@ -2977,13 +2991,6 @@
         });
 
         async function initializeUser() {
-            // Check if this user is a guest in someone else's account
-            const memberQuery = query(
-                collection(db, 'familyMembers'),
-                where('guestUid', '==', currentUser.uid)
-            );
-            const memberSnap = await getDoc(doc(db, 'familyMembers', currentUser.uid)).catch(() => null);
-            
             // Check familyMembers collection for this user as a guest
             const guestQuery = query(collection(db, 'familyMembers'), where('guestUid', '==', currentUser.uid));
             const guestSnap = await new Promise((resolve) => {
@@ -3046,27 +3053,82 @@
             loadMealPlans();
             loadStaples();
             trackLogin();
+            backfillIncognito();
         }
 
+        // Makes sure the owner has a code, and that the code is registered in
+        // joinCodes (the lookup shoppers use to join). Never blocks app startup.
         async function ensureFamilyCode() {
-            const codeDoc = await getDoc(doc(db, 'familyCodes', currentUser.uid));
-            if (codeDoc.exists()) {
-                familyCode = codeDoc.data().code;
-            } else {
-                familyCode = generateCode();
-                await setDoc(doc(db, 'familyCodes', currentUser.uid), {
-                    ownerUid: currentUser.uid,
-                    code: familyCode,
-                    createdAt: serverTimestamp()
-                });
+            try {
+                const uid = currentUser.uid;
+                const codeRef = doc(db, 'familyCodes', uid);
+                const codeDoc = await getDoc(codeRef);
+                let code = codeDoc.exists() ? codeDoc.data().code : null;
+
+                for (let attempt = 0; attempt < 5; attempt++) {
+                    if (!code) code = generateCode();
+                    const joinRef = doc(db, 'joinCodes', code);
+                    const joinSnap = await getDoc(joinRef);
+                    if (joinSnap.exists()) {
+                        if (joinSnap.data().ownerUid === uid) {
+                            familyCode = code;
+                            return;
+                        }
+                        code = null; // taken by another family, pick a new one
+                        continue;
+                    }
+                    const batch = writeBatch(db);
+                    batch.set(codeRef, { ownerUid: uid, code, createdAt: serverTimestamp() });
+                    batch.set(joinRef, { ownerUid: uid, memberCount: 0, createdAt: serverTimestamp() });
+                    await batch.commit();
+                    familyCode = code;
+                    return;
+                }
+            } catch (e) {
+                console.error('Could not set up family code:', e);
+            }
+        }
+
+        // Keeps the shopper count on the join code equal to the real number of shoppers.
+        async function syncMemberCount(count) {
+            if (isGuest || !familyCode) return;
+            try {
+                const joinRef = doc(db, 'joinCodes', familyCode);
+                const snap = await getDoc(joinRef);
+                const target = Math.min(count, 6);
+                if (snap.exists() && snap.data().memberCount !== target) {
+                    await updateDoc(joinRef, { memberCount: target });
+                }
+            } catch (e) {
+                console.error('Could not sync shopper count:', e);
+            }
+        }
+
+        // Older lists were saved without an incognito setting. Shoppers can only see
+        // lists marked "not incognito", so the owner's app fills it in once.
+        let incognitoBackfilled = false;
+        async function backfillIncognito() {
+            if (isGuest || incognitoBackfilled || !currentUser) return;
+            incognitoBackfilled = true;
+            try {
+                const snap = await getDocs(query(collection(db, 'groceryLists'), where('userId', '==', currentUser.uid)));
+                for (const d of snap.docs) {
+                    if (typeof d.data().incognito !== 'boolean') {
+                        await updateDoc(d.ref, { incognito: false });
+                    }
+                }
+            } catch (e) {
+                console.error('Could not update older lists:', e);
             }
         }
 
         function generateCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            const bytes = new Uint32Array(6);
+            crypto.getRandomValues(bytes);
             let code = '';
             for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+                code += chars.charAt(bytes[i] % chars.length);
             }
             return code;
         }
@@ -3091,6 +3153,9 @@
                     }
                     knownMemberIds.add(d.id);
                 });
+                syncMemberCount(snapshot.size);
+                const shoppersModal = document.getElementById('myShoppersModal');
+                if (shoppersModal && shoppersModal.classList.contains('active')) renderMembersList();
             });
         }
 
@@ -3186,7 +3251,10 @@
             // Apply incognito state
             const incogBtn = document.getElementById('incognitoToggle');
             const shoppingViewEl = document.querySelector('.shopping-view');
-            if (incogBtn) incogBtn.classList.toggle('active', isIncognito);
+            if (incogBtn) {
+                incogBtn.classList.toggle('active', isIncognito);
+                incogBtn.style.display = isGuest ? 'none' : '';
+            }
             if (shoppingViewEl) shoppingViewEl.classList.toggle('incognito', isIncognito);
             
             const doneBtn = document.getElementById('doneBtn');
@@ -3214,11 +3282,12 @@
             ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
             const queryUid = isGuest ? ownerUid : currentUser.uid;
             
-            const listsQuery = query(
-                collection(db, 'groceryLists'),
-                where('userId', '==', queryUid)
-            );
-            
+            // Shoppers may only read lists that aren't incognito, so their query has to say so.
+            const listsQuery = isGuest
+                ? query(collection(db, 'groceryLists'), where('userId', '==', queryUid), where('incognito', '==', false))
+                : query(collection(db, 'groceryLists'), where('userId', '==', queryUid));
+
+            if (unsubscribeLists) unsubscribeLists();
             unsubscribeLists = onSnapshot(listsQuery, (snapshot) => {
                 shoppingLists = [];
                 snapshot.forEach((doc) => {
@@ -3331,20 +3400,20 @@
                     const dateStr = listDate.toLocaleDateString() + ' ' + listDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
                     const itemCount = list.items?.length || 0;
-                    const totalSpent = list.items?.reduce((sum, item) => sum + (item.qty * item.price), 0) || 0;
-                    
+                    const totalSpent = list.items?.reduce((sum, item) => sum + (num(item.qty) * num(item.price)), 0) || 0;
+
                     card.innerHTML = `
                         <div class="list-header">
                             <div class="list-info">
-                                <h4>${list.incognito ? '👻' : '📝'} ${list.storeName || 'Shopping List'}</h4>
-                                <div class="list-date">${dateStr}</div>
+                                <h4>${list.incognito ? '👻' : '📝'} ${esc(list.storeName || 'Shopping List')}</h4>
+                                <div class="list-date">${esc(dateStr)}</div>
                             </div>
-                            <button class="delete-list-btn" onclick="deleteList('${list.id}', event)">🗑️</button>
+                            ${isGuest ? '' : `<button class="delete-list-btn" onclick="deleteList(${jsArg(list.id)}, event)">🗑️</button>`}
                         </div>
                         <div class="list-stats">
                             <div class="stat-item">
                                 <div class="stat-label">Budget</div>
-                                <div class="stat-value">$${(list.budget || 0).toFixed(2)}</div>
+                                <div class="stat-value">$${num(list.budget).toFixed(2)}</div>
                             </div>
                             <div class="stat-item">
                                 <div class="stat-label">Items</div>
@@ -3381,25 +3450,25 @@
                 const listDate = list.date?.toDate ? list.date.toDate() : new Date(list.date);
                 const dateStr = listDate.toLocaleDateString() + ' ' + listDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 
-                const delta = (list.budget || 0) - (list.totalSpent || 0);
+                const delta = num(list.budget) - num(list.totalSpent);
                 const overBudget = delta < 0;
-                
+
                 card.innerHTML = `
                     <div class="list-header">
                         <div class="list-info">
-                            <h4>${list.incognito ? '👻' : '💸'} ${list.storeName || 'Shopping Trip'}</h4>
-                            <div class="list-date">${dateStr}</div>
+                            <h4>${list.incognito ? '👻' : '💸'} ${esc(list.storeName || 'Shopping Trip')}</h4>
+                            <div class="list-date">${esc(dateStr)}</div>
                         </div>
-                        <button class="delete-list-btn" onclick="deleteList('${list.id}', event)">🗑️</button>
+                        ${isGuest ? '' : `<button class="delete-list-btn" onclick="deleteList(${jsArg(list.id)}, event)">🗑️</button>`}
                     </div>
                     <div class="list-stats">
                         <div class="stat-item">
                             <div class="stat-label">Budget</div>
-                            <div class="stat-value">$${(list.budget || 0).toFixed(2)}</div>
+                            <div class="stat-value">$${num(list.budget).toFixed(2)}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Spent</div>
-                            <div class="stat-value">$${(list.totalSpent || 0).toFixed(2)}</div>
+                            <div class="stat-value">$${num(list.totalSpent).toFixed(2)}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">${overBudget ? 'Over' : 'Under'}</div>
@@ -3440,7 +3509,7 @@
 
             currentListId = listId;
             currentItems = list.items || [];
-            isIncognito = list.incognito || false;
+            isIncognito = isGuest ? false : (list.incognito || false);
             milestonesHit = { fifty: false, seventyfive: false, over: false };
             document.getElementById('storeName').value = list.storeName || '';
             document.getElementById('budgetAmount').value = list.budget || '';
@@ -3511,6 +3580,7 @@
 
         // Incognito toggle
         function toggleIncognito() {
+            if (isGuest) return; // shoppers can't make lists incognito
             isIncognito = !isIncognito;
             const btn = document.getElementById('incognitoToggle');
             const view = document.querySelector('.shopping-view');
@@ -3544,7 +3614,7 @@
                     category: item.category || ''
                 })),
                 completed: false,
-                incognito: isIncognito
+                incognito: isGuest ? false : isIncognito
             };
 
             try {
@@ -3747,10 +3817,10 @@
                     headerEl.onclick = () => toggleCategory(cat);
                     headerEl.innerHTML = `
                         <div class="category-header-left">
-                            <span>${cat}</span>
+                            <span>${esc(cat)}</span>
                             <span style="color: #999; font-weight: 400; text-transform: none; letter-spacing: 0;">(${groups[cat].length})</span>
                         </div>
-                        <span class="category-toggle" id="toggle-${cat.replace(/\s/g,'-')}">▼</span>
+                        <span class="category-toggle" id="toggle-${esc(cat.replace(/\s/g,'-'))}">▼</span>
                     `;
                     groupEl.appendChild(headerEl);
 
@@ -3808,20 +3878,20 @@
             itemEl.dataset.itemId = item.id;
             itemEl.onclick = () => editItem(item.id);
 
-            const total = item.qty * item.price;
+            const total = num(item.qty) * num(item.price);
 
             itemEl.innerHTML = `
                 <div class="item-row-main">
-                    <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck('${item.id}')">
+                    <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleItemCheck(${jsArg(item.id)})">
                     <div class="item-details">
-                        <div class="item-name-text">${item.name}</div>
-                        <div class="item-info">Qty: ${item.qty} × $${item.price.toFixed(2)}</div>
+                        <div class="item-name-text">${esc(item.name)}</div>
+                        <div class="item-info">Qty: ${esc(item.qty)} × $${num(item.price).toFixed(2)}</div>
                     </div>
                     <div class="item-total">$${total.toFixed(2)}</div>
-                    <button class="delete-item-btn" onclick="deleteItem('${item.id}', event)">×</button>
+                    <button class="delete-item-btn" onclick="deleteItem(${jsArg(item.id)}, event)">×</button>
                 </div>
                 <div class="item-row-sub">
-                    <a onclick="event.stopPropagation(); showAddToMealModal('${item.id}')" style="color:var(--accent-primary); cursor:pointer; text-decoration:none; font-size:0.78em;">add to meal plan</a>
+                    <a onclick="event.stopPropagation(); showAddToMealModal(${jsArg(item.id)})" style="color:var(--accent-primary); cursor:pointer; text-decoration:none; font-size:0.78em;">add to meal plan</a>
                 </div>
             `;
 
@@ -3953,6 +4023,7 @@
                         category: item.category || ''
                     })),
                     completed: true,
+                    incognito: isGuest ? false : isIncognito,
                     date: serverTimestamp(),
                     createdAt: serverTimestamp()
                 };
@@ -3995,7 +4066,8 @@
         // Delete list
         async function deleteList(listId, event) {
             event.stopPropagation();
-            
+            if (isGuest) return; // only the owner can delete lists
+
             if (confirm('Delete this shopping list?')) {
                 try {
                     await deleteDoc(doc(db, 'groceryLists', listId));
@@ -4256,8 +4328,8 @@
             try {
                 await addDoc(collection(db, 'loginEvents'), {
                     userId: currentUser.uid,
-                    displayName: currentUser.displayName || '',
-                    email: currentUser.email || '',
+                    displayName: (currentUser.displayName || '').slice(0, 200),
+                    email: (currentUser.email || '').slice(0, 320),
                     timestamp: serverTimestamp()
                 });
             } catch (e) {
@@ -4313,10 +4385,10 @@
             container.innerHTML = staples.map(s => `
                 <div class="staple-item">
                     <div class="staple-item-info">
-                        <div class="staple-item-name">${s.name}</div>
-                        <div class="staple-item-price">${s.price ? '$' + parseFloat(s.price).toFixed(2) : 'No price saved'}</div>
+                        <div class="staple-item-name">${esc(s.name)}</div>
+                        <div class="staple-item-price">${s.price ? '$' + num(s.price).toFixed(2) : 'No price saved'}</div>
                     </div>
-                    <button class="staple-remove-btn" onclick="removeStaple('${s.id}', '${s.name.replace(/'/g, "\'")}')">×</button>
+                    ${isGuest ? '' : `<button class="staple-remove-btn" onclick="removeStaple(${jsArg(s.id)}, ${jsArg(s.name)})">×</button>`}
                 </div>
             `).join('');
         }
@@ -4353,6 +4425,7 @@
         }
 
         async function removeStaple(stapleId, name) {
+            if (isGuest) return; // only the owner can remove staples
             if (!confirm(`Remove "${name}" from your staples?`)) return;
             try {
                 await deleteDoc(doc(db, 'staples', stapleId));
@@ -4373,8 +4446,8 @@
                 <label class="staples-checklist-item">
                     <input type="checkbox" id="stapleCheck_${idx}">
                     <div class="staples-checklist-info">
-                        <div class="staples-checklist-name">${s.name}</div>
-                        <div class="staples-checklist-price">${s.price ? '$' + parseFloat(s.price).toFixed(2) : 'No price saved'}</div>
+                        <div class="staples-checklist-name">${esc(s.name)}</div>
+                        <div class="staples-checklist-price">${s.price ? '$' + num(s.price).toFixed(2) : 'No price saved'}</div>
                     </div>
                 </label>
             `).join('');
@@ -4452,7 +4525,7 @@
             try {
                 await addDoc(collection(db, 'trialEvents'), {
                     timestamp: serverTimestamp(),
-                    userAgent: navigator.userAgent
+                    userAgent: (navigator.userAgent || '').slice(0, 500)
                 });
             } catch (e) {}
         }
@@ -4515,6 +4588,7 @@
                         budget: parseFloat(data.budget) || 0,
                         items: data.items,
                         completed: false,
+                        incognito: false,
                         createdAt: serverTimestamp()
                     });
                     localStorage.removeItem('idkGuestList');
@@ -4624,8 +4698,8 @@
             container.innerHTML = ingredients.map((ing, idx) => `
                 <label class="ingredient-checklist-item">
                     <input type="checkbox" id="ingCheck_${idx}" checked>
-                    <span class="ingredient-checklist-name">${ing.name}</span>
-                    <span class="ingredient-checklist-qty">${ing.qty > 0 ? ing.qty : ''} ${ing.unit || ''}</span>
+                    <span class="ingredient-checklist-name">${esc(ing.name)}</span>
+                    <span class="ingredient-checklist-qty">${ing.qty > 0 ? esc(ing.qty) : ''} ${esc(ing.unit || '')}</span>
                 </label>
             `).join('');
 
@@ -4673,6 +4747,7 @@
                         budget: 0,
                         items: newItems,
                         completed: false,
+                        incognito: false,
                         createdAt: serverTimestamp()
                     });
                     viewList(docRef.id);
@@ -4907,10 +4982,10 @@
                 return;
             }
             grid.innerHTML = recipes.map(r => `
-                <div class="recipe-card" onclick="showRecipeDetail(${r.id})">
-                    <img class="recipe-card-img" src="${r.image || ''}" alt="${r.title}" onerror="this.style.display='none'">
+                <div class="recipe-card" onclick="showRecipeDetail(${jsArg(r.id)})">
+                    <img class="recipe-card-img" src="${esc(r.image || '')}" alt="${esc(r.title)}" onerror="this.style.display='none'">
                     <div class="recipe-card-info">
-                        <div class="recipe-card-name">${r.title}</div>
+                        <div class="recipe-card-name">${esc(r.title)}</div>
                         <div class="recipe-card-meta">Tap to see ingredients & instructions</div>
                     </div>
                 </div>
@@ -4988,7 +5063,7 @@
             // Ingredients
             const ings = (recipe.extendedIngredients || []);
             document.getElementById('recipeDetailIngredients').innerHTML = ings.length > 0
-                ? ings.map(i => `<div class="recipe-ingredient-item">${i.original}</div>`).join('')
+                ? ings.map(i => `<div class="recipe-ingredient-item">${esc(i.original)}</div>`).join('')
                 : '<div class="recipe-ingredient-item" style="color:#999;">No ingredients available.</div>';
 
             // Instructions
@@ -4997,9 +5072,9 @@
                 steps = recipe.analyzedInstructions[0].steps || [];
             }
             document.getElementById('recipeDetailInstructions').innerHTML = steps.length > 0
-                ? steps.map(s => `<div class="recipe-instruction-step"><strong>${s.number}.</strong> ${s.step}</div>`).join('')
+                ? steps.map(s => `<div class="recipe-instruction-step"><strong>${esc(s.number)}.</strong> ${esc(s.step)}</div>`).join('')
                 : recipe.instructions
-                    ? `<div class="recipe-instruction-step">${recipe.instructions.replace(/<[^>]*>/g, '')}</div>`
+                    ? `<div class="recipe-instruction-step">${esc(new DOMParser().parseFromString(String(recipe.instructions), 'text/html').body.textContent || '')}</div>`
                     : '<div class="recipe-instruction-step" style="color:#999;">No instructions available.</div>';
         }
 
@@ -5225,15 +5300,15 @@
                 return `
                     <div class="meal-card">
                         <div class="meal-card-header">
-                            <span class="meal-card-name">${meal.mealName}</span>
+                            <span class="meal-card-name">${esc(meal.mealName)}</span>
                             <div class="meal-card-actions">
-                                <button class="meal-action-btn" onclick="showEditMealModal('${meal.id}')">✏️</button>
-                                <button class="meal-action-btn" onclick="deleteMeal('${meal.id}')">🗑️</button>
+                                <button class="meal-action-btn" onclick="showEditMealModal(${jsArg(meal.id)})">✏️</button>
+                                ${isGuest ? '' : `<button class="meal-action-btn" onclick="deleteMeal(${jsArg(meal.id)})">🗑️</button>`}
                             </div>
                         </div>
-                        ${ingList ? `<div class="meal-ingredients-list">${ingList}</div>` : ''}
-                        ${meal.recipeId ? `<a onclick="viewRecipeFromMeal(${meal.recipeId})" style="display:block; margin-top:8px; font-size:0.82em; color:var(--accent-primary); cursor:pointer; text-decoration:none;">View Recipe</a>` : ''}
-                        <button class="meal-add-to-list-btn" onclick="showSelectListModal('${meal.id}')">+ Add to Shopping List</button>
+                        ${ingList ? `<div class="meal-ingredients-list">${esc(ingList)}</div>` : ''}
+                        ${meal.recipeId ? `<a onclick="viewRecipeFromMeal(${jsArg(meal.recipeId)})" style="display:block; margin-top:8px; font-size:0.82em; color:var(--accent-primary); cursor:pointer; text-decoration:none;">View Recipe</a>` : ''}
+                        <button class="meal-add-to-list-btn" onclick="showSelectListModal(${jsArg(meal.id)})">+ Add to Shopping List</button>
                     </div>
                 `;
             }).join('');
@@ -5280,8 +5355,8 @@
             }
             editor.innerHTML = pendingMealIngredients.map((ing, idx) => `
                 <div class="ingredient-row">
-                    <input type="text" class="qty-input" value="${ing.qty || ''}" placeholder="Qty" oninput="updateIngredient(${idx}, 'qty', this.value)">
-                    <input type="text" value="${ing.name || ''}" placeholder="Ingredient name" oninput="updateIngredient(${idx}, 'name', this.value)">
+                    <input type="text" class="qty-input" value="${esc(ing.qty || '')}" placeholder="Qty" oninput="updateIngredient(${idx}, 'qty', this.value)">
+                    <input type="text" value="${esc(ing.name || '')}" placeholder="Ingredient name" oninput="updateIngredient(${idx}, 'name', this.value)">
                     <button class="ingredient-remove-btn" onclick="removeIngredient(${idx})">×</button>
                 </div>
             `).join('');
@@ -5336,6 +5411,7 @@
         }
 
         async function deleteMeal(mealId) {
+            if (isGuest) return; // only the owner can delete meals
             if (!confirm('Delete this meal?')) return;
             try {
                 await deleteDoc(doc(db, 'mealPlans', mealId));
@@ -5359,8 +5435,8 @@
                 container.appendChild(newBtn);
             } else {
                 container.innerHTML = activeLists.map(l => `
-                    <div class="list-select-item" onclick="addMealToExistingList('${mealId}', '${l.id}')">
-                        ${l.storeName || 'Shopping List'}
+                    <div class="list-select-item" onclick="addMealToExistingList(${jsArg(mealId)}, ${jsArg(l.id)})">
+                        ${esc(l.storeName || 'Shopping List')}
                     </div>
                 `).join('');
                 const newBtn = document.createElement('div');
@@ -5471,7 +5547,7 @@
             const suggestEl = document.getElementById('existingMealsSuggestions');
             if (dayMeals.length > 0) {
                 suggestEl.innerHTML = '<div style="font-size:0.78em; color:#999; margin-bottom:4px;">Existing meals this day:</div>' +
-                    dayMeals.map(m => `<div style="font-size:0.85em; color:var(--accent-primary); cursor:pointer; padding:4px 0;" onclick="document.getElementById('addToMealName').value='${m.mealName}'">${m.mealName}</div>`).join('');
+                    dayMeals.map(m => `<div style="font-size:0.85em; color:var(--accent-primary); cursor:pointer; padding:4px 0;" onclick="document.getElementById('addToMealName').value=${jsArg(m.mealName)}">${esc(m.mealName)}</div>`).join('');
             } else {
                 suggestEl.innerHTML = '';
             }
@@ -5621,8 +5697,6 @@
                 document.getElementById('shoppersGuestView').classList.remove('hidden');
 
                 // Show owner info
-                const ownerCodeSnap = await getDoc(doc(db, 'familyCodes', ownerUid));
-                const ownerData = ownerCodeSnap.exists() ? ownerCodeSnap.data() : {};
                 document.getElementById('shoppersOwnerInfo').innerHTML = `
                     <div class="shoppers-member">
                         <div class="shoppers-member-avatar">👑</div>
@@ -5660,15 +5734,19 @@
                 return;
             }
 
-            container.innerHTML = familyMembers.map(m => `
+            container.innerHTML = familyMembers.map(m => {
+                const initial = String(m.guestName || '?')[0].toUpperCase();
+                const photo = /^https:\/\//.test(m.guestPhoto || '') ? m.guestPhoto : '';
+                return `
                 <div class="shoppers-member">
                     <div class="shoppers-member-avatar">
-                        ${m.guestPhoto ? `<img src="${m.guestPhoto}" onerror="this.parentElement.textContent='${(m.guestName||'?')[0].toUpperCase()}'">` : (m.guestName||'?')[0].toUpperCase()}
+                        ${photo ? `<img src="${esc(photo)}" onerror="this.parentElement.textContent=${jsArg(initial)}">` : esc(initial)}
                     </div>
-                    <div class="shoppers-member-name">${m.guestName || 'Unknown'}</div>
-                    <button class="shoppers-remove-btn" onclick="removeShopper('${m.guestUid}')">×</button>
+                    <div class="shoppers-member-name">${esc(m.guestName || 'Unknown')}</div>
+                    <button class="shoppers-remove-btn" onclick="removeShopper(${jsArg(m.guestUid)})">×</button>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function showJoinShoppers() {
@@ -5682,73 +5760,126 @@
                 return;
             }
 
-            // Look up code
-            const codeQuery = query(collection(db, 'familyCodes'), where('code', '==', code));
-            const codeSnap = await new Promise((resolve) => {
-                const unsub = onSnapshot(codeQuery, (snap) => { unsub(); resolve(snap); });
-            });
-
-            if (codeSnap.empty) {
+            // Look up the code directly; codes can't be searched or listed.
+            const joinRef = doc(db, 'joinCodes', code);
+            let joinSnap = null;
+            try {
+                joinSnap = await getDoc(joinRef);
+            } catch (e) {
+                joinSnap = null;
+            }
+            if (!joinSnap || !joinSnap.exists()) {
                 alert('Code not found. Please check and try again.');
                 return;
             }
 
-            const ownerData = codeSnap.docs[0].data();
-            if (ownerData.ownerUid === currentUser.uid) {
+            const familyOwnerUid = joinSnap.data().ownerUid;
+            if (familyOwnerUid === currentUser.uid) {
                 alert("That's your own code!");
                 return;
             }
 
-            // Check member count
-            const membersQuery = query(collection(db, 'familyMembers'), where('ownerUid', '==', ownerData.ownerUid));
-            const membersSnap = await new Promise((resolve) => {
-                const unsub = onSnapshot(membersQuery, (snap) => { unsub(); resolve(snap); });
-            });
-
-            if (membersSnap.size >= 6) {
-                alert('This account already has the maximum of 6 shoppers.');
+            // Join and bump the family's shopper count in one step (max 6 shoppers).
+            try {
+                await runTransaction(db, async (tx) => {
+                    const fresh = await tx.get(joinRef);
+                    if (!fresh.exists()) throw new Error('not-found');
+                    const count = fresh.data().memberCount || 0;
+                    if (count >= 6) throw new Error('full');
+                    tx.set(doc(db, 'familyMembers', currentUser.uid), {
+                        ownerUid: familyOwnerUid,
+                        guestUid: currentUser.uid,
+                        guestName: (currentUser.displayName || 'Unknown').slice(0, 100),
+                        guestPhoto: (currentUser.photoURL || '').slice(0, 2000),
+                        joinCode: code,
+                        joinedAt: serverTimestamp()
+                    });
+                    tx.update(joinRef, { memberCount: count + 1 });
+                });
+            } catch (e) {
+                if (e.message === 'full') {
+                    alert('This account already has the maximum of 6 shoppers.');
+                } else if (e.message === 'not-found') {
+                    alert('Code not found. Please check and try again.');
+                } else {
+                    console.error('Join failed:', e);
+                    alert("Couldn't join. Please check the code and try again.");
+                }
                 return;
             }
 
-            // Add to family
-            await setDoc(doc(db, 'familyMembers', currentUser.uid), {
-                ownerUid: ownerData.ownerUid,
-                guestUid: currentUser.uid,
-                guestName: currentUser.displayName || 'Unknown',
-                guestPhoto: currentUser.photoURL || '',
-                joinedAt: serverTimestamp()
-            });
-
             isGuest = true;
-            ownerUid = ownerData.ownerUid;
+            ownerUid = familyOwnerUid;
             closeModal('joinShoppersModal');
             closeModal('myShoppersModal');
             showToast('✅ Joined! Loading shared lists...', '');
 
-            // Reload with owner data
-            if (unsubscribeLists) unsubscribeLists();
+            // Switch everything over to the owner's data
+            if (unsubscribeFamily) { unsubscribeFamily(); unsubscribeFamily = null; }
+            familyMembers = [];
             loadShoppingLists();
+            loadMealPlans();
+            loadStaples();
             showMainApp();
         }
 
         async function leaveShoppers() {
             if (!confirm('Are you sure you want to leave My Shoppers?')) return;
-            await deleteDoc(doc(db, 'familyMembers', currentUser.uid));
+            const memberRef = doc(db, 'familyMembers', currentUser.uid);
+            try {
+                const memberSnap = await getDoc(memberRef);
+                const joinCode = memberSnap.exists() ? memberSnap.data().joinCode : null;
+                if (joinCode) {
+                    // Leave and lower the family's shopper count together
+                    try {
+                        await runTransaction(db, async (tx) => {
+                            const joinRef = doc(db, 'joinCodes', joinCode);
+                            const j = await tx.get(joinRef);
+                            tx.delete(memberRef);
+                            if (j.exists() && j.data().ownerUid === ownerUid && (j.data().memberCount || 0) > 0) {
+                                tx.update(joinRef, { memberCount: j.data().memberCount - 1 });
+                            }
+                        });
+                    } catch (e) {
+                        // Count couldn't be updated; the owner's app corrects it next time they open it.
+                        await deleteDoc(memberRef);
+                    }
+                } else {
+                    await deleteDoc(memberRef);
+                }
+            } catch (e) {
+                console.error('Leave failed:', e);
+                alert("Couldn't leave My Shoppers. Please try again.");
+                return;
+            }
+
             isGuest = false;
             ownerUid = null;
             closeModal('myShoppersModal');
             showToast('You have left My Shoppers', '');
-            if (unsubscribeLists) unsubscribeLists();
+            const badge = document.querySelector('#mainApp .guest-badge');
+            if (badge) badge.remove();
+
+            // Switch everything back to this user's own data
             await ensureFamilyCode();
             loadShoppingLists();
+            loadMealPlans();
+            loadStaples();
+            startFamilyListener();
+            backfillIncognito();
             showMainApp();
         }
 
         async function removeShopper(guestUid) {
             if (!confirm('Remove this shopper from your account?')) return;
-            await deleteDoc(doc(db, 'familyMembers', guestUid));
+            try {
+                await deleteDoc(doc(db, 'familyMembers', guestUid));
+            } catch (e) {
+                alert("Couldn't remove that shopper. Please try again.");
+                return;
+            }
+            // The member listener updates the list and the shopper count.
             showToast('Shopper removed', '');
-            renderMembersList();
         }
 
         function copyShopperLink() {
